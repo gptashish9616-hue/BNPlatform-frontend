@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Requirements — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="my-requirements.css" />
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>My Requirements</h1><p>Requirements you've posted</p></div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a href="../dashboard/user-dashboard.html"><i class="fa-solid fa-house"></i> Home</a>
+                <span class="sep">&rsaquo;</span>
+                <span>Requirements</span>
+                <span class="sep">&rsaquo;</span>
+                <span class="bc-current">My Requirements</span>
+            </nav>
+
+            <div class="page-head">
+                <div>
+                    <h2>Posted requirements</h2>
+                    <p>Track accepted professionals and close requirements.</p>
+                </div>
+                <a href="create-requirement.html" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Post requirement</a>
+            </div>
+
+            <div class="card">
+                <div class="card-title" style="margin-bottom:0;">All your posted requirements</div>
+                <div class="table-wrap">
+                    <table class="tbl tbl-stack">
+                        <thead><tr><th>Requirement</th><th>Category</th><th>Responses</th><th>Status</th><th>Posted</th><th></th></tr></thead>
+                        <tbody id="myReqRows">
+                            <tr><td colspan="6" class="muted" style="text-align:center;padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        async function loadMine() {
+            const tbody = document.getElementById("myReqRows");
+            try {
+                const list = await Api.requirements.mine();
+                if (!list.length) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="padding:40px 20px;">
+                                <div class="empty">
+                                    <i class="fa-solid fa-list-check"></i>
+                                    <h3>No requirements yet</h3>
+                                    <p>Post your first requirement and get connected with professionals.</p>
+                                    <a href="create-requirement.html" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Post requirement</a>
+                                </div>
+                            </td>
+                        </tr>`;
+                    return;
+                }
+                tbody.innerHTML = list.map((r) => {
+                    const canFulfill = r.status === "IN_PROGRESS" || r.status === "OPEN";
+                    return `
+                    <tr${r.status === "FULFILLED" || r.status === "CLOSED" ? ' style="opacity:.65;"' : ""}>
+                        <td><strong>${BnpUtils.escape(r.title || "Untitled")}</strong></td>
+                        <td data-label="Category"><span class="badge badge-blue">${BnpUtils.escape(r.category || "General")}</span></td>
+                        <td data-label="Responses" class="muted">${r.responseCount || 0}</td>
+                        <td data-label="Status">${BnpUtils.statusBadge(r.status)}</td>
+                        <td data-label="Posted" class="muted">${BnpUtils.date(r.createdAt)}</td>
+                        <td>
+                            <div class="req-actions">
+                                <a href="requirement-details.html?id=${r.id}" class="btn btn-ghost btn-sm">Manage</a>
+                                ${canFulfill ? `<button class="btn btn-primary btn-sm" onclick="fulfill(${r.id})">Mark fulfilled</button>` : ""}
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join("");
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="6" class="muted" style="text-align:center;padding:20px;">Could not load your requirements.</td></tr>`;
+            }
+        }
+
+        async function fulfill(id) {
+            if (!confirm("Mark this requirement as fulfilled? This will award points.")) return;
+            try {
+                await Api.requirements.fulfill(id);
+                BnpUtils.toast("Requirement fulfilled — points awarded!", "success");
+                loadMine();
+            } catch (e) { BnpUtils.toast(e.message, "error"); }
+        }
+        window.fulfill = fulfill;
+
+        function showPremiumGate() {
+            document.querySelector(".app-content").innerHTML = `
+                <nav class="breadcrumb">
+                    <a href="../dashboard/user-dashboard.html"><i class="fa-solid fa-house"></i> Home</a>
+                    <span class="sep">&rsaquo;</span>
+                    <span>Requirements</span>
+                    <span class="sep">&rsaquo;</span>
+                    <span class="bc-current">My Requirements</span>
+                </nav>
+                <div class="card" style="text-align:center;padding:60px 30px;max-width:520px;margin:40px auto;">
+                    <div style="font-size:48px;color:var(--red);margin-bottom:16px;"><i class="fa-solid fa-lock"></i></div>
+                    <h2 style="font-size:20px;font-weight:700;margin-bottom:10px;">Premium Membership Required</h2>
+                    <p class="muted" style="font-size:14px;line-height:1.7;margin-bottom:24px;">Posting and managing requirements is only available to premium members. Upgrade your plan to access this feature.</p>
+                    <a href="../membership/plans.html" class="btn btn-primary"><i class="fa-solid fa-crown"></i> Upgrade to Premium</a>
+                </div>`;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            if (!window.BnpStorage.isPremium()) { showPremiumGate(); return; }
+            loadMine();
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Super Admin Setup — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/auth.css" />
+</head>
+
+<body class="auth-page">
+
+    <div class="auth-wrap">
+
+        <!-- BRAND PANEL -->
+        <aside class="auth-brand">
+            <a href="../../index.html" class="auth-brand-logo">BN<span>Platform</span></a>
+
+            <div class="auth-brand-body">
+                <h1>Platform super admin setup.</h1>
+                <p>Create the first Super Admin account to manage the entire BNPlatform. This page is for initial platform setup only.</p>
+
+                <div class="auth-brand-features">
+                    <div class="auth-feature">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <div><strong>Full platform control</strong><small>Manage users, roles and settings</small></div>
+                    </div>
+                    <div class="auth-feature">
+                        <i class="fa-solid fa-users-gear"></i>
+                        <div><strong>User management</strong><small>Approve, suspend or promote members</small></div>
+                    </div>
+                    <div class="auth-feature">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <div><strong>Admin dashboard</strong><small>View analytics and platform health</small></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- FORM PANEL -->
+        <main class="auth-form-panel">
+            <div class="auth-card">
+                <div class="admin-setup-badge">
+                    <i class="fa-solid fa-shield-halved"></i> First-time setup
+                </div>
+                <h2>Create Super Admin</h2>
+                <p class="sub">Register the platform owner account. This sets up your full admin access.</p>
+
+                <form id="adminSetupForm" novalidate>
+                    <div class="auth-field">
+                        <label for="name">Full name</label>
+                        <div class="auth-input">
+                            <i class="fa-solid fa-user"></i>
+                            <input type="text" id="name" placeholder="Your full name" autocomplete="name" />
+                        </div>
+                        <div class="auth-error" id="nameErr">Please enter your name.</div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="email">Email address</label>
+                        <div class="auth-input">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" id="email" placeholder="admin@business.com" autocomplete="email" />
+                        </div>
+                        <div class="auth-error" id="emailErr">Please enter a valid email address.</div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="phone">Phone number</label>
+                        <div class="auth-input">
+                            <i class="fa-solid fa-phone"></i>
+                            <input type="tel" id="phone" placeholder="+91 98xxx xxxxx" autocomplete="tel" />
+                        </div>
+                        <div class="auth-error" id="phoneErr">Please enter a valid phone number.</div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="password">Password</label>
+                        <div class="auth-input">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="password" placeholder="Create a strong password" autocomplete="new-password" oninput="strength()" />
+                            <i class="fa-solid fa-eye toggle-pw" onclick="togglePw('password', this)"></i>
+                        </div>
+                        <div class="pw-strength" id="pwStrength"><span></span><span></span><span></span><span></span></div>
+                        <div class="auth-error" id="pwErr">Use at least 8 characters.</div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="setupKey">Setup secret key</label>
+                        <div class="auth-input">
+                            <i class="fa-solid fa-key"></i>
+                            <input type="password" id="setupKey" placeholder="Enter the setup secret key" />
+                            <i class="fa-solid fa-eye toggle-pw" onclick="togglePw('setupKey', this)"></i>
+                        </div>
+                        <div class="auth-error" id="setupKeyErr">Setup key is required.</div>
+                    </div>
+
+                    <button type="submit" class="auth-btn admin-btn">
+                        <i class="fa-solid fa-shield-halved"></i> Create Super Admin account
+                    </button>
+                </form>
+
+                <p class="auth-foot">Already set up? <a href="login.html" class="auth-link">Sign in</a></p>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

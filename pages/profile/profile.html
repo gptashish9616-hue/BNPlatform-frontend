@@ -1,0 +1,336 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Profile — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="profile.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>My Profile</h1><p>How others see you on BNPlatform</p></div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <!-- PROFILE HEADER -->
+            <div class="card pf-header-card" style="padding:0;overflow:hidden;margin-bottom:18px;">
+                <div class="pf-cover"></div>
+                <div style="padding:0 24px 22px;">
+                    <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px;margin-top:-44px;">
+                        <div style="position:relative;flex-shrink:0;">
+                            <img id="pfAvatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="avatar"
+                                style="width:96px;height:96px;border-radius:50%;border:4px solid #fff;object-fit:cover;display:block;" />
+                            <span id="pfVerifiedBadge" class="pf-verified-badge" style="display:none;" title="Documents verified"><i class="fa-solid fa-check"></i></span>
+                        </div>
+                        <div style="flex:1;min-width:200px;padding-bottom:4px;">
+                            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                                <h2 id="pfName" style="margin:0;font-size:22px;font-weight:800;">—</h2>
+                                <span class="badge badge-amber" id="pfTier"><i class="fa-solid fa-crown"></i> —</span>
+                            </div>
+                            <p class="muted" id="pfSub" style="margin:4px 0 0;">—</p>
+                        </div>
+                        <div style="display:flex;gap:10px;padding-bottom:4px;">
+                            <a href="edit-profile.html" class="btn btn-outline"><i class="fa-solid fa-pen"></i> Edit profile</a>
+                            <button class="btn btn-primary" onclick="shareProfile(this)"><i class="fa-solid fa-share-nodes"></i> Share</button>
+                        </div>
+                    </div>
+
+                    <div class="pf-completion" style="margin-top:20px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                            <span class="muted" style="font-size:12.5px;font-weight:600;">Profile completeness</span>
+                            <span class="text-red" style="font-size:12.5px;font-weight:700;" id="pfCompletionPct">0%</span>
+                        </div>
+                        <div class="progress"><span id="pfCompletionBar" style="width:0%;"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STATS ROW -->
+            <div class="grid grid-3" style="margin-bottom:18px;">
+                <div class="stat">
+                    <div class="stat-top"><div class="stat-icon"><i class="fa-solid fa-star"></i></div></div>
+                    <div class="stat-num" id="pfRating">0.0</div>
+                    <div class="stat-lbl">Rating <span class="muted">(<span id="pfReviewCount">0</span> reviews)</span></div>
+                </div>
+                <div class="stat">
+                    <div class="stat-top"><div class="stat-icon"><i class="fa-solid fa-medal"></i></div></div>
+                    <div class="stat-num" id="pfPoints">0</div>
+                    <div class="stat-lbl">Credibility points</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-top"><div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div></div>
+                    <div class="stat-num" id="pfSinceStat">—</div>
+                    <div class="stat-lbl">Member since</div>
+                </div>
+            </div>
+
+            <!-- UPGRADE CTA (free tier only) -->
+            <div class="card pf-upgrade-card" id="pfUpgradeCard" style="display:none;margin-bottom:18px;">
+                <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+                    <div class="pf-upgrade-icon"><i class="fa-solid fa-crown"></i></div>
+                    <div style="flex:1;min-width:220px;">
+                        <strong style="font-size:15px;">You're on the Free plan</strong>
+                        <p class="muted" style="margin:4px 0 0;font-size:13px;line-height:1.6;">Upgrade to Premium to respond to requirements, get discovered by more members, and unlock full profile visibility.</p>
+                    </div>
+                    <a href="../membership/plans.html" class="btn btn-primary"><i class="fa-solid fa-crown"></i> Upgrade to Premium</a>
+                </div>
+            </div>
+
+            <!-- TABS -->
+            <div class="tabs">
+                <div class="tab active" onclick="showTab(this,'about')">About</div>
+                <div class="tab" onclick="showTab(this,'reviews')">Reviews <span class="muted" id="pfReviewsTab"></span></div>
+                <div class="tab" onclick="showTab(this,'authenticity')">Authenticity</div>
+                <div class="tab" onclick="showTab(this,'company')">Company</div>
+            </div>
+
+            <div class="grid" style="grid-template-columns:1.7fr 1fr;" id="profileGrid">
+
+                <!-- LEFT -->
+                <div style="display:flex;flex-direction:column;gap:18px;">
+
+                    <!-- ABOUT -->
+                    <div class="card tab-pane" data-pane="about">
+                        <div class="card-title">About</div>
+                        <p class="muted" id="pfBio" style="line-height:1.7;">—</p>
+                        <div class="card-title" style="margin-top:18px;">Headline</div>
+                        <p class="muted" id="pfHeadline" style="margin:0;">—</p>
+                    </div>
+
+                    <!-- REVIEWS -->
+                    <div class="card tab-pane" data-pane="reviews" style="display:none;">
+                        <div class="card-title">Ratings &amp; reviews</div>
+                        <div style="display:flex;gap:24px;align-items:center;margin-bottom:18px;flex-wrap:wrap;">
+                            <div style="text-align:center;">
+                                <div style="font-size:40px;font-weight:800;" id="pfRevAvg">0.0</div>
+                                <div style="color:#f59e0b;">★★★★★</div>
+                                <div class="muted" style="font-size:12px;"><span id="pfRevCount">0</span> reviews</div>
+                            </div>
+                            <div style="flex:1;min-width:200px;" id="pfRevBars"></div>
+                        </div>
+                        <div id="pfReviewList">
+                            <div class="list-item"><div class="li-body muted">Loading reviews…</div></div>
+                        </div>
+                    </div>
+
+                    <!-- AUTHENTICITY -->
+                    <div class="card tab-pane" data-pane="authenticity" style="display:none;">
+                        <div class="card-title">Authenticity &amp; documents</div>
+                        <p class="muted" style="font-size:13px;margin-bottom:16px;">Certificates and documents uploaded to build trust with your network.</p>
+                        <div id="pfDocs">
+                            <div class="list-item"><div class="li-body muted">Loading documents…</div></div>
+                        </div>
+                        <input type="file" id="pfDocFile" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx" hidden>
+                        <button id="pfDocUploadBtn" class="btn btn-outline btn-sm" style="margin-top:14px;" onclick="addDoc()"><i class="fa-solid fa-upload"></i> Upload document</button>
+                    </div>
+
+                    <!-- COMPANY -->
+                    <div class="card tab-pane" data-pane="company" style="display:none;">
+                        <div class="card-title">Company profile</div>
+                        <div id="pfCompany"><div class="muted">Loading…</div></div>
+                    </div>
+                </div>
+
+                <!-- RIGHT -->
+                <div style="display:flex;flex-direction:column;gap:18px;">
+                    <div class="card">
+                        <div class="card-title">Contact</div>
+                        <div class="list-item" style="padding:10px 0;"><div class="li-icon" style="background:var(--bg);color:var(--muted);"><i class="fa-solid fa-envelope"></i></div><div class="li-body"><strong id="pfEmail">—</strong><p>Email</p></div></div>
+                        <div class="list-item" style="padding:10px 0;"><div class="li-icon" style="background:var(--bg);color:var(--muted);"><i class="fa-solid fa-phone"></i></div><div class="li-body"><strong id="pfPhone">—</strong><p>Phone</p></div></div>
+                        <div class="list-item" style="padding:10px 0;"><div class="li-icon" style="background:var(--bg);color:var(--muted);"><i class="fa-solid fa-location-dot"></i></div><div class="li-body"><strong id="pfLocation">—</strong><p><a href="address.html" class="text-red">Manage addresses</a></p></div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Profile stats</div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Credibility points</span><strong id="pfStatPoints">—</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Reviews</span><strong id="pfStatReviews">—</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;"><span class="muted">Member since</span><strong id="pfSince">—</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        function showTab(el, pane) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            document.querySelectorAll('.tab-pane').forEach(p => {
+                p.style.display = p.dataset.pane === pane ? '' : 'none';
+            });
+        }
+
+        const TIER = { SUPER_ADMIN: "Super Admin", SUB_ADMIN: "Admin", PREMIUM_USER: "Premium", FREE_USER: "Free" };
+
+        async function loadProfile() {
+            try {
+                const me = await Api.users.me();
+                const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+                set("pfName", me.fullName || "Member");
+                document.getElementById("pfTier").innerHTML = `<i class="fa-solid fa-${me.premium ? "crown" : "user"}"></i> ${TIER[me.role] || "Free"}`;
+                set("pfSub", [me.profession, [me.city, me.state].filter(Boolean).join(", ")].filter(Boolean).join(" · ") || "Professional");
+                set("pfRating", (me.avgRating ?? 0).toFixed(1));
+                set("pfReviewCount", me.reviewCount ?? 0);
+                set("pfPoints", (me.points ?? 0).toLocaleString("en-IN"));
+                set("pfBio", me.bio || "No bio added yet. Use Edit profile to introduce yourself.");
+                set("pfHeadline", me.headline || "—");
+                set("pfRevAvg", (me.avgRating ?? 0).toFixed(1));
+                set("pfRevCount", me.reviewCount ?? 0);
+                set("pfReviewsTab", `(${me.reviewCount ?? 0})`);
+                set("pfEmail", me.email || "—");
+                set("pfPhone", me.phone || "—");
+                set("pfLocation", [me.city, me.state].filter(Boolean).join(", ") || "—");
+                set("pfStatPoints", (me.points ?? 0).toLocaleString("en-IN"));
+                set("pfStatReviews", me.reviewCount ?? 0);
+                set("pfSince", BnpUtils.date(me.createdAt));
+                set("pfSinceStat", BnpUtils.date(me.createdAt));
+                document.getElementById("pfAvatar").src = BnpUtils.avatarFor(me.avatarUrl, me.fullName);
+
+                document.getElementById("pfUpgradeCard").style.display = me.premium ? "none" : "";
+
+                const fields = [me.bio, me.headline, me.phone, me.city, me.avatarUrl];
+                const pct = Math.round((fields.filter(Boolean).length / fields.length) * 100);
+                document.getElementById("pfCompletionPct").textContent = `${pct}%`;
+                document.getElementById("pfCompletionBar").style.width = `${pct}%`;
+
+                loadReviews(me.id);
+                loadDocs();
+                loadCompany();
+            } catch (e) { console.warn(e); }
+        }
+
+        function shareProfile(btn) {
+            const url = window.location.href;
+            if (navigator.share) {
+                navigator.share({ title: "My BNPlatform profile", url }).catch(() => {});
+                return;
+            }
+            navigator.clipboard.writeText(url).then(() => {
+                BnpUtils.toast("Profile link copied to clipboard.", "success");
+            }).catch(() => {
+                BnpUtils.toast("Could not copy link.", "error");
+            });
+        }
+        window.shareProfile = shareProfile;
+
+        async function loadReviews(userId) {
+            const box = document.getElementById("pfReviewList");
+            try {
+                const reviews = await Api.reviews.forUser(userId);
+                // rating distribution bars from real reviews
+                const bars = document.getElementById("pfRevBars");
+                if (bars) {
+                    const total = reviews.length || 1;
+                    bars.innerHTML = [5, 4, 3, 2, 1].map((star) => {
+                        const pct = Math.round((reviews.filter((r) => r.rating === star).length / total) * 100);
+                        return `<div style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:6px;"><span class="muted">${star}</span><div class="progress" style="flex:1;"><span style="width:${pct}%;"></span></div></div>`;
+                    }).join("");
+                }
+                box.innerHTML = reviews.length ? reviews.map((r) => `
+                    <div class="list-item">
+                        <div class="avatar-text" style="width:40px;height:40px;background:var(--red-light);color:var(--red);">${BnpUtils.initials("U")}</div>
+                        <div class="li-body"><strong>Member</strong> <span style="color:#f59e0b;font-size:12px;">${"★".repeat(r.rating)}</span><p>${BnpUtils.escape(r.comment || "")}</p></div>
+                        <span class="muted" style="font-size:12px;">${BnpUtils.date(r.createdAt)}</span>
+                    </div>`).join("") : `<div class="list-item"><div class="li-body muted">No reviews yet.</div></div>`;
+            } catch (e) { box.innerHTML = `<div class="list-item"><div class="li-body muted">Could not load reviews.</div></div>`; }
+        }
+
+        async function loadDocs() {
+            const box = document.getElementById("pfDocs");
+            try {
+                const docs = await Api.profile.documents();
+                const badge = document.getElementById("pfVerifiedBadge");
+                if (badge) badge.style.display = docs.some((d) => d.status === "VERIFIED") ? "flex" : "none";
+                box.innerHTML = docs.length ? docs.map((d) => `
+                    <div class="list-item">
+                        <div class="li-icon" style="background:var(--red-light);color:var(--red);"><i class="fa-solid fa-file-lines"></i></div>
+                        <div class="li-body"><strong>${BnpUtils.escape(d.title || "Document")}</strong><p>${BnpUtils.escape(d.docType || "")} · ${BnpUtils.date(d.createdAt)}</p></div>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            ${d.fileUrl ? `<a href="${BnpUtils.fileUrl(d.fileUrl)}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" title="View"><i class="fa-solid fa-eye"></i></a>` : ""}
+                            ${BnpUtils.statusBadge(d.status)}
+                            <button class="btn btn-ghost btn-sm" title="Delete" onclick="delDoc(${d.id})"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>`).join("") : `<div class="list-item"><div class="li-body muted">No documents uploaded yet.</div></div>`;
+            } catch (e) { box.innerHTML = `<div class="list-item"><div class="li-body muted">Could not load documents.</div></div>`; }
+        }
+
+        async function loadCompany() {
+            const box = document.getElementById("pfCompany");
+            try {
+                const c = await Api.profile.company();
+                if (!c) { box.innerHTML = `<p class="muted">No company profile added yet.</p>`; return; }
+                box.innerHTML = `
+                    <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px;">
+                        <div class="avatar-text" style="width:54px;height:54px;border-radius:12px;background:var(--blue-light);color:var(--blue);font-size:20px;"><i class="fa-solid fa-building"></i></div>
+                        <div><strong style="font-size:15px;">${BnpUtils.escape(c.companyName || "Company")}</strong><p class="muted" style="margin:2px 0 0;font-size:12.5px;">${BnpUtils.escape(c.industry || "")}${c.teamSize ? " · " + BnpUtils.escape(c.teamSize) : ""}</p></div>
+                    </div>
+                    <p class="muted" style="line-height:1.7;font-size:13px;">${BnpUtils.escape(c.about || "")}</p>`;
+            } catch (e) { box.innerHTML = `<p class="muted">Could not load company profile.</p>`; }
+        }
+
+        // Real document upload: pick a title, then a file; the file is stored on the
+        // server and the returned URL is saved against the document record.
+        function addDoc() {
+            const title = prompt("Document title (e.g. CA Membership Certificate):");
+            if (!title) return;
+            const input = document.getElementById("pfDocFile");
+            input.onchange = async () => {
+                const file = input.files && input.files[0];
+                if (!file) return;
+                const btn = document.getElementById("pfDocUploadBtn");
+                BnpUtils.loading(btn, true, "Uploading…");
+                try {
+                    const uploaded = await Api.files.upload(file, "documents");
+                    await Api.profile.addDocument({ title, docType: "certificate", fileUrl: uploaded.url });
+                    BnpUtils.toast("Document uploaded.", "success");
+                    loadDocs();
+                } catch (e) {
+                    BnpUtils.toast(e.message, "error");
+                } finally {
+                    BnpUtils.loading(btn, false);
+                    input.value = "";
+                    input.onchange = null;
+                }
+            };
+            input.click();
+        }
+        window.addDoc = addDoc;
+
+        async function delDoc(id) {
+            if (!confirm("Delete this document?")) return;
+            try {
+                await Api.profile.deleteDocument(id);
+                BnpUtils.toast("Document deleted.", "success");
+                loadDocs();
+            } catch (e) { BnpUtils.toast(e.message, "error"); }
+        }
+        window.delDoc = delDoc;
+
+        document.addEventListener("DOMContentLoaded", () => { if (window.BnpStorage.isAuthenticated()) loadProfile(); });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

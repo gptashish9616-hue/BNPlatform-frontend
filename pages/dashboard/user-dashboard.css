@@ -1,0 +1,43 @@
+@media (max-width: 991px) {
+    .dash-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Profile-strength header row: let the text side shrink/wrap instead of
+   pushing the fixed-size avatar circle off the card on narrow screens. */
+.profile-strength-row {
+    min-width: 0;
+}
+
+.profile-strength-row > div:last-child {
+    flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 480px) {
+    .avatar-text {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 16px !important;
+    }
+
+    .resp-banner-header,
+    .dash-notif-row {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .resp-banner-row {
+        padding-left: 14px;
+        padding-right: 14px;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 360px) {
+    #rankList .cell-user strong,
+    #dashRecentReqs .li-body strong {
+        font-size: 12.5px;
+    }
+}

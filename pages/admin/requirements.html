@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Requirements — BNPlatform Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+</head>
+
+<body class="app" data-require="admin">
+
+    <div id="sidebar-container" data-shell="admin"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Requirements</h1><p>Manage requirements posted across the platform</p></div>
+            <div class="topbar-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="rqSearch" placeholder="Search by title, category, city…" oninput="filterRequirements()">
+            </div>
+            <div class="topbar-icon" id="adminBell"><i class="fa-solid fa-bell"></i><span class="bell-count-badge" id="adminBellDot" style="display:none;"></span></div>
+            <a href="profile.html"><img class="topbar-avatar" src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" alt="me" /></a>
+        </header>
+
+        <div class="app-content">
+
+            <!-- Stat boxes -->
+            <div class="grid grid-4" style="margin-bottom:18px;">
+                <div class="stat">
+                    <div class="stat-num" id="rqTotal">—</div>
+                    <div class="stat-lbl">Total requirements</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num" id="rqOpen" style="color:var(--blue);">—</div>
+                    <div class="stat-lbl">Open</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num" id="rqProgress" style="color:var(--amber);">—</div>
+                    <div class="stat-lbl">In progress</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num" id="rqFulfilled" style="color:var(--green);">—</div>
+                    <div class="stat-lbl">Fulfilled</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    Requirement activity
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <select id="rqStatusFilter" onchange="filterRequirements()"
+                            style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;font-family:inherit;outline:none;">
+                            <option value="">All statuses</option>
+                            <option value="OPEN">Open</option>
+                            <option value="IN_PROGRESS">In progress</option>
+                            <option value="FULFILLED">Fulfilled</option>
+                            <option value="CLOSED">Closed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs" style="margin-bottom:16px;">
+                    <div class="tab active" id="tabAll"        onclick="setTab('all')">All</div>
+                    <div class="tab"        id="tabOpen"       onclick="setTab('open')">Open</div>
+                    <div class="tab"        id="tabProgress"   onclick="setTab('progress')">In progress</div>
+                    <div class="tab"        id="tabFulfilled"  onclick="setTab('fulfilled')">Fulfilled</div>
+                    <div class="tab"        id="tabClosed"     onclick="setTab('closed')">Closed</div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="tbl tbl-stack">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Poster</th>
+                                <th>Category</th>
+                                <th>Budget</th>
+                                <th>City</th>
+                                <th>Responses</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rqRows">
+                            <tr><td colspan="9" class="muted" style="text-align:center;padding:28px;">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top:14px;font-size:13px;">
+                    <span class="muted" id="rqCount">—</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Detail / Edit Modal ─────────────────────────────────── -->
+    <div id="rqModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:14px;padding:0;width:100%;max-width:560px;box-shadow:0 8px 40px rgba(0,0,0,.18);max-height:90vh;overflow-y:auto;">
+
+            <!-- Modal header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border);">
+                <div>
+                    <h2 style="font-size:16px;font-weight:700;margin:0;" id="mdTitle">Requirement Details</h2>
+                    <p class="muted" style="font-size:12.5px;margin:2px 0 0;" id="mdSub"></p>
+                </div>
+                <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;font-size:20px;color:#888;line-height:1;">&times;</button>
+            </div>
+
+            <!-- Poster -->
+            <div style="padding:18px 24px 0;">
+                <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg);border-radius:10px;">
+                    <img id="mdPosterImg" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">
+                    <div>
+                        <strong id="mdPosterName" style="font-size:13px;"></strong>
+                        <div class="muted" style="font-size:11.5px;">Posted this requirement</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editable fields -->
+            <div style="padding:16px 24px;">
+                <table class="tbl-form">
+                    <tbody>
+                        <tr><td><label for="mdFTitle">Title</label></td><td><input type="text" id="mdFTitle"></td></tr>
+                        <tr><td><label for="mdFCategory">Category</label></td><td><select id="mdFCategory"></select></td></tr>
+                        <tr><td><label for="mdFBudget">Budget</label></td><td><input type="text" id="mdFBudget"></td></tr>
+                        <tr><td><label for="mdFCity">City</label></td><td><input type="text" id="mdFCity"></td></tr>
+                        <tr><td><label for="mdFDescription">Description</label></td><td><textarea id="mdFDescription" rows="4"></textarea></td></tr>
+                        <tr><td><label for="mdFStatus">Status</label></td><td>
+                            <select id="mdFStatus">
+                                <option value="OPEN">Open</option>
+                                <option value="IN_PROGRESS">In progress</option>
+                                <option value="FULFILLED">Fulfilled</option>
+                                <option value="CLOSED">Closed</option>
+                            </select>
+                        </td></tr>
+                        <tr><td>Responses</td><td class="muted" style="font-size:12.5px;"><span id="mdRespCount"></span></td></tr>
+                        <tr><td>Posted</td><td class="muted" style="font-size:12.5px;"><span id="mdDate"></span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Actions -->
+            <div style="padding:0 24px 20px;display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn btn-primary btn-sm" onclick="saveRequirement()"><i class="fa-solid fa-floppy-disk"></i> Save changes</button>
+                <button class="btn btn-outline btn-sm" style="color:var(--red);border-color:var(--red);" onclick="deleteRequirement()"><i class="fa-solid fa-trash"></i> Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/admin-bell.js"></script>
+    <script src="../../assets/js/professions.js"></script>
+    <script>
+        BnpProfessions.fillSelect(document.getElementById("mdFCategory"), { placeholder: "Select category" });
+
+        let allRequirements = [];
+        let userCache = {};   // id → { fullName, avatarUrl }
+        let activeTab = "all";
+        let currentReq = null;
+
+        // ── Load ─────────────────────────────────────────────────
+        async function loadRequirements() {
+            const tbody = document.getElementById("rqRows");
+            try {
+                allRequirements = await Api.admin.requirements();
+                BnpStorage.initSeenBaseline("requirements", allRequirements.map(r => r.id));
+
+                const ids = [...new Set(allRequirements.map(r => r.posterId).filter(Boolean))];
+                await Promise.all(ids.map(async id => {
+                    try { userCache[id] = await Api.admin.user(id); }
+                    catch (e) { userCache[id] = { fullName: "#" + id, avatarUrl: null }; }
+                }));
+
+                updateStats();
+                filterRequirements();
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="9" class="muted" style="text-align:center;padding:28px;">
+                    Could not load requirements: ${BnpUtils.escape(e.message)}</td></tr>`;
+            }
+        }
+
+        // ── Stats ─────────────────────────────────────────────────
+        function updateStats() {
+            const open      = allRequirements.filter(r => r.status === "OPEN").length;
+            const progress  = allRequirements.filter(r => r.status === "IN_PROGRESS").length;
+            const fulfilled = allRequirements.filter(r => r.status === "FULFILLED").length;
+            document.getElementById("rqTotal").textContent     = allRequirements.length;
+            document.getElementById("rqOpen").textContent      = open;
+            document.getElementById("rqProgress").textContent  = progress;
+            document.getElementById("rqFulfilled").textContent = fulfilled;
+        }
+
+        // ── Tab ───────────────────────────────────────────────────
+        function setTab(tab) {
+            activeTab = tab;
+            ["all","open","progress","fulfilled","closed"].forEach(t => {
+                const el = document.getElementById("tab" + t.charAt(0).toUpperCase() + t.slice(1));
+                if (el) el.classList.toggle("active", t === tab);
+            });
+            const map = { open:"OPEN", progress:"IN_PROGRESS", fulfilled:"FULFILLED", closed:"CLOSED" };
+            document.getElementById("rqStatusFilter").value = map[tab] || "";
+            filterRequirements();
+        }
+
+        // ── Filter + render ───────────────────────────────────────
+        function filterRequirements() {
+            const q      = document.getElementById("rqSearch").value.trim().toLowerCase();
+            const status = document.getElementById("rqStatusFilter").value;
+
+            const list = allRequirements.filter(r => {
+                if (status && r.status !== status) return false;
+
+                const title    = (r.title    || "").toLowerCase();
+                const category = (r.category || "").toLowerCase();
+                const city     = (r.city     || "").toLowerCase();
+                const poster   = (userCache[r.posterId]?.fullName || "").toLowerCase();
+                if (q && ![title, category, city, poster].some(s => s.includes(q))) return false;
+
+                return true;
+            });
+
+            renderTable(list);
+        }
+
+        function posterName(id) {
+            return userCache[id]?.fullName || ("#" + id);
+        }
+        function posterAvatar(id) {
+            const u = userCache[id];
+            return BnpUtils.avatarFor(u?.avatarUrl, u?.fullName || ("User " + id));
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById("rqRows");
+            document.getElementById("rqCount").textContent =
+                `Showing ${list.length} of ${allRequirements.length} requirements`;
+
+            if (!list.length) {
+                tbody.innerHTML = `<tr><td colspan="9" class="muted" style="text-align:center;padding:28px;">No requirements found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(r => {
+                const isNew = !BnpStorage.isSeen("requirements", r.id);
+                return `
+                <tr class="${isNew ? "row-new" : ""}">
+                    <td><strong>${BnpUtils.escape(r.title || "Untitled")}</strong> ${isNew ? '<span class="badge badge-new">New</span>' : ""}</td>
+                    <td data-label="Poster">
+                        <div class="cell-user">
+                            <img src="${posterAvatar(r.posterId)}" alt="">
+                            <span>${BnpUtils.escape(posterName(r.posterId))}</span>
+                        </div>
+                    </td>
+                    <td data-label="Category" class="muted">${BnpUtils.escape(r.category || "—")}</td>
+                    <td data-label="Budget" class="muted">${BnpUtils.escape(r.budget || "—")}</td>
+                    <td data-label="City" class="muted">${BnpUtils.escape(r.city || "—")}</td>
+                    <td data-label="Responses">${r.responseCount || 0}</td>
+                    <td data-label="Status">${BnpUtils.statusBadge(r.status)}</td>
+                    <td data-label="Date" class="muted">${BnpUtils.date(r.createdAt)}</td>
+                    <td>
+                        <button class="btn btn-ghost btn-sm" onclick="openModal(${r.id})">
+                            <i class="fa-solid fa-pen"></i> Manage
+                        </button>
+                    </td>
+                </tr>`;
+            }).join("");
+        }
+
+        // ── Detail / Edit Modal ─────────────────────────────────────
+        function openModal(id) {
+            currentReq = allRequirements.find(r => r.id === id);
+            if (!currentReq) return;
+            const r = currentReq;
+
+            if (!BnpStorage.isSeen("requirements", id)) {
+                BnpStorage.markSeen("requirements", id);
+                filterRequirements();
+            }
+
+            document.getElementById("mdTitle").textContent = "Requirement #RQ-" + r.id;
+            document.getElementById("mdSub").textContent   = "Posted " + BnpUtils.date(r.createdAt);
+
+            document.getElementById("mdPosterImg").src = posterAvatar(r.posterId);
+            document.getElementById("mdPosterName").textContent = posterName(r.posterId);
+
+            document.getElementById("mdFTitle").value       = r.title || "";
+            document.getElementById("mdFCategory").value    = r.category || "";
+            document.getElementById("mdFBudget").value      = r.budget || "";
+            document.getElementById("mdFCity").value        = r.city || "";
+            document.getElementById("mdFDescription").value = r.description || "";
+            document.getElementById("mdFStatus").value      = r.status || "OPEN";
+
+            document.getElementById("mdRespCount").textContent = (r.responseCount || 0) + " response(s)";
+            document.getElementById("mdDate").textContent      = BnpUtils.date(r.createdAt);
+
+            document.getElementById("rqModal").style.display = "flex";
+        }
+
+        async function saveRequirement() {
+            if (!currentReq) return;
+            const payload = {
+                title: document.getElementById("mdFTitle").value.trim(),
+                category: document.getElementById("mdFCategory").value.trim(),
+                budget: document.getElementById("mdFBudget").value.trim(),
+                city: document.getElementById("mdFCity").value.trim(),
+                description: document.getElementById("mdFDescription").value.trim()
+            };
+            const newStatus = document.getElementById("mdFStatus").value;
+
+            try {
+                await Api.admin.updateRequirement(currentReq.id, payload);
+                if (newStatus !== currentReq.status) {
+                    await Api.admin.updateRequirementStatus(currentReq.id, newStatus);
+                }
+                BnpUtils.toast("Requirement updated", "success");
+                closeModal();
+                loadRequirements();
+            } catch (e) {
+                BnpUtils.toast(e.message, "error");
+            }
+        }
+
+        async function deleteRequirement() {
+            if (!currentReq) return;
+            if (!confirm("Delete this requirement and all its responses? This cannot be undone.")) return;
+            try {
+                await Api.admin.deleteRequirement(currentReq.id);
+                BnpUtils.toast("Requirement deleted", "success");
+                closeModal();
+                loadRequirements();
+            } catch (e) {
+                BnpUtils.toast(e.message, "error");
+            }
+        }
+
+        function closeModal() {
+            document.getElementById("rqModal").style.display = "none";
+            currentReq = null;
+        }
+
+        document.getElementById("rqModal").addEventListener("click", function (e) {
+            if (e.target === this) closeModal();
+        });
+
+        window.openModal          = openModal;
+        window.closeModal         = closeModal;
+        window.saveRequirement    = saveRequirement;
+        window.deleteRequirement  = deleteRequirement;
+        window.setTab             = setTab;
+        window.filterRequirements = filterRequirements;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.BnpStorage?.isAuthenticated()) loadRequirements();
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,8 @@
+        .price-card { background:#fff; border:1px solid var(--s-border); border-radius:18px; padding:28px; height:100%; position:relative; }
+        .price-card.featured { border:2px solid var(--s-red); box-shadow:0 16px 40px rgba(227,30,36,.12); }
+        .price-card ul { list-style:none; padding:0; margin:18px 0 0; }
+        .price-card li { font-size:14px; padding:7px 0; display:flex; gap:10px; align-items:flex-start; }
+        .price-card li i { color:var(--s-red); margin-top:3px; }
+        .price-card li.off { color:#9aa0a6; }
+        .price-card li.off i { color:#c5c9d0; }
+        .pop-badge { position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--s-red); color:#fff; font-size:11.5px; font-weight:700; padding:4px 14px; border-radius:20px; }

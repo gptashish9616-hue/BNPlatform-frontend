@@ -1,0 +1,26 @@
+    .ref-card {
+        background: #fff;
+        border: 1px solid #e8eaed;
+        border-radius: 14px;
+        padding: 18px;
+        font-family: 'Inter', Arial, sans-serif;
+        max-width: 420px;
+    }
+    .ref-card__top { display: flex; align-items: center; gap: 12px; }
+    .ref-card__avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; }
+    .ref-card__who { flex: 1; min-width: 0; }
+    .ref-card__who strong { display: block; font-size: 14px; }
+    .ref-card__who small { font-size: 12px; color: #9aa0a6; }
+    .ref-card__status { font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+    .ref-card__status--accepted { background: #e6f4ea; color: #1e8e3e; }
+    .ref-card__note { font-size: 13px; color: #5f6368; line-height: 1.6; margin: 14px 0; }
+    .ref-card__meta { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: #9aa0a6; margin-bottom: 16px; }
+    .ref-card__actions { display: flex; gap: 10px; }
+    .ref-card__btn {
+        flex: 1; text-align: center; text-decoration: none;
+        padding: 8px 12px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer;
+        background: #e31e24; color: #fff; border: 1.5px solid #e31e24;
+    }
+    .ref-card__btn:hover { background: #c9171d; }
+    .ref-card__btn--ghost { background: #fff; color: #1a1a1a; border-color: #e8eaed; }
+    .ref-card__btn--ghost:hover { background: #f5f6f8; }

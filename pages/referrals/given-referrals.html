@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Referrals Given — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>Business Referrals — Given</h1>
+                <p>Clients you referred to other professionals</p>
+            </div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:22px;">
+                <a href="../dashboard/user-dashboard.html" style="color:var(--muted);display:flex;align-items:center;gap:5px;">
+                    <i class="fa-solid fa-house" style="color:var(--red);"></i> Home
+                </a>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span>Referrals</span>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span style="color:var(--text);font-weight:600;">Given Referrals</span>
+            </nav>
+
+            <!-- Locked state (free tier) -->
+            <div class="card" id="gvLocked" style="display:none;text-align:center;padding:54px 24px;">
+                <div style="font-size:38px;color:var(--red);margin-bottom:14px;"><i class="fa-solid fa-lock"></i></div>
+                <h3 style="margin:0 0 8px;font-size:17px;">Business Referrals is a Premium feature</h3>
+                <p class="muted" style="max-width:440px;margin:0 auto 20px;line-height:1.65;">Giving and tracking business referrals is available to Premium members. Upgrade to start building your referral network and earning credibility points.</p>
+                <a href="../membership/plans.html" class="btn btn-primary"><i class="fa-solid fa-crown"></i> Upgrade to Premium</a>
+            </div>
+
+            <div id="gvMain">
+                <!-- Stats -->
+                <div class="grid grid-4" style="margin-bottom:18px;">
+                    <div class="stat" data-no-anim>
+                        <div class="stat-num" id="gvTotal">0</div>
+                        <div class="stat-lbl">Total given</div>
+                    </div>
+                    <div class="stat" data-no-anim>
+                        <div class="stat-num" id="gvAccepted" style="color:var(--green);">0</div>
+                        <div class="stat-lbl">Accepted</div>
+                    </div>
+                    <div class="stat" data-no-anim>
+                        <div class="stat-num" id="gvPending" style="color:var(--amber);">0</div>
+                        <div class="stat-lbl">Pending</div>
+                    </div>
+                    <div class="stat" data-no-anim>
+                        <div class="stat-num" id="gvDeclined" style="color:var(--red);">0</div>
+                        <div class="stat-lbl">Declined</div>
+                    </div>
+                </div>
+
+                <!-- Action row -->
+                <div class="page-head" style="margin-bottom:18px;">
+                    <div></div>
+                    <a href="create-referral.html" class="btn btn-primary"><i class="fa-solid fa-plus"></i> New referral</a>
+                </div>
+
+                <!-- Table card with filter tabs -->
+                <div class="card">
+                    <div class="tabs" id="gvTabs" style="margin-bottom:0;">
+                        <div class="tab active" data-filter="ALL">All</div>
+                        <div class="tab" data-filter="ACCEPTED">Accepted</div>
+                        <div class="tab" data-filter="PENDING">Pending</div>
+                        <div class="tab" data-filter="DECLINED">Declined</div>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="tbl tbl-stack">
+                            <thead>
+                                <tr>
+                                    <th>Client</th>
+                                    <th>Referred to</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="givenRows">
+                                <tr><td colspan="6" class="muted" style="text-align:center;padding:28px;">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        let allReferrals = [];
+        let receiverNames = {};
+        let activeFilter = "ALL";
+
+        function filterRows(rows) {
+            if (activeFilter === "ACCEPTED") return rows.filter(r => ["ACCEPTED", "COMPLETED"].includes(r.status));
+            if (activeFilter === "PENDING")  return rows.filter(r => r.status === "PENDING");
+            if (activeFilter === "DECLINED") return rows.filter(r => ["REJECTED", "EXPIRED"].includes(r.status));
+            return rows;
+        }
+
+        function renderRows() {
+            const tbody = document.getElementById("givenRows");
+            const filtered = filterRows(allReferrals);
+
+            if (!filtered.length) {
+                const label = activeFilter === "ALL" ? "You haven't given any referrals yet."
+                    : "No " + activeFilter.toLowerCase() + " referrals.";
+                tbody.innerHTML = `
+                    <tr><td colspan="6" style="padding:0;">
+                        <div class="empty">
+                            <i class="fa-solid fa-share-from-square"></i>
+                            <h3>No referrals</h3>
+                            <p>${label}</p>
+                            ${activeFilter === "ALL" ? '<a href="create-referral.html" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Give a referral</a>' : ""}
+                        </div>
+                    </td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(r => `
+                <tr>
+                    <td>
+                        <div class="cell-user">
+                            <img src="${BnpUtils.avatar(r.clientName)}">
+                            <div>
+                                <strong>${BnpUtils.escape(r.clientName || "Client")}</strong>
+                                <small>${BnpUtils.escape(r.clientContact || "")}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td data-label="Referred to">${BnpUtils.escape(receiverNames[r.receiverId] || "Professional")}</td>
+                    <td data-label="Category">${BnpUtils.escape(r.category || "—")}</td>
+                    <td data-label="Status">${BnpUtils.statusBadge(r.status)}</td>
+                    <td data-label="Date" class="muted">${BnpUtils.date(r.createdAt)}</td>
+                    <td><a href="referral-details.html?id=${r.id}" class="btn btn-ghost btn-sm">View</a></td>
+                </tr>`).join("");
+        }
+
+        async function loadGiven() {
+            const tbody = document.getElementById("givenRows");
+            try {
+                const rows = await Api.referrals.given();
+                allReferrals = rows;
+
+                document.getElementById("gvTotal").textContent    = rows.length;
+                document.getElementById("gvAccepted").textContent = rows.filter(r => ["ACCEPTED", "COMPLETED"].includes(r.status)).length;
+                document.getElementById("gvPending").textContent  = rows.filter(r => r.status === "PENDING").length;
+                document.getElementById("gvDeclined").textContent = rows.filter(r => ["REJECTED", "EXPIRED"].includes(r.status)).length;
+
+                const uniqueIds = [...new Set(rows.map(r => r.receiverId))];
+                await Promise.all(uniqueIds.map(async id => {
+                    try { receiverNames[id] = (await Api.users.get(id)).fullName; }
+                    catch (e) { receiverNames[id] = "Professional"; }
+                }));
+
+                renderRows();
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="6" class="muted" style="text-align:center;padding:28px;">Could not load referrals. Please try again.</td></tr>`;
+            }
+        }
+
+        // Tab click — filter without re-fetching
+        document.getElementById("gvTabs").addEventListener("click", e => {
+            const tab = e.target.closest(".tab[data-filter]");
+            if (!tab) return;
+            document.querySelectorAll("#gvTabs .tab").forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+            activeFilter = tab.dataset.filter;
+            renderRows();
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            if (!window.BnpStorage.isPremium()) {
+                document.getElementById("gvMain").style.display = "none";
+                document.getElementById("gvLocked").style.display = "";
+                return;
+            }
+            loadGiven();
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

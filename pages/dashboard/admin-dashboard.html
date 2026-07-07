@@ -1,0 +1,253 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="admin-dashboard.css">
+</head>
+
+<body class="app" data-require="admin">
+
+    <div id="sidebar-container" data-shell="admin"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Admin Dashboard</h1><p>Platform overview</p></div>
+            <div class="topbar-search"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search users, referrals..."></div>
+            <a href="../../index.html" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="white-space:nowrap;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Visit Website</a>
+            <div class="topbar-icon" id="adminBell"><i class="fa-solid fa-bell"></i><span class="bell-count-badge" id="adminBellDot" style="display:none;"></span></div>
+            <a href="../admin/profile.html"><img class="topbar-avatar" src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" alt="me" /></a>
+        </header>
+
+        <div class="app-content">
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px;margin-bottom:18px;">
+                <a class="stat" href="../admin/users.html" title="View all users">
+                    <div class="stat-top"><div class="stat-icon" style="background:var(--blue-light);color:var(--blue);"><i class="fa-solid fa-users"></i></div></div>
+                    <div class="stat-num" id="adUsers">—</div><div class="stat-lbl">Total users</div>
+                </a>
+                <a class="stat" href="../admin/users.html" title="View premium members">
+                    <div class="stat-top"><div class="stat-icon" style="background:var(--amber-light);color:var(--amber);"><i class="fa-solid fa-crown"></i></div></div>
+                    <div class="stat-num" id="adPremium">—</div><div class="stat-lbl">Premium members</div>
+                </a>
+                <a class="stat" href="../admin/membership-management.html" title="View active subscriptions">
+                    <div class="stat-top"><div class="stat-icon" style="background:var(--green-light);color:var(--green);"><i class="fa-solid fa-id-card"></i></div></div>
+                    <div class="stat-num" id="adActiveSubs">—</div><div class="stat-lbl">Active subscriptions</div>
+                </a>
+                <a class="stat" href="../admin/membership-management.html" title="View revenue &amp; subscriptions">
+                    <div class="stat-top"><div class="stat-icon" style="background:var(--green-light);color:var(--green);"><i class="fa-solid fa-indian-rupee-sign"></i></div></div>
+                    <div class="stat-num" id="adRevenue">—</div><div class="stat-lbl">Total revenue</div>
+                </a>
+                <a class="stat" href="../admin/referrals.html" title="View all referrals">
+                    <div class="stat-top"><div class="stat-icon" style="background:var(--purple-light);color:var(--purple);"><i class="fa-solid fa-share-nodes"></i></div></div>
+                    <div class="stat-num" id="adReferrals">—</div><div class="stat-lbl">Total referrals</div>
+                </a>
+                <a class="stat" href="../admin/requirements.html" title="View all requirements">
+                    <div class="stat-top"><div class="stat-icon" style="background:var(--blue-light);color:var(--blue);"><i class="fa-solid fa-layer-group"></i></div></div>
+                    <div class="stat-num" id="adRequirements">—</div><div class="stat-lbl">Requirements posted</div>
+                </a>
+                <a class="stat" href="../admin/users.html" title="View users &amp; invites">
+                    <div class="stat-top"><div class="stat-icon" style="background:var(--purple-light);color:var(--purple);"><i class="fa-solid fa-user-plus"></i></div></div>
+                    <div class="stat-num" id="adInvites">—</div><div class="stat-lbl">Invites sent</div>
+                </a>
+            </div>
+
+            <div class="grid" style="grid-template-columns:1.7fr 1fr;" id="adGrid">
+                <div style="display:flex;flex-direction:column;gap:18px;">
+
+                    <div class="card">
+                        <div class="card-title">Recent signups <a href="../admin/users.html" class="btn btn-ghost btn-sm">View all</a></div>
+                        <div class="table-wrap">
+                            <table class="tbl tbl-stack">
+                                <thead><tr><th>User</th><th>Role</th><th>City</th><th>Points</th><th>Rating</th></tr></thead>
+                                <tbody id="adSignups">
+                                    <tr><td colspan="5" class="muted" style="text-align:center;padding:18px;">Loading…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Recent referrals <a href="../admin/referrals.html" class="btn btn-ghost btn-sm">View all</a></div>
+                        <div class="table-wrap">
+                            <table class="tbl tbl-stack">
+                                <thead><tr><th>Referrer</th><th>Receiver</th><th>Category</th><th>Status</th><th>Date</th></tr></thead>
+                                <tbody id="adRecentReferrals">
+                                    <tr><td colspan="5" class="muted" style="text-align:center;padding:18px;">Loading…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Recent requirements</div>
+                        <div class="table-wrap">
+                            <table class="tbl tbl-stack">
+                                <thead><tr><th>Title</th><th>Poster</th><th>Status</th><th>Responses</th></tr></thead>
+                                <tbody id="adRecentRequirements">
+                                    <tr><td colspan="4" class="muted" style="text-align:center;padding:18px;">Loading…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:18px;">
+                    <div class="card">
+                        <div class="card-title">Plan distribution</div>
+                        <div id="adPlanDist"><div class="muted">Loading…</div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Subscriptions overview</div>
+                        <div id="adSubsOverview"><div class="muted">Loading…</div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Top cities</div>
+                        <div id="adTopCities"><div class="muted">Loading…</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/admin-bell.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            try {
+                const d = await Api.dashboard.admin();
+                document.getElementById("adUsers").textContent = (d.totalUsers ?? 0).toLocaleString("en-IN");
+                document.getElementById("adPremium").textContent = (d.premiumUsers ?? 0).toLocaleString("en-IN");
+                document.getElementById("adActiveSubs").textContent = (d.activeSubscriptions ?? 0).toLocaleString("en-IN");
+                document.getElementById("adRevenue").textContent = BnpUtils.money(d.totalRevenue);
+                document.getElementById("adReferrals").textContent = (d.totalReferrals ?? 0).toLocaleString("en-IN");
+                document.getElementById("adRequirements").textContent = (d.totalRequirements ?? 0).toLocaleString("en-IN");
+                document.getElementById("adInvites").textContent = (d.totalInvites ?? 0).toLocaleString("en-IN");
+
+                // plan distribution from real role counts
+                const total = d.totalUsers || 1;
+                const free = d.freeUsers || 0, prem = d.premiumUsers || 0, admin = (d.subAdmins || 0) + (d.superAdmins || 0);
+                const bar = (label, n, color) => {
+                    const pct = Math.round((n / total) * 100);
+                    return `<div style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span class="muted">${label}</span><strong>${pct}%</strong></div><div class="progress"><span style="width:${pct}%;${color ? "background:" + color + ";" : ""}"></span></div></div>`;
+                };
+                document.getElementById("adPlanDist").innerHTML =
+                    bar("Free", free, "var(--hint)") + bar("Premium", prem, "") + bar("Admins", admin, "var(--blue)");
+            } catch (e) { console.warn(e); }
+
+            try {
+                const ROLE = { SUPER_ADMIN: ["badge-red", "Super Admin"], SUB_ADMIN: ["badge-red", "Admin"], PREMIUM_USER: ["badge-amber", "Premium"], FREE_USER: ["badge-gray", "Free"] };
+                const normRole = (r) => {
+                    const role = (r || "FREE_USER").toUpperCase();
+                    if (role === "PREMIUM") return "PREMIUM_USER";
+                    if (role === "ADMIN")   return "SUB_ADMIN";
+                    if (role === "USER" || role === "BASIC") return "FREE_USER";
+                    return role;
+                };
+                const resolvePremium = (u) => {
+                    if (u.premium === true) return true;
+                    if (normRole(u.role) === "PREMIUM_USER") return true;
+                    const mt = (u.membershipType || u.planName || "").toUpperCase();
+                    if (mt.includes("PREMIUM")) return true;
+                    return false;
+                };
+
+                const allUsers = await Api.admin.users();
+                const userMap = {};
+                allUsers.forEach((u) => { userMap[u.id] = u; });
+                const nameOf = (id) => userMap[id]?.fullName || "Unknown member";
+
+                // top cities computed from real users
+                const cityCount = {};
+                allUsers.forEach((u) => { if (u.city) cityCount[u.city] = (cityCount[u.city] || 0) + 1; });
+                const top = Object.entries(cityCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+                document.getElementById("adTopCities").innerHTML = top.length
+                    ? top.map(([city, n], i) => `<div class="list-item" style="padding:9px 0;"><span class="muted" style="width:20px;">${i + 1}</span><div class="li-body"><strong>${BnpUtils.escape(city)}</strong></div><span class="muted">${n}</span></div>`).join("")
+                    : `<div class="muted">No city data yet.</div>`;
+
+                // Fetch detailed info for the 6 recent users (individual endpoint may include subscription)
+                const recentBasic = allUsers.slice(-5).reverse();
+                const recentDetailed = await Promise.all(
+                    recentBasic.map(u => Api.admin.user(u.id).catch(() => u))
+                );
+
+                const tbody = document.getElementById("adSignups");
+                tbody.innerHTML = recentDetailed.map((u) => {
+                    const resolvedRole = resolvePremium(u) ? "PREMIUM_USER" : normRole(u.role);
+                    const [cls, lbl] = ROLE[resolvedRole] || ROLE.FREE_USER;
+                    return `<tr>
+                        <td><div class="cell-user"><img src="${u.avatarUrl || BnpUtils.avatar(u.fullName)}"><div><strong>${BnpUtils.escape(u.fullName)}</strong><small>${BnpUtils.escape(u.profession || "")}</small></div></div></td>
+                        <td data-label="Role"><span class="badge ${cls}">${lbl}</span></td>
+                        <td data-label="City">${BnpUtils.escape(u.city || "—")}</td>
+                        <td data-label="Points">${u.points ?? 0}</td>
+                        <td data-label="Rating" class="muted">★ ${(u.avgRating ?? 0).toFixed(1)}</td>
+                    </tr>`;
+                }).join("") || `<tr><td colspan="5" class="muted" style="text-align:center;padding:18px;">No users yet.</td></tr>`;
+
+                const REF_STATUS = { PENDING: "badge-amber", ACCEPTED: "badge-blue", COMPLETED: "badge-green", REJECTED: "badge-red", EXPIRED: "badge-gray" };
+                const REQ_STATUS = { OPEN: "badge-blue", IN_PROGRESS: "badge-amber", FULFILLED: "badge-green", CLOSED: "badge-gray" };
+                const SUB_STATUS = { ACTIVE: ["badge-green", "var(--green)"], PENDING: ["badge-amber", "var(--amber)"], EXPIRED: ["badge-gray", "var(--hint)"], CANCELLED: ["badge-red", "var(--red)"] };
+
+                const [referrals, requirements, subscriptions] = await Promise.all([
+                    Api.admin.referrals().catch(() => []),
+                    Api.admin.requirements().catch(() => []),
+                    Api.admin.subscriptions().catch(() => [])
+                ]);
+
+                const refBody = document.getElementById("adRecentReferrals");
+                refBody.innerHTML = referrals.slice(0, 5).map((r) => `
+                    <tr>
+                        <td>${BnpUtils.escape(nameOf(r.referrerId))}</td>
+                        <td data-label="Receiver">${BnpUtils.escape(nameOf(r.receiverId))}</td>
+                        <td data-label="Category">${BnpUtils.escape(r.category || "—")}</td>
+                        <td data-label="Status"><span class="badge ${REF_STATUS[r.status] || "badge-gray"}">${r.status}</span></td>
+                        <td data-label="Date" class="muted">${BnpUtils.date(r.createdAt)}</td>
+                    </tr>`).join("") || `<tr><td colspan="5" class="muted" style="text-align:center;padding:18px;">No referrals yet.</td></tr>`;
+
+                const reqBody = document.getElementById("adRecentRequirements");
+                reqBody.innerHTML = requirements.slice(0, 5).map((r) => `
+                    <tr>
+                        <td><strong>${BnpUtils.escape(r.title || "Untitled")}</strong></td>
+                        <td data-label="Poster">${BnpUtils.escape(nameOf(r.posterId))}</td>
+                        <td data-label="Status"><span class="badge ${REQ_STATUS[r.status] || "badge-gray"}">${r.status}</span></td>
+                        <td data-label="Responses" class="muted">${r.responseCount ?? 0}</td>
+                    </tr>`).join("") || `<tr><td colspan="4" class="muted" style="text-align:center;padding:18px;">No requirements yet.</td></tr>`;
+
+                const subCounts = subscriptions.reduce((acc, s) => {
+                    acc[s.status] = (acc[s.status] || 0) + 1;
+                    return acc;
+                }, {});
+                const subRows = Object.keys(SUB_STATUS)
+                    .filter((status) => subCounts[status])
+                    .map((status) => {
+                        const [cls, color] = SUB_STATUS[status];
+                        return `<div class="list-item" style="padding:9px 0;">
+                            <span class="badge ${cls}" style="min-width:78px;justify-content:center;">${status}</span>
+                            <div class="li-body"></div>
+                            <strong style="color:${color};">${subCounts[status]}</strong>
+                        </div>`;
+                    }).join("");
+                document.getElementById("adSubsOverview").innerHTML = subRows || `<div class="muted">No subscriptions yet.</div>`;
+            } catch (e) { console.warn(e); }
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

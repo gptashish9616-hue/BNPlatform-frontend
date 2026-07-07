@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Group Chat — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="chat.css">
+    <link rel="stylesheet" href="group-chat.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>Group Chat</h1>
+                <p>Talk with your city &amp; category communities</p>
+            </div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:14px;">
+                <a href="../dashboard/user-dashboard.html" style="color:var(--muted);display:flex;align-items:center;gap:5px;">
+                    <i class="fa-solid fa-house" style="color:var(--red);"></i> Home
+                </a>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span style="color:var(--text);font-weight:600;">Group Chat</span>
+            </nav>
+
+            <!-- Premium gate -->
+            <div id="chatGate" class="card chat-gate" style="display:none;">
+                <div class="cg-icon"><i class="fa-solid fa-lock"></i></div>
+                <h2 style="margin:0 0 8px;font-size:20px;">Group Chat is a Premium Feature</h2>
+                <p class="muted" style="max-width:380px;margin:0 auto 22px;font-size:13.5px;line-height:1.6;">
+                    Upgrade to a premium plan to join and message your city &amp; category communities.
+                </p>
+                <a href="../membership/plans.html" class="btn btn-primary">
+                    <i class="fa-solid fa-crown"></i> Upgrade now
+                </a>
+            </div>
+
+            <!-- Chat shell -->
+            <div id="chatWrap" class="chat-shell" style="display:none;">
+
+                <!-- ── Left: My groups ── -->
+                <aside class="chat-sidebar">
+                    <div class="chat-sidebar-head">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                            <h3 style="margin:0;">My Groups</h3>
+                            <button class="new-msg-btn" id="browseGroupsBtn" title="Browse Groups">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </button>
+                        </div>
+                        <div class="chat-search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="groupSearch" placeholder="Search my groups…" autocomplete="off">
+                        </div>
+                    </div>
+                    <div id="groupList" class="conv-list">
+                        <div class="muted" style="padding:20px 16px;font-size:13px;">Loading…</div>
+                    </div>
+                </aside>
+
+                <!-- ── Right: Message panel ── -->
+                <section class="chat-panel" id="chatPanel">
+
+                    <!-- Empty state -->
+                    <div class="chat-empty" id="chatEmpty">
+                        <div class="ce-icon"><i class="fa-solid fa-users-rectangle"></i></div>
+                        <h3>Group Communication</h3>
+                        <p>Select a group on the left or browse groups to join one.</p>
+                        <button class="btn btn-primary" style="margin-top:16px;" onclick="openBrowseModal()">
+                            <i class="fa-solid fa-magnifying-glass"></i> Browse Groups
+                        </button>
+                    </div>
+
+                    <!-- Active thread (hidden until group selected) -->
+                    <div id="chatThread" style="display:none;flex-direction:column;height:100%;">
+
+                        <!-- Thread header -->
+                        <div class="thread-head" id="threadHead">
+                            <!-- filled by JS -->
+                        </div>
+
+                        <!-- Message list -->
+                        <div class="msg-list" id="msgList">
+                            <!-- filled by JS -->
+                        </div>
+
+                        <!-- Composer -->
+                        <form class="composer" id="composer">
+                            <input
+                                id="msgInput"
+                                class="composer-input"
+                                type="text"
+                                autocomplete="off"
+                                placeholder="Message the group…"
+                            >
+                            <button type="submit" class="composer-send" title="Send">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </form>
+
+                    </div>
+                </section>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Browse Groups Modal -->
+    <div id="browseModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#fff;border-radius:18px;width:min(460px,100%);max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden;">
+            <!-- Header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;border-bottom:1px solid var(--border);">
+                <strong style="font-size:16px;">Browse Groups</strong>
+                <button id="browseClose" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:2px 6px;border-radius:6px;line-height:1;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <!-- Search box -->
+            <div style="padding:14px 22px;border-bottom:1px solid var(--border);">
+                <div style="position:relative;">
+                    <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--hint);font-size:13px;"></i>
+                    <input id="browseSearch" type="text" placeholder="Search by name, city or category…"
+                        style="width:100%;padding:10px 12px 10px 34px;border:1.5px solid var(--border);border-radius:10px;font:inherit;font-size:13.5px;outline:none;box-sizing:border-box;"
+                        autocomplete="off">
+                </div>
+            </div>
+            <!-- Results -->
+            <div id="browseResults" style="overflow-y:auto;flex:1;padding:8px 0;">
+                <div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Loading groups…
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Message Confirm Modal -->
+    <div id="deleteMsgModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#fff;border-radius:16px;width:min(360px,100%);padding:26px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+            <div style="width:56px;height:56px;border-radius:50%;background:var(--red-light);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 16px;">
+                <i class="fa-solid fa-trash"></i>
+            </div>
+            <h3 style="margin:0 0 8px;font-size:16px;">Delete message?</h3>
+            <p class="muted" style="font-size:13px;margin:0 0 20px;">This cannot be undone.</p>
+            <div style="display:flex;gap:10px;justify-content:center;">
+                <button class="btn btn-outline" id="deleteMsgCancel">Cancel</button>
+                <button class="btn btn-primary" id="deleteMsgConfirm" style="background:var(--red);border-color:var(--red);">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        const ME    = window.BnpStorage.getUser() || {};
+        const MY_ID = ME.id || ME.userId;
+
+        let myGroups      = [];   // groups the user has joined
+        let allBrowsable  = [];   // all active groups (for the browse modal)
+        let activeGroupId = null;
+        const userCache   = {};
+        let pollTimer      = null;
+        let lastMsgCount   = -1;
+        let wsConnected    = false;
+        let stompClient    = null;
+        let groupSubscription = null;
+
+        // ── User resolver (cached) — used to show sender names in group threads ──
+        async function resolveUser(id) {
+            if (userCache[id]) return userCache[id];
+            try { userCache[id] = await Api.users.get(id); }
+            catch (e) { userCache[id] = { id, fullName: "User #" + id, avatarUrl: null }; }
+            return userCache[id];
+        }
+
+        function groupIcon(type) {
+            return type === "CITY" ? "fa-city" : "fa-layer-group";
+        }
+
+        // ── Time helpers (same formatting rules as 1-1 chat) ─────────
+        function msgTime(iso) {
+            if (!iso) return "";
+            const d = new Date(iso);
+            return isNaN(d) ? "" : d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        }
+
+        function dateSep(iso) {
+            if (!iso) return "";
+            const d   = new Date(iso);
+            const now = new Date();
+            const today     = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const yesterday = new Date(today - 86400000);
+            const msgDay    = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            if (msgDay.getTime() === today.getTime())     return "Today";
+            if (msgDay.getTime() === yesterday.getTime()) return "Yesterday";
+            return d.toLocaleDateString([], { day: "2-digit", month: "long", year: "numeric" });
+        }
+
+        // ── Render "My Groups" list ───────────────────────────────────
+        function renderGroupList(groups) {
+            const box = document.getElementById("groupList");
+            if (!groups.length) {
+                box.innerHTML = `
+                    <div style="padding:32px 16px;text-align:center;">
+                        <i class="fa-solid fa-users-rectangle" style="font-size:28px;color:var(--hint);margin-bottom:10px;"></i>
+                        <p class="muted" style="font-size:13px;margin:0;">You haven't joined any groups yet.<br>Browse groups to get started.</p>
+                    </div>`;
+                return;
+            }
+            box.innerHTML = groups.map(g => `
+                <div class="group-item ${g.id === activeGroupId ? "active" : ""}" data-id="${g.id}">
+                    <div class="gi-icon ${g.type === "CATEGORY" ? "category" : ""}">
+                        <i class="fa-solid ${groupIcon(g.type)}"></i>
+                    </div>
+                    <div class="gi-body">
+                        <div class="gi-name">${BnpUtils.escape(g.name)}</div>
+                        <div class="gi-last">${(g.memberCount ?? 0).toLocaleString("en-IN")} members</div>
+                    </div>
+                </div>`).join("");
+
+            box.querySelectorAll(".group-item").forEach(el => {
+                el.addEventListener("click", () => openGroup(Number(el.dataset.id)));
+            });
+        }
+
+        async function loadMyGroups(selectId) {
+            const box = document.getElementById("groupList");
+            try {
+                myGroups = await Api.groupChat.myGroups();
+            } catch (e) {
+                if (/premium/i.test(e.message)) { showGate(); return; }
+                box.innerHTML = `<div class="muted" style="padding:16px;font-size:13px;">Could not load your groups.</div>`;
+                return;
+            }
+
+            const searchQ = document.getElementById("groupSearch").value.toLowerCase().trim();
+            renderGroupList(searchQ ? myGroups.filter(g => g.name.toLowerCase().includes(searchQ)) : myGroups);
+
+            if (selectId) openGroup(selectId);
+        }
+
+        document.getElementById("groupSearch").addEventListener("input", e => {
+            const q = e.target.value.toLowerCase().trim();
+            renderGroupList(q ? myGroups.filter(g => g.name.toLowerCase().includes(q)) : myGroups);
+        });
+
+        // ── Open a group thread ───────────────────────────────────────
+        async function openGroup(groupId) {
+            activeGroupId = groupId;
+            lastMsgCount  = -1;
+            const group = myGroups.find(g => g.id === groupId);
+            if (!group) return;
+
+            document.querySelectorAll(".group-item").forEach(el =>
+                el.classList.toggle("active", Number(el.dataset.id) === groupId));
+
+            document.getElementById("threadHead").innerHTML = `
+                <div class="gi-icon ${group.type === "CATEGORY" ? "category" : ""}" style="border-radius:50%;">
+                    <i class="fa-solid ${groupIcon(group.type)}"></i>
+                </div>
+                <div>
+                    <div class="th-name">${BnpUtils.escape(group.name)}</div>
+                    <div class="th-members">${(group.memberCount ?? 0).toLocaleString("en-IN")} members</div>
+                </div>
+                <div class="th-actions">
+                    <button class="btn btn-outline btn-sm" onclick="leaveGroup(${group.id})" title="Leave group">
+                        <i class="fa-solid fa-right-from-bracket"></i> Leave
+                    </button>
+                </div>`;
+
+            document.getElementById("chatEmpty").style.display = "none";
+            document.getElementById("chatThread").style.display = "flex";
+
+            await loadMessages(true);
+            subscribeToGroup(groupId);
+            startPolling();
+        }
+
+        // ── Render messages (each bubble shows the sender's name — a group has many senders, unlike 1-1 chat) ──
+        async function loadMessages(scroll) {
+            if (!activeGroupId) return;
+            let msgs;
+            try { msgs = await Api.groupChat.messages(activeGroupId); }
+            catch (e) { return; }
+            if (msgs.length === lastMsgCount) return;
+            lastMsgCount = msgs.length;
+
+            const senders = await Promise.all(
+                [...new Set(msgs.map(m => m.senderId))].map(id => resolveUser(id))
+            );
+            const senderMap = {};
+            senders.forEach(u => senderMap[u.id] = u);
+
+            const list = document.getElementById("msgList");
+            if (!msgs.length) {
+                list.innerHTML = `
+                    <div style="margin:auto;text-align:center;color:var(--hint);">
+                        <i class="fa-regular fa-hand-wave" style="font-size:28px;margin-bottom:10px;display:block;"></i>
+                        <p style="font-size:13px;margin:0;">Be the first to say hello 👋</p>
+                    </div>`;
+                return;
+            }
+
+            let html = "";
+            let lastDate = null;
+
+            msgs.forEach(m => {
+                const mine = m.senderId === MY_ID;
+                const side = mine ? "me" : "them";
+                const mDate = dateSep(m.createdAt);
+
+                if (mDate !== lastDate) {
+                    html += `<div class="msg-date-sep">${mDate}</div>`;
+                    lastDate = mDate;
+                }
+
+                const sender = senderMap[m.senderId];
+                const canDelete = mine && !m.deleted;
+                html += `
+                    <div class="bubble-group ${side}">
+                        ${!mine ? `<div class="bg-sender-name">${BnpUtils.escape(sender?.fullName || "Member")}</div>` : ""}
+                        <div class="bubble ${side}${m.deleted ? " deleted" : ""}">
+                            ${canDelete ? `<button class="bubble-delete-btn" data-id="${m.id}" title="Delete message"><i class="fa-solid fa-trash"></i></button>` : ""}
+                            ${m.deleted ? `<i class="fa-solid fa-ban" style="margin-right:5px;"></i>This message was deleted` : BnpUtils.escape(m.content || "")}
+                            <small class="b-time">${msgTime(m.createdAt)}</small>
+                        </div>
+                    </div>`;
+            });
+
+            list.innerHTML = html;
+            if (scroll) list.scrollTop = list.scrollHeight;
+
+            list.querySelectorAll(".bubble-delete-btn").forEach(btn => {
+                btn.addEventListener("click", e => {
+                    e.stopPropagation();
+                    askDeleteMessage(Number(btn.dataset.id));
+                });
+            });
+        }
+
+        // ── Delete message (custom confirm modal, no native confirm()) ──
+        let pendingDeleteMsgId = null;
+
+        function askDeleteMessage(messageId) {
+            pendingDeleteMsgId = messageId;
+            document.getElementById("deleteMsgModal").style.display = "flex";
+        }
+
+        function closeDeleteMsgModal() {
+            document.getElementById("deleteMsgModal").style.display = "none";
+            pendingDeleteMsgId = null;
+        }
+
+        document.getElementById("deleteMsgCancel").addEventListener("click", closeDeleteMsgModal);
+        document.getElementById("deleteMsgModal").addEventListener("click", e => {
+            if (e.target === document.getElementById("deleteMsgModal")) closeDeleteMsgModal();
+        });
+        document.getElementById("deleteMsgConfirm").addEventListener("click", async () => {
+            if (!pendingDeleteMsgId || !activeGroupId) { closeDeleteMsgModal(); return; }
+            const messageId = pendingDeleteMsgId;
+            closeDeleteMsgModal();
+            try {
+                await Api.groupChat.deleteMessage(activeGroupId, messageId);
+                lastMsgCount = -1;
+                await loadMessages(true);
+            } catch (err) {
+                BnpUtils.toast(err.message, "error");
+            }
+        });
+
+        // ── Polling (fallback for when the WebSocket isn't connected) ──
+        function startPolling() {
+            if (pollTimer) clearInterval(pollTimer);
+            if (wsConnected) return;
+            pollTimer = setInterval(() => { if (!wsConnected) loadMessages(true); }, 4000);
+        }
+
+        // ── Live messaging over WebSocket (STOMP) — one group topic at a time ──
+        function subscribeToGroup(groupId) {
+            if (groupSubscription) { groupSubscription.unsubscribe(); groupSubscription = null; }
+            if (!stompClient || !wsConnected) return;
+            groupSubscription = stompClient.subscribe(`/topic/group-messages/${groupId}`, frame => {
+                if (Number(groupId) !== activeGroupId) return;
+                lastMsgCount = -1;
+                loadMessages(true);
+            });
+        }
+
+        function connectWs() {
+            if (!window.StompJs) return;
+            const token = window.BnpStorage.getToken();
+            if (!token) return;
+            const wsBase = (window.BNP_CONFIG?.API_BASE_URL || "").replace(/\/$/, "").replace(/^http/, "ws");
+
+            stompClient = new StompJs.Client({
+                brokerURL: `${wsBase}/ws?token=${encodeURIComponent(token)}`,
+                reconnectDelay: 5000,
+                onConnect: () => {
+                    wsConnected = true;
+                    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+                    if (activeGroupId) subscribeToGroup(activeGroupId);
+                },
+                onWebSocketClose: () => {
+                    wsConnected = false;
+                    if (activeGroupId) startPolling();
+                },
+                onStompError: () => { wsConnected = false; }
+            });
+            stompClient.activate();
+        }
+
+        // ── Send message ─────────────────────────────────────────────
+        document.getElementById("composer").addEventListener("submit", async e => {
+            e.preventDefault();
+            const input = document.getElementById("msgInput");
+            const text  = input.value.trim();
+            if (!text || !activeGroupId) return;
+            input.value = "";
+            input.focus();
+            try {
+                await Api.groupChat.send(activeGroupId, text);
+                lastMsgCount = -1;
+                await loadMessages(true);
+            } catch (err) {
+                BnpUtils.toast(err.message, "error");
+                input.value = text;
+            }
+        });
+
+        document.getElementById("msgInput").addEventListener("keydown", e => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                document.getElementById("composer").requestSubmit();
+            }
+        });
+
+        // ── Leave group ───────────────────────────────────────────────
+        async function leaveGroup(groupId) {
+            try {
+                await Api.groupChat.leave(groupId);
+                BnpUtils.toast("Left group", "success");
+                if (groupSubscription) { groupSubscription.unsubscribe(); groupSubscription = null; }
+                activeGroupId = null;
+                document.getElementById("chatThread").style.display = "none";
+                document.getElementById("chatEmpty").style.display = "flex";
+                await loadMyGroups();
+            } catch (err) {
+                BnpUtils.toast(err.message, "error");
+            }
+        }
+        window.leaveGroup = leaveGroup;
+
+        // ── Premium gate ─────────────────────────────────────────────
+        function showGate() {
+            document.getElementById("chatWrap").style.display = "none";
+            document.getElementById("chatGate").style.display = "block";
+        }
+
+        // ── Browse / Join Groups modal ────────────────────────────────
+        function openBrowseModal() {
+            document.getElementById("browseModal").style.display = "flex";
+            loadBrowsableGroups();
+            setTimeout(() => document.getElementById("browseSearch").focus(), 80);
+        }
+        window.openBrowseModal = openBrowseModal;
+
+        function closeBrowseModal() {
+            document.getElementById("browseModal").style.display = "none";
+            document.getElementById("browseSearch").value = "";
+        }
+
+        async function loadBrowsableGroups() {
+            const box = document.getElementById("browseResults");
+            box.innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading groups…</div>`;
+            try {
+                allBrowsable = await Api.groupChat.browsableGroups();
+                renderBrowsable(allBrowsable);
+            } catch (e) {
+                box.innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">Could not load groups.</div>`;
+            }
+        }
+
+        function renderBrowsable(groups) {
+            const box = document.getElementById("browseResults");
+            const joinedIds = new Set(myGroups.map(g => g.id));
+
+            if (!groups.length) {
+                box.innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">No groups found.</div>`;
+                return;
+            }
+
+            box.innerHTML = groups.map(g => {
+                const joined = joinedIds.has(g.id);
+                const tag = g.type === "CITY" ? (g.city || "City") : (g.category || "Category");
+                return `
+                <div class="browse-group-item" data-id="${g.id}">
+                    <div class="bg-icon ${g.type === "CATEGORY" ? "category" : ""}">
+                        <i class="fa-solid ${groupIcon(g.type)}"></i>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <div class="bg-title">${BnpUtils.escape(g.name)}</div>
+                        <div class="bg-sub">${BnpUtils.escape(tag)} · ${(g.memberCount ?? 0).toLocaleString("en-IN")} members</div>
+                    </div>
+                    <button class="btn ${joined ? "btn-outline" : "btn-primary"} btn-sm join-btn" data-id="${g.id}" ${joined ? "disabled" : ""}>
+                        ${joined ? "Joined" : "Join"}
+                    </button>
+                </div>`;
+            }).join("");
+
+            box.querySelectorAll(".join-btn:not([disabled])").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    const groupId = Number(btn.dataset.id);
+                    BnpUtils.loading(btn, true, "Joining…");
+                    try {
+                        await Api.groupChat.join(groupId);
+                        BnpUtils.toast("Joined group", "success");
+                        closeBrowseModal();
+                        document.getElementById("chatWrap").style.display = "grid";
+                        await loadMyGroups(groupId);
+                    } catch (err) {
+                        BnpUtils.toast(err.message, "error");
+                        BnpUtils.loading(btn, false);
+                    }
+                });
+            });
+        }
+
+        document.getElementById("browseGroupsBtn").addEventListener("click", openBrowseModal);
+        document.getElementById("browseClose").addEventListener("click", closeBrowseModal);
+        document.getElementById("browseModal").addEventListener("click", e => {
+            if (e.target === document.getElementById("browseModal")) closeBrowseModal();
+        });
+
+        document.getElementById("browseSearch").addEventListener("input", e => {
+            const q = e.target.value.toLowerCase().trim();
+            if (!q) { renderBrowsable(allBrowsable); return; }
+            renderBrowsable(allBrowsable.filter(g =>
+                g.name.toLowerCase().includes(q) ||
+                (g.city || "").toLowerCase().includes(q) ||
+                (g.category || "").toLowerCase().includes(q)));
+        });
+
+        // ── Init ─────────────────────────────────────────────────────
+        async function init() {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            try {
+                document.getElementById("chatWrap").style.display = "grid";
+                await loadMyGroups();
+                connectWs();
+            } catch (e) {
+                if (/premium/i.test(e.message)) showGate();
+                else BnpUtils.toast(e.message, "error");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", init);
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

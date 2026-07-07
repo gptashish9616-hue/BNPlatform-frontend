@@ -1,0 +1,128 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Subscription — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="subscription.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>My Subscription</h1><p>Manage your plan &amp; billing</p></div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+            <div class="grid" style="grid-template-columns:1fr 340px;align-items:start;" id="subGrid">
+
+                <div style="display:flex;flex-direction:column;gap:18px;">
+
+                    <!-- Current plan -->
+                    <div class="card" style="background:linear-gradient(150deg,#e31e24,#a8181f);border:none;color:#fff;">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+                            <div>
+                                <span class="badge" style="background:rgba(255,255,255,.2);color:#fff;"><i class="fa-solid fa-crown"></i> <span id="subBadge">—</span></span>
+                                <div style="font-size:26px;font-weight:800;margin-top:12px;" id="subPrice">—</div>
+                                <p style="opacity:.9;font-size:13px;margin:6px 0 0;" id="subRenew">—</p>
+                            </div>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;" id="subActions">
+                                <a href="plans.html" class="btn btn-sm" style="background:#fff;color:var(--red);">Change plan</a>
+                                <button class="btn btn-sm" style="background:rgba(255,255,255,.18);color:#fff;border-color:transparent;" onclick="cancelSub(this)">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent payments -->
+                    <div class="card">
+                        <div class="card-title">Recent payments <a href="payment-history.html" class="btn btn-ghost btn-sm">View all</a></div>
+                        <div id="subPayments"><div class="list-item"><div class="li-body muted">Loading…</div></div></div>
+                    </div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:18px;">
+                    <div class="card">
+                        <div class="card-title">Premium benefits</div>
+                        <div class="list-item" style="padding:9px 0;"><i class="fa-solid fa-check text-red"></i><span style="font-size:13px;">Map &amp; nearby search</span></div>
+                        <div class="list-item" style="padding:9px 0;"><i class="fa-solid fa-check text-red"></i><span style="font-size:13px;">Unlimited chat</span></div>
+                        <div class="list-item" style="padding:9px 0;"><i class="fa-solid fa-check text-red"></i><span style="font-size:13px;">Full contact details</span></div>
+                        <div class="list-item" style="padding:9px 0;"><i class="fa-solid fa-check text-red"></i><span style="font-size:13px;">Profile analytics</span></div>
+                    </div>
+                    <a href="payment-history.html" class="btn btn-outline" style="width:100%;"><i class="fa-solid fa-receipt"></i> View payment history</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        async function loadSubscription() {
+            try {
+                const [sub, plans] = await Promise.all([Api.subscription.current(), Api.subscription.plans()]);
+                const badge = document.getElementById("subBadge");
+                const price = document.getElementById("subPrice");
+                const renew = document.getElementById("subRenew");
+
+                if (!sub) {
+                    badge.textContent = "Free";
+                    price.innerHTML = '₹0<span style="font-size:13px;font-weight:500;opacity:.85;">/month</span>';
+                    renew.textContent = "You're on the free plan.";
+                    document.getElementById("subActions").innerHTML = '<a href="plans.html" class="btn btn-sm" style="background:#fff;color:var(--red);">Upgrade</a>';
+                    return;
+                }
+                const plan = plans.find((p) => p.id === sub.planId);
+                badge.textContent = plan ? plan.name : "Premium";
+                price.innerHTML = (plan ? BnpUtils.money(plan.price) : "—") +
+                    `<span style="font-size:13px;font-weight:500;opacity:.85;">/${plan && (plan.billingCycle || "").startsWith("YEAR") ? "year" : "month"}</span>`;
+                renew.innerHTML = sub.status === "ACTIVE"
+                    ? `Renews on <strong>${BnpUtils.date(sub.endDate)}</strong>`
+                    : `Status: <strong>${sub.status}</strong>`;
+            } catch (e) { console.warn(e); }
+
+            try {
+                const payments = (await Api.subscription.payments()).slice(0, 4);
+                document.getElementById("subPayments").innerHTML = payments.length ? payments.map((p) => `
+                    <div class="list-item" style="padding:10px 0;">
+                        <div class="li-icon" style="background:var(--bg);color:var(--text);"><i class="fa-solid fa-receipt"></i></div>
+                        <div class="li-body"><strong>${BnpUtils.money(p.amount)}</strong><p>${BnpUtils.escape(p.reference || "")} · ${BnpUtils.date(p.paidAt || p.createdAt)}</p></div>
+                        ${BnpUtils.statusBadge(p.status)}
+                    </div>`).join("") : `<div class="list-item"><div class="li-body muted">No payments yet.</div></div>`;
+            } catch (e) { console.warn(e); }
+        }
+
+        async function cancelSub(btn) {
+            if (!confirm("Cancel your subscription? You'll keep access until it expires.")) return;
+            BnpUtils.loading(btn, true, "Cancelling…");
+            try {
+                await Api.subscription.cancel();
+                BnpUtils.toast("Subscription cancelled.", "success");
+                loadSubscription();
+            } catch (e) { BnpUtils.toast(e.message, "error"); }
+            finally { BnpUtils.loading(btn, false); }
+        }
+        window.cancelSub = cancelSub;
+        document.addEventListener("DOMContentLoaded", () => { if (window.BnpStorage.isAuthenticated()) loadSubscription(); });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

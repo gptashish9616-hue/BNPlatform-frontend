@@ -1,0 +1,182 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Requirement Details — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="requirement-details.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Requirement Details</h1><p>#RQ-7741</p></div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+            <a href="all-requirements.html" class="btn btn-ghost btn-sm" style="margin-bottom:16px;"><i class="fa-solid fa-arrow-left"></i> Back</a>
+
+            <div class="grid" style="grid-template-columns:1.7fr 1fr;align-items:start;" id="rqdGrid">
+
+                <div style="display:flex;flex-direction:column;gap:18px;">
+                    <div class="card">
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;" id="rqdBadges"></div>
+                        <h2 style="font-size:20px;font-weight:800;margin:0 0 10px;" id="rqdTitle">Loading…</h2>
+                        <div style="display:flex;align-items:center;gap:16px;font-size:12.5px;color:var(--hint);margin-bottom:16px;flex-wrap:wrap;" id="rqdMeta"></div>
+                        <p class="muted" style="line-height:1.7;" id="rqdDesc"></p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Responses <span class="muted" id="rqdRespLabel"></span></div>
+                        <div id="rqdResponses"><div class="list-item"><div class="li-body muted">Loading…</div></div></div>
+                    </div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:18px;">
+                    <div class="card">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+                            <img id="rqdPosterAvatar" src="https://ui-avatars.com/api/?name=U" style="width:46px;height:46px;border-radius:50%;">
+                            <div><strong id="rqdPosterName">—</strong><p class="muted" style="margin:2px 0 0;font-size:12.5px;">Posted by</p></div>
+                        </div>
+                        <div id="rqdActions"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Summary</div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Budget</span><strong id="rqdBudget">—</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Category</span><strong id="rqdCategory">—</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;"><span class="muted">Responses</span><strong id="rqdRespCount">0</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        const RID = BnpUtils.param("id");
+        let requirement = null;
+
+        async function load() {
+            if (!RID) { BnpUtils.toast("No requirement specified.", "error"); return; }
+            try {
+                requirement = await Api.requirements.details(RID);
+                const me = BnpStorage.getUser();
+                const mine = me && requirement.posterId === me.userId;
+
+                document.getElementById("rqdBadges").innerHTML =
+                    `<span class="badge badge-blue">${BnpUtils.escape(requirement.category || "General")}</span> ${BnpUtils.statusBadge(requirement.status)}`;
+                document.getElementById("rqdTitle").textContent = requirement.title || "Untitled";
+                document.getElementById("rqdMeta").innerHTML =
+                    `<span><i class="fa-solid fa-location-dot"></i> ${BnpUtils.escape(requirement.city || "Remote")}</span>
+                     <span><i class="fa-solid fa-clock"></i> ${BnpUtils.dateTime(requirement.createdAt)}</span>`;
+                document.getElementById("rqdDesc").textContent = requirement.description || "No description provided.";
+                document.getElementById("rqdBudget").textContent = requirement.budget || "—";
+                document.getElementById("rqdCategory").textContent = requirement.category || "—";
+                document.getElementById("rqdRespCount").textContent = requirement.responseCount || 0;
+
+                try {
+                    const poster = await Api.users.get(requirement.posterId);
+                    document.getElementById("rqdPosterName").textContent = poster.fullName;
+                    document.getElementById("rqdPosterAvatar").src = poster.avatarUrl || BnpUtils.avatar(poster.fullName);
+                } catch (e) {}
+
+                renderActions(mine);
+                renderResponses(mine);
+            } catch (e) {
+                BnpUtils.toast(e.message, "error");
+            }
+        }
+
+        function renderActions(mine) {
+            const box = document.getElementById("rqdActions");
+            if (mine) {
+                const canFulfill = requirement.status === "OPEN" || requirement.status === "IN_PROGRESS";
+                box.innerHTML = canFulfill
+                    ? `<button class="btn btn-primary" style="width:100%;" onclick="fulfill()"><i class="fa-solid fa-flag-checkered"></i> Mark fulfilled</button>
+                       <p class="muted" style="font-size:12px;margin:10px 0 0;">Accept a response below, then mark fulfilled to earn points.</p>`
+                    : `<p class="muted" style="font-size:13px;">This requirement is ${requirement.status.toLowerCase()}.</p>`;
+            } else if (!BnpStorage.isPremium()) {
+                box.innerHTML = `
+                    <div style="text-align:center;padding:18px 10px;">
+                        <div style="font-size:32px;color:var(--red);margin-bottom:10px;"><i class="fa-solid fa-lock"></i></div>
+                        <p style="font-size:13.5px;font-weight:600;margin:0 0 6px;">Premium required to respond</p>
+                        <p class="muted" style="font-size:12.5px;line-height:1.6;margin:0 0 16px;">Upgrade your plan to send responses and connect with requirement posters.</p>
+                        <a href="../../pages/membership/plans.html" class="btn btn-primary" style="width:100%;"><i class="fa-solid fa-crown"></i> Upgrade to Premium</a>
+                    </div>`;
+            } else if (requirement.status === "OPEN") {
+                box.innerHTML = `
+                    <div class="field"><label>Your message</label><textarea id="rqdMsg" rows="3" placeholder="How can you help?"></textarea></div>
+                    <div class="field"><label>Quote (optional)</label><input type="text" id="rqdQuote" placeholder="₹ your quote"></div>
+                    <button class="btn btn-primary" style="width:100%;" onclick="respond(this)"><i class="fa-solid fa-paper-plane"></i> Send response</button>`;
+            } else {
+                box.innerHTML = `<p class="muted" style="font-size:13px;">This requirement is no longer open for responses.</p>`;
+            }
+        }
+
+        async function renderResponses(mine) {
+            const box = document.getElementById("rqdResponses");
+            try {
+                const responses = await Api.requirements.responses(RID);
+                document.getElementById("rqdRespLabel").textContent = `(${responses.length})`;
+                if (!responses.length) { box.innerHTML = `<div class="list-item"><div class="li-body muted">No responses yet.</div></div>`; return; }
+
+                const names = {};
+                await Promise.all([...new Set(responses.map((r) => r.responderId))].map(async (id) => {
+                    try { names[id] = (await Api.users.get(id)).fullName; } catch (e) { names[id] = "Professional"; }
+                }));
+
+                box.innerHTML = responses.map((r) => `
+                    <div class="list-item">
+                        <img src="${BnpUtils.avatar(names[r.responderId])}" style="width:42px;height:42px;border-radius:50%;">
+                        <div class="li-body"><strong>${BnpUtils.escape(names[r.responderId])}</strong>${r.accepted ? ' <span class="badge badge-green">Accepted</span>' : ""}<p>${BnpUtils.escape(r.message || "")}${r.quote ? " · " + BnpUtils.escape(r.quote) : ""}</p></div>
+                        ${mine && !r.accepted && requirement.status === "OPEN" ? `<button class="btn btn-primary btn-sm" onclick="accept(${r.id})">Accept</button>` : ""}
+                    </div>`).join("");
+            } catch (e) { box.innerHTML = `<div class="list-item"><div class="li-body muted">Could not load responses.</div></div>`; }
+        }
+
+        async function respond(btn) {
+            BnpUtils.loading(btn, true, "Sending…");
+            try {
+                await Api.requirements.respond(RID, { message: document.getElementById("rqdMsg").value.trim(), quote: document.getElementById("rqdQuote").value.trim() });
+                BnpUtils.toast("Response sent!", "success");
+                load();
+            } catch (e) { BnpUtils.loading(btn, false); BnpUtils.toast(e.message, "error"); }
+        }
+        async function accept(responseId) {
+            try { await Api.requirements.accept(RID, responseId); BnpUtils.toast("Response accepted.", "success"); load(); }
+            catch (e) { BnpUtils.toast(e.message, "error"); }
+        }
+        async function fulfill() {
+            try { await Api.requirements.fulfill(RID); BnpUtils.toast("Requirement fulfilled — points awarded!", "success"); load(); }
+            catch (e) { BnpUtils.toast(e.message, "error"); }
+        }
+        window.respond = respond; window.accept = accept; window.fulfill = fulfill;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            load();
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

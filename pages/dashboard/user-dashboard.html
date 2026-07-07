@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="user-dashboard.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>Dashboard</h1>
+                <p>Welcome back, Rahul 👋</p>
+            </div>
+            <div class="topbar-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search professionals, requirements..." />
+            </div>
+            <a class="topbar-icon" href="../notifications/notifications.html" id="bellBtn">
+                <i class="fa-solid fa-bell"></i>
+                <span class="dot" id="bellDot" style="display:none;"></span>
+                <span class="bell-count" id="bellCount" style="display:none;"></span>
+            </a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff"
+                alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <!-- New Responses on MY Requirements Banner -->
+            <div id="responsesBanner" style="display:none;margin-bottom:18px;"></div>
+
+            <!-- New Requirements Notification Banner -->
+            <div id="newReqBanner" style="margin-bottom:18px;display:none;"></div>
+
+            <!-- STAT CARDS -->
+            <div class="grid grid-4" style="margin-bottom:18px;">
+                <div class="stat">
+                    <div class="stat-top">
+                        <div class="stat-icon"><i class="fa-solid fa-star"></i></div>
+                    </div>
+                    <div class="stat-num" id="statPoints">—</div>
+                    <div class="stat-lbl">Credibility points</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-top">
+                        <div class="stat-icon"><i class="fa-solid fa-share-from-square"></i></div>
+                    </div>
+                    <div class="stat-num" id="statRefGiven">—</div>
+                    <div class="stat-lbl">Referrals given</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-top">
+                        <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
+                    </div>
+                    <div class="stat-num" id="statRequirements">—</div>
+                    <div class="stat-lbl">Requirements posted</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-top">
+                        <div class="stat-icon"><i class="fa-solid fa-eye"></i></div>
+                    </div>
+                    <div class="stat-num" id="statReviews">—</div>
+                    <div class="stat-lbl">Reviews received</div>
+                </div>
+            </div>
+
+            <!-- MAIN GRID -->
+            <div class="grid dash-grid" style="grid-template-columns: 1.7fr 1fr;">
+
+                <!-- LEFT COLUMN -->
+                <div style="display:flex;flex-direction:column;gap:18px;">
+
+                    <!-- Recent referrals -->
+                    <div class="card">
+                        <div class="card-title">Recent referrals <a href="../referrals/given-referrals.html"
+                                class="btn btn-ghost btn-sm">View all</a></div>
+                        <div class="table-wrap">
+                            <table class="tbl">
+                                <thead>
+                                    <tr>
+                                        <th>Professional</th>
+                                        <th>Category</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashReferrals">
+                                    <tr>
+                                        <td colspan="4" class="muted" style="text-align:center;padding:18px;">Loading…
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Activity feed -->
+                    <div class="card">
+                        <div class="card-title">Recent activity</div>
+                        <div id="dashActivity">
+                            <div class="list-item">
+                                <div class="li-body muted">Loading…</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div style="display:flex;flex-direction:column;gap:18px;">
+
+                    <!-- Profile completion -->
+                    <div class="card">
+                        <div class="card-title">Profile strength</div>
+                        <div class="profile-strength-row" style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+                            <div class="avatar-text" id="dashStrengthPct"
+                                style="width:52px;height:52px;background:var(--red-light);color:var(--red);font-size:18px;">
+                                —</div>
+                            <div>
+                                <strong style="font-size:14px;" id="dashStrengthLbl">Profile</strong>
+                                <p class="muted" style="margin:2px 0 0;font-size:12.5px;">Complete your profile to rank
+                                    higher.</p>
+                            </div>
+                        </div>
+                        <div class="progress" style="margin-bottom:14px;"><span id="dashStrengthBar"
+                                style="width:0%;"></span></div>
+                        <a href="../profile/edit-profile.html" class="btn btn-outline btn-sm"
+                            style="width:100%;">Complete profile</a>
+                    </div>
+
+                    <!-- Membership upsell (hidden/updated dynamically based on plan) -->
+                    <div class="card" id="membershipUpsell"
+                        style="background:linear-gradient(150deg,#e31e24,#a8181f);border:none;color:#fff;">
+                        <div style="font-size:22px;margin-bottom:8px;"><i class="fa-solid fa-crown"></i></div>
+                        <strong style="font-size:16px;">Upgrade to Premium</strong>
+                        <p style="font-size:13px;opacity:.9;margin:8px 0 16px;">Unlock the map, unlimited chat, and
+                            analytics.</p>
+                        <a href="../membership/plans.html" class="btn btn-sm"
+                            style="background:#fff;color:var(--red);width:100%;">See plans</a>
+                    </div>
+
+                    <!-- New Requirements card -->
+                    <div class="card">
+                        <div class="card-title">
+                            New Requirements
+                            <a href="../requirements/all-requirements.html" class="btn btn-ghost btn-sm"
+                                onclick="RNS.markAll()">View all</a>
+                        </div>
+                        <div id="dashRecentReqs">
+                            <div class="list-item">
+                                <div class="li-body muted"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leaderboard rank -->
+                    <div class="card">
+                        <div class="card-title">Your rank <span class="badge badge-amber" id="rankScope">City</span>
+                        </div>
+                        <div style="text-align:center;padding:6px 0 14px;">
+                            <div style="font-size:34px;font-weight:800;color:var(--red);" id="rankNum">—</div>
+                            <p class="muted" style="margin:2px 0 0;font-size:12.5px;" id="rankSub">—</p>
+                        </div>
+                        <div id="rankList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/animate.js"></script>
+    <script>
+        /* ============================================================
+           Response Notification — alerts when someone responds to MY requirement.
+           Tracks per-requirement response counts in localStorage.
+           ============================================================ */
+        const RESP_KEY = (uid) => `bnp_resp_seen_${uid || "g"}`;
+
+        function renderResponseBanner(newRespReqs) {
+            const banner = document.getElementById("responsesBanner");
+            if (!newRespReqs.length) { banner.style.display = "none"; return; }
+            banner.style.display = "block";
+            banner.innerHTML = `
+                <div class="card resp-banner-card">
+                    <div class="resp-banner-header">
+                        <strong style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--red);">
+                            <i class="fa-solid fa-reply-all"></i>
+                            ${newRespReqs.reduce((s, r) => s + r.newCount, 0)} new response${newRespReqs.reduce((s, r) => s + r.newCount, 0) > 1 ? "s" : ""} on your requirement${newRespReqs.length > 1 ? "s" : ""}!
+                        </strong>
+                        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('responsesBanner').style.display='none';" title="Dismiss"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    ${newRespReqs.map(r => `
+                    <div class="resp-banner-row" onclick="location.href='../requirements/requirement-details.html?id=${r.id}'">
+                        <div class="resp-banner-icon"><i class="fa-solid fa-comment-dots"></i></div>
+                        <div class="li-body" style="flex:1;min-width:0;">
+                            <strong>${BnpUtils.escape(r.title || "Untitled")}</strong>
+                            <p><span class="resp-new-count">+${r.newCount} new</span> &middot; ${r.responseCount} total response${r.responseCount !== 1 ? "s" : ""}</p>
+                        </div>
+                        <a href="../requirements/requirement-details.html?id=${r.id}" class="btn btn-sm resp-view-btn" onclick="event.stopPropagation();">View</a>
+                    </div>`).join("")}
+                </div>`;
+        }
+
+        async function checkMyRequirementResponses() {
+            const me = window.BnpStorage.getUser();
+            const uid = me?.userId;
+            if (!uid) return;
+            try {
+                const myReqs = await Api.requirements.mine();
+                if (!myReqs || !myReqs.length) return;
+
+                const stored = JSON.parse(localStorage.getItem(RESP_KEY(uid)) || "{}");
+                const newRespReqs = [];
+                const updated = {};
+
+                myReqs.forEach(r => {
+                    const curr = r.responseCount || 0;
+                    const prev = stored[r.id] !== undefined ? stored[r.id] : curr;
+                    updated[r.id] = curr;
+                    if (curr > prev) {
+                        newRespReqs.push({ ...r, newCount: curr - prev });
+                    }
+                });
+
+                localStorage.setItem(RESP_KEY(uid), JSON.stringify(updated));
+                renderResponseBanner(newRespReqs);
+            } catch (e) {
+                console.warn("Response check failed:", e);
+            }
+        }
+
+        /* ============================================================
+           ReqNotifStore — localStorage-based requirement notification queue.
+           Each entry: { id, reqId, title, sub, at, read, fromUserId }
+           ============================================================ */
+        const RNS = {
+            _k(uid) { return `bnp_rn_${uid || "g"}`; },
+            _ck(uid) { return `bnp_rc_${uid || "g"}`; },
+
+            get(uid) {
+                try { return JSON.parse(localStorage.getItem(this._k(uid)) || "[]"); }
+                catch { return []; }
+            },
+
+            save(uid, list) {
+                localStorage.setItem(this._k(uid), JSON.stringify(list.slice(0, 60)));
+            },
+
+            /* merge new requirements into the queue; skip already-stored ones */
+            push(uid, reqs) {
+                const existing = this.get(uid);
+                const seen = new Set(existing.map(n => n.reqId));
+                const fresh = reqs
+                    .filter(r => !seen.has(r.id))
+                    .map(r => ({
+                        id: `rn_${r.id}`,
+                        reqId: r.id,
+                        title: r.title,
+                        sub: `${r.category || "General"} · ${r.city || "Remote"}`,
+                        at: r.createdAt,
+                        read: false,
+                        fromUserId: r.posterId || null
+                    }));
+                const updated = [...fresh, ...existing];
+                this.save(uid, updated);
+                return updated;
+            },
+
+            markOne(uid, id) {
+                this.save(uid, this.get(uid).map(n => n.id === id ? { ...n, read: true } : n));
+            },
+
+            markAll(uid) {
+                const me = window.BnpStorage.getUser();
+                const key = `bnp_rc_${(uid || me?.userId || "g")}`;
+                this.save(uid || me?.userId, this.get(uid || me?.userId).map(n => ({ ...n, read: true })));
+                localStorage.setItem(key, new Date().toISOString());
+            },
+
+            unread(uid) { return this.get(uid).filter(n => !n.read).length; },
+
+            lastCheck(uid) { return localStorage.getItem(this._ck(uid)); },
+            saveCheck(uid) { localStorage.setItem(this._ck(uid), new Date().toISOString()); }
+        };
+
+        /* ---- bell badge ---- */
+        function refreshBell(uid) {
+            const count = RNS.unread(uid);
+            const dot = document.getElementById("bellDot");
+            const cnt = document.getElementById("bellCount");
+            if (count > 0) {
+                if (dot) dot.style.display = "";
+                if (cnt) { cnt.textContent = count; cnt.style.display = ""; }
+            } else {
+                if (dot) dot.style.display = "none";
+                if (cnt) cnt.style.display = "none";
+            }
+            /* also update sidebar badges after they load */
+            setTimeout(() => {
+                const badge = document.querySelector(".sb-badge");
+                if (badge) {
+                    const prev = parseInt(badge.textContent) || 0;
+                    if (count > 0) {
+                        badge.textContent = prev > 0 ? prev + count : count;
+                        badge.style.display = "";
+                    }
+                }
+                /* update All Requirements badge in sidebar */
+                const reqBadge = document.getElementById("sbReqBadge");
+                if (reqBadge) {
+                    if (count > 0) {
+                        reqBadge.textContent = count <= 3 ? String(count) : "more";
+                        reqBadge.style.display = "";
+                    } else {
+                        reqBadge.style.display = "none";
+                    }
+                }
+            }, 800);
+        }
+
+        /* ---- render notification banner ---- */
+        function renderBanner(uid) {
+            const banner = document.getElementById("newReqBanner");
+            const unread = RNS.get(uid).filter(n => !n.read);
+            if (!unread.length) { banner.style.display = "none"; return; }
+
+            banner.style.display = "block";
+            const preview = unread.slice(0, 3);
+            const more = unread.length - preview.length;
+
+            banner.innerHTML = `
+                <div class="card" style="border-left:4px solid var(--amber);background:var(--amber-light);padding:0;overflow:hidden;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #f0d080;gap:12px;flex-wrap:wrap;">
+                        <strong style="display:flex;align-items:center;gap:8px;font-size:14px;">
+                            <i class="fa-solid fa-bell" style="color:var(--amber);"></i>
+                            ${unread.length} new requirement${unread.length > 1 ? "s" : ""} posted
+                        </strong>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-ghost btn-sm" onclick="RNS.markAll(); renderBanner('${uid}'); refreshBell('${uid}');">Mark all read</button>
+                            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('newReqBanner').style.display='none';" title="Dismiss"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+                    ${preview.map(n => `
+                    <div class="dash-notif-row" onclick="openReqNotif('${n.id}', ${n.reqId}, '${uid}')">
+                        <div class="li-icon" style="flex-shrink:0;"><i class="fa-solid fa-layer-group"></i></div>
+                        <div class="li-body" style="flex:1;min-width:0;">
+                            <strong>${BnpUtils.escape(n.title)}</strong>
+                            <p>${BnpUtils.escape(n.sub)} &middot; ${BnpUtils.dateTime(n.at)}</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right muted" style="font-size:11px;flex-shrink:0;"></i>
+                    </div>`).join("")}
+                    ${more > 0 ? `
+                    <div style="padding:10px 18px;text-align:center;border-top:1px solid #f0d080;">
+                        <a href="../notifications/notifications.html" class="muted" style="font-size:12.5px;color:var(--amber);">
+                            +${more} more &mdash; See all notifications
+                        </a>
+                    </div>` : ""}
+                </div>`;
+        }
+
+        function openReqNotif(id, reqId, uid) {
+            RNS.markOne(uid, id);
+            location.href = BnpStorage.isPremium()
+                ? `../requirements/requirement-details.html?id=${reqId}`
+                : "../membership/plans.html";
+        }
+        window.openReqNotif = openReqNotif;
+        window.RNS = RNS;
+        window.renderBanner = renderBanner;
+        window.refreshBell = refreshBell;
+
+        /* ---- render recent requirements card ---- */
+        const CAT_ICON = { Design: "pen-nib", Finance: "indian-rupee-sign", Marketing: "bullhorn", Legal: "scale-balanced", "IT & Software": "laptop-code" };
+
+        function renderRecentReqs(others, newIds) {
+            const box = document.getElementById("dashRecentReqs");
+            const preview = others.slice(0, 4);
+            if (!preview.length) {
+                box.innerHTML = `<div class="list-item"><div class="li-body muted">No open requirements right now.</div></div>`;
+                return;
+            }
+            box.innerHTML = preview.map(r => {
+                const isNew = newIds.has(r.id);
+                const icon = CAT_ICON[r.category] || "layer-group";
+                const target = BnpStorage.isPremium() ? `../requirements/requirement-details.html?id=${r.id}` : "../membership/plans.html";
+                return `
+                <div class="list-item" style="cursor:pointer;" onclick="location.href='${target}'">
+                    <div class="li-icon"><i class="fa-solid fa-${icon}"></i></div>
+                    <div class="li-body">
+                        <strong>${BnpUtils.escape(r.title || "Untitled")}${isNew ? ` <span class="badge badge-red" style="font-size:10px;padding:1px 7px;vertical-align:middle;">New</span>` : ""}</strong>
+                        <p>${BnpUtils.escape(r.category || "General")} &middot; ${BnpUtils.escape(r.city || "Remote")}</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right muted" style="font-size:11px;"></i>
+                </div>`;
+            }).join("");
+        }
+
+        /* ---- main check — runs on load and on poll interval ---- */
+        async function checkNewRequirements() {
+            const me = window.BnpStorage.getUser();
+            const uid = me?.userId;
+            try {
+                const reqs = await Api.requirements.all();
+                const others = reqs
+                    .filter(r => r.posterId !== uid)
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                const lastCheck = RNS.lastCheck(uid);
+                const freshOnes = lastCheck
+                    ? others.filter(r => new Date(r.createdAt) > new Date(lastCheck))
+                    : [];
+
+                if (freshOnes.length) {
+                    RNS.push(uid, freshOnes);
+                }
+
+                RNS.saveCheck(uid);
+
+                const newIds = new Set(freshOnes.map(r => r.id));
+                renderRecentReqs(others, newIds);
+                renderBanner(uid);
+                refreshBell(uid);
+            } catch (e) {
+                const box = document.getElementById("dashRecentReqs");
+                if (box) box.innerHTML = `<div class="list-item"><div class="li-body muted">Could not load requirements.</div></div>`;
+            }
+        }
+
+        /* ============================================================
+           DOMContentLoaded — load all dashboard data
+           ============================================================ */
+        document.addEventListener("DOMContentLoaded", async () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            const $ = (id) => document.getElementById(id);
+            const me = window.BnpStorage.getUser();
+
+            // show existing unread notifications immediately before fetch
+            refreshBell(me?.userId);
+            renderBanner(me?.userId);
+
+            // check responses on my own requirements
+            checkMyRequirementResponses();
+
+            // start polling every 30 seconds
+            checkNewRequirements();
+            setInterval(checkNewRequirements, 30000);
+            setInterval(checkMyRequirementResponses, 60000);
+
+            // ---- stat cards ----
+            try {
+                const d = await Api.dashboard.user();
+                $("statPoints").textContent = (d.points ?? 0).toLocaleString("en-IN");
+                $("statRefGiven").textContent = d.referralsGiven ?? 0;
+                $("statRequirements").textContent = d.requirementsPosted ?? 0;
+                $("statReviews").textContent = d.reviewCount ?? 0;
+            } catch (e) { console.warn(e); }
+
+            // ---- recent activity (from backend notifications) ----
+            try {
+                const NT = {
+                    REFERRAL: ["green", "handshake"],
+                    REQUIREMENT: ["amber", "layer-group"],
+                    CHAT: ["blue", "comment"],
+                    REVIEW: ["amber", "star"],
+                    SUBSCRIPTION: ["purple", "crown"],
+                    POINTS: ["amber", "star"],
+                    SYSTEM: ["hint", "bell"]
+                };
+                const items = (await Api.notifications.list(false)).slice(0, 5);
+                const box = $("dashActivity");
+                box.innerHTML = items.length ? items.map(n => {
+                    const [c, ic] = NT[n.type] || NT.SYSTEM;
+                    return `
+                    <div class="list-item" style="cursor:pointer;" onclick="window.location='../notifications/notifications.html'">
+                        <div class="li-icon" style="background:var(--${c}-light);color:var(--${c});"><i class="fa-solid fa-${ic}"></i></div>
+                        <div class="li-body">
+                            <strong>${BnpUtils.escape(n.title || "")}</strong>
+                            <p>${BnpUtils.escape(n.message || "")}</p>
+                        </div>
+                        <span class="muted" style="font-size:12px;flex-shrink:0;">${BnpUtils.dateTime(n.createdAt)}</span>
+                    </div>`;
+                }).join("") : `<div class="list-item"><div class="li-body muted">No activity yet.</div></div>`;
+            } catch (e) { console.warn(e); }
+
+            // ---- profile strength ----
+            try {
+                const me2 = await Api.users.me();
+                const fields = [me2.fullName, me2.phone, me2.profession, me2.headline, me2.bio, me2.avatarUrl, me2.city, me2.state];
+                const pct = Math.round((fields.filter(Boolean).length / fields.length) * 100);
+                $("dashStrengthPct").textContent = pct + "%";
+                $("dashStrengthBar").style.width = pct + "%";
+                $("dashStrengthLbl").textContent = pct >= 90 ? "Looking great!" : pct >= 50 ? "Almost there!" : "Getting started";
+
+                // leaderboard
+                const scope = me2.city ? "City" : "Global";
+                $("rankScope").textContent = scope;
+                const board = me2.city ? await Api.points.leaderboard(me2.city) : await Api.points.leaderboard();
+                const idx = board.findIndex(u => u.id === me2.id);
+                $("rankNum").textContent = idx >= 0 ? "#" + (idx + 1) : "—";
+                $("rankSub").textContent = `of ${board.length}${me2.city ? " in " + me2.city : ""}`;
+                const around = idx >= 0 ? board.slice(Math.max(0, idx - 1), idx + 2) : board.slice(0, 3);
+                $("rankList").innerHTML = around.map(u => {
+                    const pos = board.indexOf(u) + 1;
+                    const iMe = u.id === me2.id;
+                    return `<div class="list-item" style="padding:10px ${iMe ? "8px" : "0"};${iMe ? "background:var(--red-light);border-radius:8px;margin:0 -8px;" : ""}">
+                        <span class="${iMe ? "text-red" : "muted"}" style="width:22px;font-weight:700;">${pos}</span>
+                        <div class="cell-user" style="flex:1;"><img src="${u.avatarUrl || BnpUtils.avatar(u.fullName)}"><strong>${iMe ? "You" : BnpUtils.escape(u.fullName)}</strong></div>
+                        <span class="${iMe ? "text-red" : "muted"}" style="font-size:12.5px;${iMe ? "font-weight:700;" : ""}">${(u.points ?? 0).toLocaleString("en-IN")}</span>
+                    </div>`;
+                }).join("");
+            } catch (e) { console.warn(e); }
+
+            // ---- membership upsell card (hide if on highest plan, update if on mid plan) ----
+            try {
+                const [plans, currentSub] = await Promise.all([
+                    Api.subscription.plans(),
+                    Api.subscription.current().catch(() => null)
+                ]);
+                const upsellCard = document.getElementById("membershipUpsell");
+                if (upsellCard && plans && plans.length) {
+                    const currentPlan = (currentSub && currentSub.planId)
+                        ? plans.find(p => p.id === currentSub.planId) || null
+                        : null;
+                    const currentPrice = currentPlan ? Number(currentPlan.price) : -1;
+                    const higherPlans = plans
+                        .filter(p => Number(p.price) > currentPrice)
+                        .sort((a, b) => Number(a.price) - Number(b.price));
+
+                    if (higherPlans.length === 0) {
+                        // Already on highest plan — hide upgrade card
+                        upsellCard.style.display = "none";
+                    } else if (currentPlan && Number(currentPlan.price) > 0) {
+                        // On a paid mid-tier plan — show upgrade to next tier
+                        const nextPlan = higherPlans[0];
+                        upsellCard.innerHTML = `
+                            <div style="font-size:22px;margin-bottom:8px;"><i class="fa-solid fa-arrow-up"></i></div>
+                            <strong style="font-size:16px;">Upgrade to ${BnpUtils.escape(nextPlan.name)}</strong>
+                            <p style="font-size:13px;opacity:.9;margin:8px 0 16px;">${BnpUtils.escape(nextPlan.tagline || "Get access to even more features.")}</p>
+                            <a href="../membership/plans.html" class="btn btn-sm" style="background:#fff;color:var(--red);width:100%;">Upgrade now</a>`;
+                    }
+                    // else: free user — default card stays as-is
+                }
+            } catch (e) { /* keep default upsell card */ }
+
+            // ---- recent referrals ----
+            try {
+                const rows = (await Api.referrals.given()).slice(0, 5);
+                const tbody = $("dashReferrals");
+                const rbadge = s => {
+                    const map = {
+                        ACCEPTED: ["badge-green", "check", "Accepted"],
+                        COMPLETED: ["badge-green", "check", "Completed"],
+                        PENDING: ["badge-amber", "clock", "Pending"],
+                        REJECTED: ["badge-red", "xmark", "Declined"],
+                        EXPIRED: ["badge-red", "xmark", "Expired"]
+                    };
+                    const [cls, ic, lbl] = map[s] || ["badge-amber", "clock", s];
+                    return `<span class="badge ${cls}"><i class="fa-solid fa-${ic}"></i> ${lbl}</span>`;
+                };
+                tbody.innerHTML = rows.length
+                    ? rows.map(r => `
+                        <tr>
+                            <td><div class="cell-user"><img src="${BnpUtils.avatar(r.clientName)}"><div><strong>${BnpUtils.escape(r.clientName || "Client")}</strong><small>${BnpUtils.escape(r.clientContact || "")}</small></div></div></td>
+                            <td>${BnpUtils.escape(r.category || "—")}</td>
+                            <td>${rbadge(r.status)}</td>
+                            <td class="muted">${BnpUtils.date(r.createdAt)}</td>
+                        </tr>`).join("")
+                    : `<tr><td colspan="4" class="muted" style="text-align:center;padding:18px;">No referrals yet.</td></tr>`;
+            } catch (e) { console.warn(e); }
+        });
+    </script>
+
+    <style>
+        /* Bell count badge */
+        .bell-count {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: var(--red);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 17px;
+            height: 17px;
+            border-radius: 20px;
+            padding: 0 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+        }
+
+        /* Response banner — alerts for new replies on MY requirements */
+        .resp-banner-card {
+            border-left: 4px solid var(--red) !important;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffffff 70%) !important;
+            padding: 0 !important;
+            overflow: hidden;
+        }
+
+        .resp-banner-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid #ffd5d5;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .resp-banner-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 18px;
+            border-bottom: 1px solid #ffd5d5;
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .resp-banner-row:last-of-type {
+            border-bottom: none;
+        }
+
+        .resp-banner-row:hover {
+            background: #fff0f0;
+        }
+
+        .resp-banner-row .li-body strong {
+            font-size: 13px;
+        }
+
+        .resp-banner-row .li-body p {
+            font-size: 12px;
+            color: var(--muted);
+            margin: 2px 0 0;
+        }
+
+        .resp-banner-icon {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            background: #ffe0e0;
+            color: var(--red);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+        }
+
+        .resp-new-count {
+            background: var(--red);
+            color: #fff;
+            font-size: 10.5px;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 20px;
+        }
+
+        .resp-view-btn {
+            margin-left: auto;
+            flex-shrink: 0;
+            background: #fff0f0;
+            color: var(--red);
+            border: 1.5px solid var(--red);
+            font-size: 12px;
+        }
+
+        .resp-view-btn:hover {
+            background: var(--red);
+            color: #fff;
+        }
+
+        /* Notification row in banner */
+        .dash-notif-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 18px;
+            border-bottom: 1px solid #f0d080;
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .dash-notif-row:last-of-type {
+            border-bottom: none;
+        }
+
+        .dash-notif-row:hover {
+            background: rgba(0, 0, 0, .04);
+        }
+
+        .dash-notif-row .li-body strong {
+            font-size: 13px;
+        }
+
+        .dash-notif-row .li-body p {
+            font-size: 12px;
+            color: var(--muted);
+            margin: 2px 0 0;
+        }
+    </style>
+</body>
+
+</html>

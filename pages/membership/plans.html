@@ -1,0 +1,164 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Membership Plans — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="plans.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Membership</h1><p>Choose the plan that fits you</p></div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <div style="text-align:center;margin-bottom:26px;">
+                <h2 style="font-size:24px;font-weight:800;margin:0 0 8px;">Unlock your full networking potential</h2>
+                <p class="muted" style="margin:0;">Upgrade anytime. Cancel anytime. Prices in INR, billed monthly.</p>
+            </div>
+
+            <div class="grid grid-3" id="planGrid">
+                <div class="card"><div class="muted">Loading plans…</div></div>
+            </div>
+
+            <p class="muted" style="text-align:center;font-size:12.5px;margin-top:22px;"><i class="fa-solid fa-lock"></i> Secure payments · Cancel anytime · No hidden fees</p>
+        </div>
+    </div>
+
+    
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        async function loadPlans() {
+            const grid = document.getElementById("planGrid");
+            try {
+                const [plans, currentSub] = await Promise.all([
+                    Api.subscription.plans(),
+                    Api.subscription.current().catch(() => null)
+                ]);
+
+                // Find the plan the user is currently on (active subscription only).
+                // Ignore stale subscription rows for users who aren't actually premium
+                // right now (e.g. an old subscription that never got cancelled/expired
+                // after an admin downgrade) — otherwise a free user can end up with
+                // every plan at or below that stale price hidden.
+                const currentPlan = (currentSub && currentSub.planId && BnpStorage.isPremium())
+                    ? plans.find(p => p.id === currentSub.planId) || null
+                    : null;
+
+                const currentPrice = currentPlan ? Number(currentPlan.price) : -1;
+
+                // Only show plans that cost more than the current plan
+                const visiblePlans = plans.filter(p => Number(p.price) > currentPrice);
+
+                if (visiblePlans.length === 0 && currentPlan) {
+                    // User is already on the highest available plan
+                    const expiry = currentSub && currentSub.endDate
+                        ? new Date(currentSub.endDate).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
+                        : null;
+                    grid.innerHTML = `
+                        <div class="card" style="grid-column:1/-1;text-align:center;padding:48px 24px;">
+                            <i class="fa-solid fa-crown" style="font-size:44px;color:var(--red);margin-bottom:18px;display:block;"></i>
+                            <h3 style="font-size:20px;font-weight:800;margin:0 0 10px;">You're on our best plan!</h3>
+                            <p class="muted" style="margin:0;font-size:14px;">
+                                You're already on the <strong>${BnpUtils.escape(currentPlan.name)}</strong> plan — the highest tier we offer.
+                                ${expiry ? `<br>Your plan is active until <strong>${expiry}</strong>.` : ""}
+                            </p>
+                        </div>`;
+                    return;
+                }
+
+                // Single remaining plan → centered red upgrade card
+                if (visiblePlans.length === 1 && Number(visiblePlans[0].price) > 0) {
+                    const p = visiblePlans[0];
+                    const feats = (p.features || "").split(/\n+/).filter(Boolean);
+                    const cycle = (p.billingCycle || "MONTHLY").toUpperCase() === "YEARLY" ? "yr" : "mo";
+                    grid.classList.add("single-plan");
+                    grid.innerHTML = `
+                        <div class="plan-card-upgrade card">
+                            <div class="plan-upgrade-header">
+                                <div class="plan-badge"><i class="fa-solid fa-arrow-up"></i> Upgrade Now</div>
+                                <h3>${BnpUtils.escape(p.name)}</h3>
+                                <p>${BnpUtils.escape(p.tagline || "")}</p>
+                                <div class="plan-price">${BnpUtils.money(p.price)}<span>/${cycle}</span></div>
+                            </div>
+                            <div class="plan-upgrade-body">
+                                <ul>
+                                    ${feats.map(f => `<li><i class="fa-solid fa-check"></i>${BnpUtils.escape(f)}</li>`).join("")}
+                                </ul>
+                                <button class="btn-upgrade" onclick="subscribe(${p.id}, this)">
+                                    <i class="fa-solid fa-crown"></i> Upgrade to ${BnpUtils.escape(p.name)}
+                                </button>
+                            </div>
+                        </div>`;
+                    return;
+                }
+
+                grid.classList.remove("single-plan");
+                grid.innerHTML = visiblePlans.map((p) => {
+                    const free = Number(p.price) === 0;
+                    const feats = (p.features || "").split(/\n+/).filter(Boolean);
+                    const featured = p.popular;
+                    let btn;
+                    if (free) {
+                        btn = `<a href="#" class="btn btn-ghost" style="width:100%;margin:16px 0;" onclick="return false;">Current plan</a>`;
+                    } else {
+                        btn = `<button class="btn ${featured ? "btn-primary" : "btn-outline"}" style="width:100%;margin:16px 0;" onclick="subscribe(${p.id}, this)">Choose ${BnpUtils.escape(p.name)}</button>`;
+                    }
+                    return `
+                    <div class="card" ${featured ? 'style="border:2px solid var(--red);position:relative;"' : ""}>
+                        ${featured ? '<span class="badge badge-red" style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);">Most popular</span>' : ""}
+                        <h3 style="font-size:16px;font-weight:700;margin:0 0 4px;">${BnpUtils.escape(p.name)}</h3>
+                        <p class="muted" style="font-size:12.5px;margin:0 0 14px;">${BnpUtils.escape(p.tagline || "")}</p>
+                        <div style="font-size:32px;font-weight:800;">${BnpUtils.money(p.price)}<span style="font-size:13px;font-weight:500;color:var(--muted);">/${(p.billingCycle || "MONTHLY").toLowerCase().slice(0, 2) === "ye" ? "yr" : "mo"}</span></div>
+                        ${btn}
+                        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;font-size:13px;">
+                            ${feats.map((f) => `<li><i class="fa-solid fa-check text-red"></i> ${BnpUtils.escape(f)}</li>`).join("")}
+                        </ul>
+                    </div>`;
+                }).join("");
+            } catch (e) {
+                grid.innerHTML = `<div class="card"><div class="muted">Could not load plans.</div></div>`;
+            }
+        }
+
+        async function subscribe(planId, btn) {
+            BnpUtils.loading(btn, true, "Processing…");
+            try {
+                await Api.subscription.subscribe(planId);
+                // refresh cached user so chrome reflects the new premium role
+                try { const me = await Api.users.me(); BnpStorage.setUser({ userId: me.id, fullName: me.fullName, email: me.email, role: me.role }); } catch (e) {}
+                BnpUtils.toast("You're now subscribed!", "success");
+                setTimeout(() => (location.href = "subscription.html"), 800);
+            } catch (e) {
+                BnpUtils.loading(btn, false);
+                BnpUtils.toast(e.message, "error");
+            }
+        }
+        window.subscribe = subscribe;
+        document.addEventListener("DOMContentLoaded", () => { if (window.BnpStorage.isAuthenticated()) loadPlans(); });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

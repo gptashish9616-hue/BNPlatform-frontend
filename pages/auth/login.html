@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/auth.css" />
+</head>
+
+<body class="auth-page">
+
+    <div class="auth-wrap">
+
+        <!-- BRAND PANEL -->
+        <aside class="auth-brand">
+            <a href="../../index.html" class="auth-brand-logo">BN<span>Platform</span></a>
+
+            <div class="auth-brand-body">
+                <h1>Welcome back to your network.</h1>
+                <p>Sign in to connect with professionals nearby, manage referrals, and grow your business.</p>
+
+                <div class="auth-brand-features">
+                    <div class="auth-feature">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <div><strong>Find professionals near you</strong><small>Discover verified members on the map</small></div>
+                    </div>
+                    <div class="auth-feature">
+                        <i class="fa-solid fa-gift"></i>
+                        <div><strong>Earn referral rewards</strong><small>Invite peers and get a free month</small></div>
+                    </div>
+                    <div class="auth-feature">
+                        <i class="fa-solid fa-trophy"></i>
+                        <div><strong>Climb the leaderboard</strong><small>Build credibility city &amp; state-wide</small></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- FORM PANEL -->
+        <main class="auth-form-panel">
+            <div class="auth-card">
+                <h2>Sign in</h2>
+                <p class="sub">Enter your credentials to access your account.</p>
+
+                <form id="loginForm" novalidate>
+                    <div class="auth-field">
+                        <label for="email">Email address</label>
+                        <div class="auth-input">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" id="email" placeholder="you@business.com" autocomplete="email" />
+                        </div>
+                        <div class="auth-error" id="emailErr">Please enter a valid email address.</div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="password">Password</label>
+                        <div class="auth-input">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" />
+                            <i class="fa-solid fa-eye toggle-pw" onclick="togglePw('password', this)"></i>
+                        </div>
+                        <div class="auth-error" id="pwErr">Password is required.</div>
+                    </div>
+
+                    <div class="auth-row">
+                        <label><input type="checkbox" /> Remember me</label>
+                        <a href="forgot-password.html" class="auth-link">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="auth-btn">
+                        <i class="fa-solid fa-right-to-bracket"></i> Sign in
+                    </button>
+                </form>
+
+                <div class="auth-divider">or continue with</div>
+
+                <div class="auth-social">
+                    <button type="button"><i class="fa-brands fa-google" style="color:#ea4335"></i> Google</button>
+                    <button type="button"><i class="fa-brands fa-linkedin" style="color:#0a66c2"></i> LinkedIn</button>
+                </div>
+
+                <p class="auth-foot">Don't have an account? <a href="register.html" class="auth-link">Create one</a></p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Shared frontend stack: config → storage → utils → api → guards → page logic -->
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

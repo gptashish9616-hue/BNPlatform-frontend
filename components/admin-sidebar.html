@@ -1,0 +1,63 @@
+<!-- Shared ADMIN sidebar — injected by app-shell.js when the page sets
+     <div id="sidebar-container" data-shell="admin">. Pages are 2 levels deep. -->
+<aside class="app-sidebar" id="appSidebar">
+
+    <div class="sb-head">
+        <a href="../dashboard/admin-dashboard.html" class="sb-logo">BN<span>Admin</span></a>
+        <button class="sb-close" onclick="toggleSidebar()" aria-label="Close menu"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <nav class="sb-nav">
+        <a class="sb-link" href="../dashboard/admin-dashboard.html" data-page="admin-dashboard.html">
+            <i class="fa-solid fa-gauge-high"></i> Dashboard
+        </a>
+
+        <div class="sb-group">Management</div>
+        <a class="sb-link" href="../admin/users.html" data-page="users.html">
+            <i class="fa-solid fa-users"></i> Users
+        </a>
+        <a class="sb-link" href="../admin/membership-management.html" data-page="membership-management.html">
+            <i class="fa-solid fa-crown"></i> Memberships
+        </a>
+        <a class="sb-link" href="../admin/groups.html" data-page="groups.html">
+            <i class="fa-solid fa-user-group"></i> Groups
+        </a>
+        <a class="sb-link" href="../admin/referrals.html" data-page="referrals.html">
+            <i class="fa-solid fa-share-nodes"></i> Referrals
+        </a>
+        <a class="sb-link" href="../admin/requirements.html" data-page="requirements.html">
+            <i class="fa-solid fa-list-check"></i> Requirements
+        </a>
+
+        <div class="sb-group">System</div>
+        <a class="sb-link" href="../admin/points-system.html" data-page="points-system.html">
+            <i class="fa-solid fa-star"></i> Points System
+        </a>
+        <a class="sb-link" href="../admin/rewards.html" data-page="rewards.html">
+            <i class="fa-solid fa-gift"></i> Rewards
+        </a>
+        <a class="sb-link" href="../notifications/notifications.html" data-page="notifications.html">
+            <i class="fa-solid fa-bell"></i> Notifications
+            <span class="sb-badge" id="sbNotifBadge" style="display:none;"></span>
+        </a>
+        <a class="sb-link" href="../admin/settings.html" data-page="settings.html">
+            <i class="fa-solid fa-gear"></i> Settings
+        </a>
+        <a class="sb-link" href="../admin/profile.html" data-page="profile.html">
+            <i class="fa-solid fa-user"></i> Profile
+        </a>
+    </nav>
+
+    <div class="sb-foot">
+        <a class="sb-user" href="../admin/profile.html" style="text-decoration:none;color:inherit;">
+            <img src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" alt="user" />
+            <div>
+                <strong>Admin</strong>
+                <small>Super Admin</small>
+            </div>
+        </a>
+        <a href="../auth/login.html" class="sb-logout" title="Log out"><i class="fa-solid fa-right-from-bracket"></i></a>
+    </div>
+</aside>
+
+<div class="sb-backdrop" id="sbBackdrop" onclick="toggleSidebar()"></div>

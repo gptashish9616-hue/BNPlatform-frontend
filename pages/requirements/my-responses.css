@@ -1,0 +1,186 @@
+/* ========================================
+   MY RESPONSES PAGE
+   ======================================== */
+
+/* breadcrumb */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.breadcrumb a { color: var(--muted); display: inline-flex; align-items: center; gap: 5px; transition: color .15s; }
+.breadcrumb a:hover { color: var(--red); }
+.breadcrumb .fa-house { color: var(--red); }
+.breadcrumb .sep { color: var(--hint); font-size: 12px; }
+.breadcrumb .bc-current { color: var(--text); font-weight: 600; }
+
+/* stat icons */
+.resp-stat-icon {
+    width: 42px; height: 42px;
+    border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+}
+.recv-icon { background: var(--green-light); color: var(--green); }
+.sent-icon { background: var(--blue-light); color: var(--blue); }
+
+/* tab count pill */
+.tab-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10.5px; font-weight: 700;
+    min-width: 20px; height: 20px; padding: 0 6px;
+    border-radius: 20px; margin-left: 6px;
+}
+.recv-count { background: var(--green); color: #fff; }
+.sent-count { background: var(--blue); color: #fff; }
+
+/* requirement group (for Received) */
+.resp-group {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 18px;
+}
+.resp-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+}
+.resp-req-title {
+    font-size: 15.5px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--text);
+}
+.resp-group-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* response cards */
+.resp-card {
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+.resp-card:last-child { margin-bottom: 0; }
+
+.resp-incoming { border-left: 4px solid var(--green); }
+.resp-outgoing { border-left: 4px solid var(--blue); }
+
+.resp-direction-bar {
+    padding: 8px 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+}
+
+.resp-card-body { padding: 16px; }
+
+.resp-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+.resp-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+.resp-meta {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    gap: 2px;
+}
+.resp-meta strong { font-size: 13.5px; font-weight: 600; }
+.resp-meta .muted { font-size: 12px; }
+
+/* incoming/sent direction badges */
+.badge-incoming { background: var(--green-light); color: var(--green); }
+.badge-sent { background: var(--blue-light); color: var(--blue); }
+
+/* message text */
+.resp-message {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 0 0 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* quote pill */
+.resp-quote-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-light);
+    color: var(--green);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+.resp-outgoing .resp-quote-pill {
+    background: var(--blue-light);
+    color: var(--blue);
+}
+
+/* footer row (sent cards) */
+.resp-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+}
+.resp-footer .muted { font-size: 12.5px; }
+
+/* requirement link (sent cards) */
+.resp-req-link {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 3px;
+    text-decoration: none;
+    transition: color .15s;
+}
+.resp-req-link:hover { color: var(--red); }
+.resp-req-link i { color: var(--muted); font-size: 12px; }
+
+/* responsive */
+@media (max-width: 720px) {
+    .resp-group-header { flex-direction: column; }
+    .resp-card-header { flex-wrap: wrap; }
+    .resp-stats { grid-template-columns: 1fr 1fr !important; }
+    .resp-footer { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+    .resp-stats { grid-template-columns: 1fr !important; }
+}

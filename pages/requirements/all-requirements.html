@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>All Requirements — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="all-requirements.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>All Requirements</h1>
+                <p>Open opportunities you can accept</p>
+            </div>
+            <div class="topbar-search"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="reqSearch"
+                    placeholder="Search requirements..."></div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span
+                    class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff"
+                alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a href="../dashboard/user-dashboard.html"><i class="fa-solid fa-house"></i> Home</a>
+                <span class="sep">&rsaquo;</span>
+                <span>Requirements</span>
+                <span class="sep">&rsaquo;</span>
+                <span class="bc-current">All Requirements</span>
+            </nav>
+
+            <!-- Filters -->
+            <div class="card" style="margin-bottom:18px;padding:14px 18px;overflow:visible;">
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;" id="reqFilterBar">
+                    <span class="badge badge-red req-filter" data-cat="All" style="cursor:pointer;"
+                        onclick="setFilter(this,'All')">All</span>
+                    <div class="req-more-wrap">
+                        <span class="badge badge-gray" id="reqMoreBtn" style="cursor:pointer;user-select:none;">More <i
+                                class="fa-solid fa-chevron-down" style="font-size:9px;"></i></span>
+                        <div class="req-more-dropdown" id="reqMoreDropdown">
+                            <button class="req-more-item req-more-other" id="reqOtherBtn">Other <i
+                                    class="fa-solid fa-chevron-right" style="font-size:9px;"></i></button>
+                        </div>
+                    </div>
+                    <select id="reqSort"
+                        style="margin-left:auto;padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;font-family:inherit;"
+                        onchange="applyFilters()">
+                        <option value="newest">Newest</option>
+                        <option value="responses">Most responses</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Other professions modal -->
+            <div id="reqOtherModal"
+                style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+                <div
+                    style="background:#fff;border-radius:18px;width:min(520px,100%);max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+                    <div
+                        style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;border-bottom:1px solid #f0f0f0;font-size:16px;font-weight:700;color:#222;">
+                        <span>Other Professions</span>
+                        <button id="reqOtherClose"
+                            style="background:none;border:none;font-size:18px;color:#888;cursor:pointer;padding:2px 6px;border-radius:6px;"><i
+                                class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div id="reqOtherGrid"
+                        style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;padding:18px 22px 22px;overflow-y:auto;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requirement cards -->
+            <div class="grid grid-2" id="reqGrid">
+                <div class="card">
+                    <div class="muted">Loading requirements…</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/professions.js"></script>
+    <script>
+        const CAT_COLOR = { Design: "blue", Finance: "green", Marketing: "purple", Legal: "amber", "IT & Software": "blue", Other: "gray" };
+
+        let allReqs = [];
+        let allPosters = {};
+        let activeFilter = "All";
+        let currentUserId = null;
+        let isPremiumUser = false;
+
+        function renderProfessionFilters() {
+            const bar = document.getElementById("reqFilterBar");
+            const moreWrap = bar.querySelector(".req-more-wrap");
+            BnpProfessions.TOP.concat(["Architecture", "Consulting"]).forEach(cat => {
+                const span = document.createElement("span");
+                span.className = "badge badge-gray req-filter";
+                span.dataset.cat = cat === "IT" ? "IT & Software" : cat;
+                span.style.cursor = "pointer";
+                span.textContent = cat === "IT" ? "IT" : cat;
+                span.addEventListener("click", () => setFilter(span, span.dataset.cat));
+                bar.insertBefore(span, moreWrap);
+            });
+
+            const moreDrop = document.getElementById("reqMoreDropdown");
+            const otherBtn = document.getElementById("reqOtherBtn");
+            BnpProfessions.MORE.filter(cat => cat !== "Architecture" && cat !== "Consulting").forEach(cat => {
+                const btn = document.createElement("button");
+                btn.className = "req-more-item";
+                btn.textContent = cat;
+                btn.addEventListener("click", () => setFilterCat(cat));
+                moreDrop.insertBefore(btn, otherBtn);
+            });
+
+            const otherGrid = document.getElementById("reqOtherGrid");
+            BnpProfessions.OTHER.forEach(cat => {
+                const btn = document.createElement("button");
+                btn.className = "req-other-item";
+                btn.textContent = cat;
+                btn.addEventListener("click", () => setFilterCat(cat));
+                otherGrid.appendChild(btn);
+            });
+        }
+        renderProfessionFilters();
+        function renderGrid(list) {
+            const grid = document.getElementById("reqGrid");
+            if (!list.length) {
+                grid.innerHTML = `
+                    <div class="card" style="grid-column:1/-1;">
+                        <div class="empty">
+                            <i class="fa-solid fa-inbox"></i>
+                            <h3>No requirements found</h3>
+                            <p>No open requirements match your filter right now.</p>
+                        </div>
+                    </div>`;
+                return;
+            }
+            grid.innerHTML = list.map((r) => {
+                const color = CAT_COLOR[r.category] || "blue";
+                const poster = allPosters[r.posterId] || "Member";
+                const isOwn = currentUserId && String(r.posterId) === String(currentUserId);
+                return `
+                <div class="card${isOwn ? " own-req-card" : ""}">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+                        <span class="badge badge-${color}">${BnpUtils.escape(r.category || "General")}</span>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            ${isOwn ? `<span class="own-req-badge"><i class="fa-solid fa-user-check"></i> Your Post</span>` : `<span class="badge badge-amber"><i class="fa-solid fa-star"></i> +75 pts</span>`}
+                        </div>
+                    </div>
+                    <h3 style="font-size:15.5px;font-weight:700;margin:12px 0 6px;">${BnpUtils.escape(r.title || "Untitled")}</h3>
+                    <p class="muted" style="font-size:13px;line-height:1.6;margin:0 0 14px;">${BnpUtils.escape((r.description || "").slice(0, 160))}</p>
+                    <div style="display:flex;align-items:center;gap:14px;font-size:12.5px;color:var(--hint);margin-bottom:14px;flex-wrap:wrap;">
+                        <span><i class="fa-solid fa-location-dot"></i> ${BnpUtils.escape(r.city || "Remote")}</span>
+                        <span><i class="fa-solid fa-clock"></i> ${BnpUtils.date(r.createdAt)}</span>
+                        <span><i class="fa-solid fa-users"></i> ${r.responseCount || 0} responses</span>
+                        ${r.budget ? `<span><i class="fa-solid fa-indian-rupee-sign"></i> ${BnpUtils.escape(r.budget)}</span>` : ""}
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;border-top:1px solid var(--border);padding-top:12px;">
+                        <img src="${BnpUtils.avatar(poster)}" style="width:32px;height:32px;border-radius:50%;">
+                        <small class="muted">Posted by <strong style="color:var(--text);">${BnpUtils.escape(poster)}</strong></small>
+                        ${isOwn
+                        ? `<a href="requirement-details.html?id=${r.id}" class="btn btn-sm" style="margin-left:auto;background:#fff0f0;color:var(--red);border:1.5px solid var(--red);"><i class="fa-solid fa-pen-to-square"></i> Manage</a>`
+                        : isPremiumUser
+                            ? `<a href="requirement-details.html?id=${r.id}" class="btn btn-primary btn-sm" style="margin-left:auto;">View &amp; respond</a>`
+                            : `<a href="../membership/plans.html" class="btn btn-sm" style="margin-left:auto;border:1.5px solid var(--border);">View details</a>`
+                    }
+                    </div>
+                </div>`;
+            }).join("");
+        }
+
+        function setFilter(el, cat) {
+            activeFilter = cat;
+            document.querySelectorAll(".req-filter").forEach((b) => {
+                b.className = "badge req-filter " + (b.dataset.cat === cat ? "badge-red" : "badge-gray");
+            });
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const q = (document.getElementById("reqSearch")?.value || "").trim().toLowerCase();
+            const sort = document.getElementById("reqSort")?.value || "newest";
+
+            let list = activeFilter === "All" ? allReqs : allReqs.filter((r) => r.category === activeFilter);
+
+            if (q) {
+                list = list.filter((r) =>
+                    (r.title || "").toLowerCase().includes(q) ||
+                    (r.description || "").toLowerCase().includes(q) ||
+                    (r.city || "").toLowerCase().includes(q)
+                );
+            }
+
+            if (sort === "newest") {
+                list = [...list].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            } else if (sort === "responses") {
+                list = [...list].sort((a, b) => (b.responseCount || 0) - (a.responseCount || 0));
+            }
+
+            renderGrid(list);
+        }
+
+        window.setFilter = setFilter;
+
+        function setFilterCat(cat) {
+            document.getElementById("reqMoreDropdown").classList.remove("open");
+            document.getElementById("reqOtherModal").style.display = "none";
+            activeFilter = cat;
+            document.querySelectorAll(".req-filter").forEach((b) => {
+                b.className = "badge req-filter badge-gray";
+            });
+            applyFilters();
+        }
+        window.setFilterCat = setFilterCat;
+
+        async function loadRequirements() {
+            const grid = document.getElementById("reqGrid");
+            grid.innerHTML = `<div class="card"><div class="muted"><i class="fa-solid fa-spinner fa-spin"></i> Loading requirements…</div></div>`;
+            try {
+                const list = await Api.requirements.all();
+                allReqs = list;
+
+                // Mark all current requirements as "seen" and clear unread local notifications
+                const me = window.BnpStorage?.getUser();
+                currentUserId = me?.userId || null;
+                isPremiumUser = window.BnpStorage?.isPremium() || false;
+                const uid = me?.userId || "g";
+                localStorage.setItem(`bnp_rc_${uid}`, new Date().toISOString());
+                // Mark all local req notifications as read
+                try {
+                    const nKey = `bnp_rn_${uid}`;
+                    const existing = JSON.parse(localStorage.getItem(nKey) || "[]");
+                    localStorage.setItem(nKey, JSON.stringify(existing.map(n => ({ ...n, read: true }))));
+                } catch (e) { /* ignore */ }
+                // clear the sidebar badge
+                setTimeout(() => { window.updateReqBadge?.(); }, 100);
+
+                const ids = [...new Set(list.map((r) => r.posterId))];
+                await Promise.all(ids.map(async (id) => {
+                    try { allPosters[id] = (await Api.users.get(id)).fullName; } catch (e) { allPosters[id] = "Member"; }
+                }));
+
+                applyFilters();
+            } catch (e) {
+                grid.innerHTML = `<div class="card"><div class="muted">Could not load requirements.</div></div>`;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            loadRequirements();
+            document.getElementById("reqSearch")?.addEventListener("input", applyFilters);
+
+            // More dropdown toggle
+            const moreBtn = document.getElementById("reqMoreBtn");
+            const moreDrop = document.getElementById("reqMoreDropdown");
+            moreBtn?.addEventListener("click", (e) => {
+                e.stopPropagation();
+                moreDrop.classList.toggle("open");
+            });
+            moreDrop?.addEventListener("click", (e) => e.stopPropagation());
+            document.addEventListener("click", () => moreDrop?.classList.remove("open"));
+
+            // Other professions modal
+            document.getElementById("reqOtherBtn")?.addEventListener("click", () => {
+                moreDrop?.classList.remove("open");
+                document.getElementById("reqOtherModal").style.display = "flex";
+            });
+            document.getElementById("reqOtherClose")?.addEventListener("click", () => {
+                document.getElementById("reqOtherModal").style.display = "none";
+            });
+            document.getElementById("reqOtherModal")?.addEventListener("click", (e) => {
+                if (e.target === document.getElementById("reqOtherModal"))
+                    document.getElementById("reqOtherModal").style.display = "none";
+            });
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

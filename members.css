@@ -1,0 +1,5 @@
+        .member-tile { background:#fff; border:1px solid var(--s-border); border-radius:16px; padding:22px; height:100%; text-align:center; transition:border-color .2s, transform .15s, box-shadow .2s; }
+        .member-tile:hover { border-color:var(--s-red); transform:translateY(-3px); box-shadow:0 12px 30px rgba(0,0,0,.06); }
+        .member-tile img { width:74px; height:74px; border-radius:50%; object-fit:cover; margin-bottom:12px; }
+        .filter-bar { background:#fff; border:1px solid var(--s-border); border-radius:14px; padding:14px 18px; box-shadow:0 6px 20px rgba(0,0,0,.05); }
+        .cat-pill { cursor:pointer; }

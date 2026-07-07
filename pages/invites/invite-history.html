@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invite History — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>Invite History</h1>
+                <p>Everyone you've invited</p>
+            </div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:22px;">
+                <a href="../dashboard/user-dashboard.html" style="color:var(--muted);display:flex;align-items:center;gap:5px;">
+                    <i class="fa-solid fa-house" style="color:var(--red);"></i> Home
+                </a>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span>Invites</span>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span style="color:var(--text);font-weight:600;">Invite History</span>
+            </nav>
+
+            <!-- Locked state (free tier) -->
+            <div class="card" id="ihLocked" style="display:none;text-align:center;padding:54px 24px;">
+                <div style="font-size:38px;color:var(--red);margin-bottom:14px;"><i class="fa-solid fa-lock"></i></div>
+                <h3 style="margin:0 0 8px;font-size:17px;">Application Referrals is a Premium feature</h3>
+                <p class="muted" style="max-width:440px;margin:0 auto 20px;line-height:1.65;">Tracking invite history and rewards is available to Premium members. Upgrade to start inviting new members.</p>
+                <a href="../membership/plans.html" class="btn btn-primary"><i class="fa-solid fa-crown"></i> Upgrade to Premium</a>
+            </div>
+
+            <div id="ihMain">
+                <!-- Stats -->
+                <div class="grid grid-4" style="margin-bottom:18px;">
+                    <div class="stat" data-no-anim>
+                        <div class="stat-num" id="ihSent">0</div>
+                        <div class="stat-lbl">Invites sent</div>
+                    </div>
+                    <div class="stat" data-no-anim>
+                        <div class="stat-num" id="ihJoined" style="color:var(--green);">0</div>
+                        <div class="stat-lbl">Joined</div>
+                    </div>
+                    <div class="stat" data-no-anim>
+                        <div class="stat-num" id="ihPending" style="color:var(--amber);">0</div>
+                        <div class="stat-lbl">Pending</div>
+                    </div>
+                    <div class="stat" data-no-anim>
+                        <div class="stat-num" id="ihFree" style="color:var(--red);">0</div>
+                        <div class="stat-lbl">Free months</div>
+                    </div>
+                </div>
+
+                <!-- Action row -->
+                <div class="page-head" style="margin-bottom:18px;">
+                    <div></div>
+                    <a href="send-invite.html" class="btn btn-primary">
+                        <i class="fa-solid fa-user-plus"></i> Send invite
+                    </a>
+                </div>
+
+                <!-- History table -->
+                <div class="card">
+                    <div class="table-wrap">
+                        <table class="tbl tbl-stack">
+                            <thead>
+                                <tr>
+                                    <th>Invitee</th>
+                                    <th>Invite code</th>
+                                    <th>Status</th>
+                                    <th>Reward</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ihRows">
+                                <tr><td colspan="5" class="muted" style="text-align:center;padding:28px;">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        async function loadHistory() {
+            const tbody = document.getElementById("ihRows");
+            try {
+                const [list, stats] = await Promise.all([Api.invites.history(), Api.invites.stats()]);
+
+                const pending = list.filter(i => i.status === "SENT");
+
+                document.getElementById("ihSent").textContent    = stats.sent;
+                document.getElementById("ihJoined").textContent  = stats.accepted;
+                document.getElementById("ihPending").textContent = pending.length;
+                document.getElementById("ihFree").textContent    = stats.freeMonthsEarned;
+
+                if (!list.length) {
+                    tbody.innerHTML = `
+                        <tr><td colspan="5" style="padding:0;">
+                            <div class="empty">
+                                <i class="fa-solid fa-user-plus"></i>
+                                <h3>No invites yet</h3>
+                                <p>You haven't invited anyone yet.</p>
+                                <a href="send-invite.html" class="btn btn-primary">
+                                    <i class="fa-solid fa-paper-plane"></i> Send your first invite
+                                </a>
+                            </div>
+                        </td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = list.map(i => {
+                    const name   = i.inviteeName || i.inviteeEmail || "Invitee";
+                    const joined = i.status === "ACCEPTED";
+                    return `
+                        <tr>
+                            <td>
+                                <div class="cell-user">
+                                    <div class="avatar-text" style="width:36px;height:36px;background:var(--red-light);color:var(--red);font-size:13px;">
+                                        ${BnpUtils.initials(name)}
+                                    </div>
+                                    <div>
+                                        <strong>${BnpUtils.escape(name)}</strong>
+                                        <small>${BnpUtils.escape(i.inviteeEmail || "")}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-label="Invite code">
+                                <code style="background:var(--bg);padding:3px 8px;border-radius:6px;font-size:12px;">
+                                    ${BnpUtils.escape(i.code || "—")}
+                                </code>
+                            </td>
+                            <td data-label="Status">${BnpUtils.statusBadge(i.status)}</td>
+                            <td data-label="Reward">
+                                ${joined
+                                    ? '<span class="badge badge-green"><i class="fa-solid fa-gift"></i> +1 month</span>'
+                                    : '<span class="muted">—</span>'}
+                            </td>
+                            <td data-label="Date" class="muted">${BnpUtils.date(i.createdAt)}</td>
+                        </tr>`;
+                }).join("");
+            } catch (e) {
+                tbody.innerHTML = `
+                    <tr><td colspan="5" class="muted" style="text-align:center;padding:28px;">
+                        Could not load invite history. Please try again.
+                    </td></tr>`;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            if (!window.BnpStorage.isPremium()) {
+                document.getElementById("ihMain").style.display = "none";
+                document.getElementById("ihLocked").style.display = "";
+                return;
+            }
+            loadHistory();
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

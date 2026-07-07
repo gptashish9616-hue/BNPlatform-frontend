@@ -1,0 +1,129 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Referral Details — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="referral-details.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Referral Details</h1><p>Referral #RF-20482</p></div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+            <a href="given-referrals.html" class="btn btn-ghost btn-sm" style="margin-bottom:16px;"><i class="fa-solid fa-arrow-left"></i> Back to referrals</a>
+
+            <div class="grid" style="grid-template-columns:1.7fr 1fr;align-items:start;" id="rdGrid">
+
+                <div style="display:flex;flex-direction:column;gap:18px;">
+                    <div class="card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                            <div class="card-title" style="margin:0;">Referral overview</div>
+                            <span id="rdStatus">—</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:14px;margin:18px 0;" id="rdPerson"></div>
+                        <div style="background:var(--bg);border-radius:9px;padding:14px;font-size:13px;color:var(--muted);line-height:1.6;">
+                            <strong style="color:var(--text);">Note:</strong> <span id="rdNote">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:18px;">
+                    <div class="card">
+                        <div class="card-title">Details</div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Client</span><strong id="rdClient">—</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Client contact</span><strong id="rdContact">—</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Category</span><strong id="rdCategory">—</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Points awarded</span><strong style="color:var(--green);" id="rdPoints">—</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;"><span class="muted">Created</span><strong id="rdCreated">—</strong></div>
+                    </div>
+                    <div id="rdActions"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        const RFID = BnpUtils.param("id");
+        let ref = null;
+
+        async function load() {
+            if (!RFID) { BnpUtils.toast("No referral specified.", "error"); return; }
+            try {
+                ref = await Api.referrals.details(RFID);
+                const me = BnpStorage.getUser();
+                const iAmReceiver = me && ref.receiverId === me.userId;
+                const otherId = iAmReceiver ? ref.referrerId : ref.receiverId;
+                const otherRole = iAmReceiver ? "Referred to you by" : "Referred to";
+
+                document.getElementById("rdStatus").innerHTML = BnpUtils.statusBadge(ref.status);
+                document.getElementById("rdNote").textContent = ref.description || "—";
+                document.getElementById("rdClient").textContent = ref.clientName || "—";
+                document.getElementById("rdContact").textContent = ref.clientContact || "—";
+                document.getElementById("rdCategory").textContent = ref.category || "—";
+                document.getElementById("rdPoints").textContent = ref.pointsAwarded ? "+" + ref.pointsAwarded : "—";
+                document.getElementById("rdCreated").textContent = BnpUtils.date(ref.createdAt);
+
+                let other = { fullName: "Member", profession: "" };
+                try { other = await Api.users.get(otherId); } catch (e) {}
+                document.getElementById("rdPerson").innerHTML = `
+                    <img src="${other.avatarUrl || BnpUtils.avatar(other.fullName)}" style="width:56px;height:56px;border-radius:50%;">
+                    <div>
+                        <strong style="font-size:16px;">${BnpUtils.escape(other.fullName)}</strong>
+                        <p class="muted" style="margin:2px 0 0;">${BnpUtils.escape(other.profession || "Professional")}${other.city ? " · " + BnpUtils.escape(other.city) : ""}</p>
+                    </div>
+                    <span class="muted" style="margin-left:auto;font-size:12px;">${otherRole}</span>`;
+
+                renderActions(iAmReceiver);
+            } catch (e) { BnpUtils.toast(e.message, "error"); }
+        }
+
+        function renderActions(iAmReceiver) {
+            const box = document.getElementById("rdActions");
+            if (!iAmReceiver) { box.innerHTML = ""; return; }
+            if (ref.status === "PENDING") {
+                box.innerHTML = `
+                    <button class="btn btn-primary" style="width:100%;margin-bottom:8px;" onclick="setStatus('ACCEPTED')"><i class="fa-solid fa-check"></i> Accept referral</button>
+                    <button class="btn btn-outline" style="width:100%;" onclick="setStatus('REJECTED')">Decline</button>`;
+            } else if (ref.status === "ACCEPTED") {
+                box.innerHTML = `<button class="btn btn-primary" style="width:100%;" onclick="setStatus('COMPLETED')"><i class="fa-solid fa-flag-checkered"></i> Mark completed</button>`;
+            } else {
+                box.innerHTML = "";
+            }
+        }
+
+        async function setStatus(status) {
+            try { await Api.referrals.updateStatus(RFID, status); BnpUtils.toast("Referral " + status.toLowerCase(), "success"); load(); }
+            catch (e) { BnpUtils.toast(e.message, "error"); }
+        }
+        window.setStatus = setStatus;
+
+        document.addEventListener("DOMContentLoaded", () => { if (window.BnpStorage.isAuthenticated()) load(); });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

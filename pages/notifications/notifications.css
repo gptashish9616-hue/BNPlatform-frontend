@@ -1,0 +1,8 @@
+@media (max-width: 991px) { #ntGrid { grid-template-columns: 1fr !important; } }
+
+.tabs-mobile-select { display: none; }
+
+@media (max-width: 600px) {
+    .tabs { display: none !important; }
+    .tabs-mobile-select { display: block; }
+}

@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Responses — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="my-responses.css" />
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>Responses</h1>
+                <p>Received &amp; sent responses</p>
+            </div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a href="../dashboard/user-dashboard.html"><i class="fa-solid fa-house"></i> Home</a>
+                <span class="sep">&rsaquo;</span>
+                <span>Requirements</span>
+                <span class="sep">&rsaquo;</span>
+                <span class="bc-current">Responses</span>
+            </nav>
+
+            <!-- Summary stats -->
+            <div class="grid grid-2 resp-stats" style="margin-bottom:22px;">
+                <div class="stat">
+                    <div class="stat-top">
+                        <div class="resp-stat-icon recv-icon"><i class="fa-solid fa-inbox"></i></div>
+                    </div>
+                    <div class="stat-num" id="statReceived">—</div>
+                    <div class="stat-lbl">Responses Received</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-top">
+                        <div class="resp-stat-icon sent-icon"><i class="fa-solid fa-paper-plane"></i></div>
+                    </div>
+                    <div class="stat-num" id="statSent">—</div>
+                    <div class="stat-lbl">My Responses Sent</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs resp-tabs" style="margin-bottom:22px;">
+                <div class="tab active" id="tabReceived" onclick="switchTab('received', this)">
+                    <i class="fa-solid fa-inbox"></i> Responses Received
+                    <span class="tab-count recv-count" id="receivedCount" style="display:none;"></span>
+                </div>
+                <div class="tab" id="tabSent" onclick="switchTab('sent', this)">
+                    <i class="fa-solid fa-paper-plane"></i> My Responses
+                    <span class="tab-count sent-count" id="sentCount" style="display:none;"></span>
+                </div>
+            </div>
+
+            <!-- Received panel -->
+            <div id="panelReceived">
+                <div id="receivedList">
+                    <div class="card"><div class="muted"><i class="fa-solid fa-spinner fa-spin"></i> Loading responses…</div></div>
+                </div>
+            </div>
+
+            <!-- Sent panel -->
+            <div id="panelSent" style="display:none;">
+                <div id="sentList">
+                    <div class="card"><div class="muted"><i class="fa-solid fa-spinner fa-spin"></i> Loading your responses…</div></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        let me = null;
+
+        function switchTab(tab, el) {
+            document.querySelectorAll(".resp-tabs .tab").forEach(t => t.classList.remove("active"));
+            el.classList.add("active");
+            document.getElementById("panelReceived").style.display = tab === "received" ? "" : "none";
+            document.getElementById("panelSent").style.display = tab === "sent" ? "" : "none";
+        }
+        window.switchTab = switchTab;
+
+        // ======================================================
+        // RECEIVED — responses on MY posted requirements
+        // ======================================================
+        async function loadReceived() {
+            const box = document.getElementById("receivedList");
+            try {
+                const myReqs = await Api.requirements.mine();
+                const withResp = myReqs.filter(r => (r.responseCount || 0) > 0);
+
+                if (!myReqs.length) {
+                    box.innerHTML = `
+                        <div class="card">
+                            <div class="empty">
+                                <i class="fa-solid fa-clipboard-list"></i>
+                                <h3>No requirements posted yet</h3>
+                                <p>Post a requirement and professionals will respond here.</p>
+                                <a href="create-requirement.html" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Post requirement</a>
+                            </div>
+                        </div>`;
+                    document.getElementById("statReceived").textContent = 0;
+                    return;
+                }
+
+                if (!withResp.length) {
+                    box.innerHTML = `
+                        <div class="card">
+                            <div class="empty">
+                                <i class="fa-solid fa-inbox"></i>
+                                <h3>No responses yet</h3>
+                                <p>You have ${myReqs.length} posted requirement${myReqs.length > 1 ? "s" : ""}. Once a professional responds, they'll appear here.</p>
+                                <a href="all-requirements.html" class="btn btn-ghost"><i class="fa-solid fa-layer-group"></i> View open requirements</a>
+                            </div>
+                        </div>`;
+                    document.getElementById("statReceived").textContent = 0;
+                    return;
+                }
+
+                // Fetch all responses in parallel
+                const allData = await Promise.all(withResp.map(async req => {
+                    try {
+                        const responses = await Api.requirements.responses(req.id);
+                        return { req, responses };
+                    } catch { return { req, responses: [] }; }
+                }));
+
+                // Resolve responder names
+                const responderIds = [...new Set(allData.flatMap(d => d.responses.map(r => r.responderId)))];
+                const names = {};
+                await Promise.all(responderIds.map(async id => {
+                    try { names[id] = (await Api.users.get(id)).fullName; } catch { names[id] = "Professional"; }
+                }));
+
+                let total = 0;
+                const html = allData.map(({ req, responses }) => {
+                    if (!responses.length) return "";
+                    total += responses.length;
+                    const canFulfill = req.status === "OPEN" || req.status === "IN_PROGRESS";
+                    return `
+                    <div class="resp-group">
+                        <div class="resp-group-header">
+                            <div>
+                                <h3 class="resp-req-title">${BnpUtils.escape(req.title || "Untitled")}</h3>
+                                <div class="resp-group-meta">
+                                    <span class="badge badge-blue">${BnpUtils.escape(req.category || "General")}</span>
+                                    <span class="muted">${responses.length} response${responses.length > 1 ? "s" : ""}</span>
+                                    ${BnpUtils.statusBadge(req.status)}
+                                </div>
+                            </div>
+                            <a href="requirement-details.html?id=${req.id}" class="btn btn-ghost btn-sm"><i class="fa-solid fa-gear"></i> Manage</a>
+                        </div>
+
+                        ${responses.map(r => `
+                        <div class="resp-card resp-incoming">
+                            <div class="resp-direction-bar"><span class="badge badge-incoming"><i class="fa-solid fa-inbox"></i> Received</span></div>
+                            <div class="resp-card-body">
+                                <div class="resp-card-header">
+                                    <img src="${BnpUtils.avatar(names[r.responderId] || "P")}" class="resp-avatar" alt="">
+                                    <div class="resp-meta">
+                                        <strong>${BnpUtils.escape(names[r.responderId] || "Professional")}</strong>
+                                        <span class="muted">${BnpUtils.dateTime(r.createdAt)}</span>
+                                    </div>
+                                    ${r.accepted
+                                        ? `<span class="badge badge-green"><i class="fa-solid fa-circle-check"></i> Accepted</span>`
+                                        : `<span class="badge badge-gray"><i class="fa-solid fa-clock"></i> Pending</span>`}
+                                </div>
+                                <p class="resp-message">${BnpUtils.escape(r.message || "—")}</p>
+                                ${r.quote ? `<div class="resp-quote-pill"><i class="fa-solid fa-indian-rupee-sign"></i> ${BnpUtils.escape(r.quote)}</div>` : ""}
+                                ${canFulfill && !r.accepted
+                                    ? `<button class="btn btn-primary btn-sm" onclick="acceptResp(${req.id}, ${r.id}, this)"><i class="fa-solid fa-check"></i> Accept this response</button>`
+                                    : ""}
+                            </div>
+                        </div>`).join("")}
+                    </div>`;
+                }).filter(Boolean).join("");
+
+                box.innerHTML = html || `<div class="card"><div class="muted">No responses to show.</div></div>`;
+                document.getElementById("statReceived").textContent = total;
+                if (total) {
+                    const badge = document.getElementById("receivedCount");
+                    badge.textContent = total;
+                    badge.style.display = "inline-flex";
+                }
+            } catch (e) {
+                box.innerHTML = `<div class="card"><div class="empty"><i class="fa-solid fa-circle-exclamation"></i><h3>Could not load responses</h3><p>${BnpUtils.escape(e.message)}</p></div></div>`;
+            }
+        }
+
+        // ======================================================
+        // SENT — responses I submitted to others' requirements
+        // ======================================================
+        async function loadSent() {
+            const box = document.getElementById("sentList");
+            try {
+                const allReqs = await Api.requirements.all();
+                const candidates = allReqs.filter(r => (r.responseCount || 0) > 0 && r.posterId !== me?.userId);
+
+                // Fetch in parallel, filter for mine
+                const results = await Promise.all(candidates.map(async req => {
+                    try {
+                        const responses = await Api.requirements.responses(req.id);
+                        const mine = responses.filter(r => r.responderId === me?.userId);
+                        return mine.map(r => ({ req, response: r }));
+                    } catch { return []; }
+                }));
+
+                const myResponses = results.flat()
+                    .sort((a, b) => new Date(b.response.createdAt) - new Date(a.response.createdAt));
+
+                document.getElementById("statSent").textContent = myResponses.length;
+
+                if (!myResponses.length) {
+                    box.innerHTML = `
+                        <div class="card">
+                            <div class="empty">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <h3>No responses sent yet</h3>
+                                <p>Browse open requirements and offer your expertise.</p>
+                                <a href="all-requirements.html" class="btn btn-primary"><i class="fa-solid fa-layer-group"></i> Browse requirements</a>
+                            </div>
+                        </div>`;
+                    return;
+                }
+
+                if (myResponses.length) {
+                    const badge = document.getElementById("sentCount");
+                    badge.textContent = myResponses.length;
+                    badge.style.display = "inline-flex";
+                }
+
+                box.innerHTML = myResponses.map(({ req, response: r }) => `
+                    <div class="resp-card resp-outgoing">
+                        <div class="resp-direction-bar"><span class="badge badge-sent"><i class="fa-solid fa-paper-plane"></i> Sent</span></div>
+                        <div class="resp-card-body">
+                            <div class="resp-card-header">
+                                <div class="resp-meta" style="flex:1;">
+                                    <a href="requirement-details.html?id=${req.id}" class="resp-req-link">
+                                        <i class="fa-solid fa-layer-group"></i> ${BnpUtils.escape(req.title || "Untitled")}
+                                    </a>
+                                    <span class="muted">${BnpUtils.escape(req.category || "General")} &middot; ${BnpUtils.escape(req.city || "Remote")}</span>
+                                </div>
+                                ${r.accepted
+                                    ? `<span class="badge badge-green"><i class="fa-solid fa-circle-check"></i> Accepted</span>`
+                                    : (req.status === "OPEN" || req.status === "IN_PROGRESS")
+                                        ? `<span class="badge badge-sent"><i class="fa-solid fa-hourglass-half"></i> Awaiting review</span>`
+                                        : `<span class="badge badge-gray"><i class="fa-solid fa-xmark"></i> Closed</span>`}
+                            </div>
+                            <p class="resp-message">${BnpUtils.escape(r.message || "—")}</p>
+                            ${r.quote ? `<div class="resp-quote-pill"><i class="fa-solid fa-indian-rupee-sign"></i> ${BnpUtils.escape(r.quote)}</div>` : ""}
+                            <div class="resp-footer">
+                                <span class="muted"><i class="fa-regular fa-clock"></i> ${BnpUtils.dateTime(r.createdAt)}</span>
+                                <a href="requirement-details.html?id=${req.id}" class="btn btn-ghost btn-sm">View requirement</a>
+                            </div>
+                        </div>
+                    </div>`).join("");
+            } catch (e) {
+                box.innerHTML = `<div class="card"><div class="empty"><i class="fa-solid fa-circle-exclamation"></i><h3>Could not load</h3><p>${BnpUtils.escape(e.message)}</p></div></div>`;
+            }
+        }
+
+        async function acceptResp(reqId, responseId, btn) {
+            if (!confirm("Accept this response? The professional will be notified.")) return;
+            BnpUtils.loading(btn, true, "Accepting…");
+            try {
+                await Api.requirements.accept(reqId, responseId);
+                BnpUtils.toast("Response accepted!", "success");
+                loadReceived();
+            } catch (e) {
+                BnpUtils.loading(btn, false);
+                BnpUtils.toast(e.message, "error");
+            }
+        }
+        window.acceptResp = acceptResp;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            if (!window.BnpStorage.isPremium()) {
+                document.querySelector(".app-content").innerHTML = `
+                    <nav class="breadcrumb">
+                        <a href="../dashboard/user-dashboard.html"><i class="fa-solid fa-house"></i> Home</a>
+                        <span class="sep">&rsaquo;</span>
+                        <span>Requirements</span>
+                        <span class="sep">&rsaquo;</span>
+                        <span class="bc-current">Responses</span>
+                    </nav>
+                    <div class="card" style="text-align:center;padding:60px 30px;max-width:520px;margin:40px auto;">
+                        <div style="font-size:48px;color:var(--red);margin-bottom:16px;"><i class="fa-solid fa-lock"></i></div>
+                        <h2 style="font-size:20px;font-weight:700;margin-bottom:10px;">Premium Membership Required</h2>
+                        <p class="muted" style="font-size:14px;line-height:1.7;margin-bottom:24px;">Viewing and sending responses is only available to premium members. Upgrade your plan to access this feature.</p>
+                        <a href="../membership/plans.html" class="btn btn-primary"><i class="fa-solid fa-crown"></i> Upgrade to Premium</a>
+                    </div>`;
+                return;
+            }
+            me = window.BnpStorage.getUser();
+            loadReceived();
+            loadSent();
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

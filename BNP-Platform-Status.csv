@@ -1,0 +1,49 @@
+Modules,Sub Modules,Features,Status Dev,Status Testing
+Authentication,Login,User Login (Email/Password + JWT),Completed,Not Started
+Authentication,Registration,New User Registration,Completed,Not Started
+Authentication,Forgot Password,Forgot Password Flow,Completed,Not Started
+Authentication,Reset Password,Reset Password Flow,Completed,Not Started
+Authentication,Admin Setup,Initial Admin Account Setup,Completed,Not Started
+Authentication,Route Guards,Session/Role based Access Guards,Completed,Not Started
+User & Profile,My Profile,View Profile,Completed,Not Started
+User & Profile,Edit Profile,Update Profile Details,Completed,Not Started
+User & Profile,Address,Manage Address Details,Completed,Not Started
+User & Profile,Company Profile,Company/Business Profile Details,Completed,Not Started
+User & Profile,Authenticity Documents,Upload/Verify Documents,Completed,Not Started
+User & Profile,User Management (Admin),Manage All Users (List/View/Edit/Block),Completed,Not Started
+Dashboard,User Dashboard,User Overview Stats & Widgets,Completed,Not Started
+Dashboard,Admin Dashboard,Admin Overview Stats & Widgets,Completed,Not Started
+Referrals,Create Referral,Give a New Referral,Completed,Not Started
+Referrals,Given Referrals,Track Referrals Given,Completed,Not Started
+Referrals,Received Referrals,Track Referrals Received,Completed,Not Started
+Referrals,Referral Details,View Single Referral Detail,Completed,Not Started
+Referrals,Referral Management (Admin),Manage All Referrals,Completed,Not Started
+Requirements,Create Requirement,Post a New Requirement,Completed,Not Started
+Requirements,My Requirements,View Own Posted Requirements,Completed,Not Started
+Requirements,All Requirements,Browse All Requirements,Completed,Not Started
+Requirements,My Responses,View My Submitted Responses,Completed,Not Started
+Requirements,Requirement Details,View Single Requirement Detail,Completed,Not Started
+Requirements,Requirement Management (Admin),Manage All Requirements,Completed,Not Started
+Membership & Subscription,Plans,View Available Membership Plans,Completed,Not Started
+Membership & Subscription,Subscription,Manage Active Subscription,Completed,Not Started
+Membership & Subscription,Payment History,View Payment History,Completed,Not Started
+Membership & Subscription,Membership Management (Admin),Manage Plans & Members,Completed,Not Started
+Chat & Messaging,One-to-One Chat,Direct Messaging Between Users,Completed,Not Started
+Chat & Messaging,Group Chat,Group Messaging,Completed,Not Started
+Chat & Messaging,Realtime Delivery,WebSocket based Live Messaging,Completed,Not Started
+Groups,Group Management,Create/Manage Groups (Admin),Completed,Not Started
+Groups,Group Membership,Add/Remove Group Members,Completed,Not Started
+Notifications,Notification List,View All Notifications,Completed,Not Started
+Notifications,Notification Dispatch,Realtime/Event based Notification Delivery,Completed,Not Started
+Invites,Send Invite,Invite New Members,Completed,Not Started
+Invites,Invite History,Track Sent Invites,Completed,Not Started
+Points & Rewards,Points Transactions,Track Earned/Spent Points,Completed,Not Started
+Points & Rewards,Points System Config (Admin),Configure Points Rules,Completed,Not Started
+Points & Rewards,Rewards Config (Admin),Configure Reward Catalogue,Completed,Not Started
+Reviews,Reviews,Submit & View Reviews/Ratings,Completed,Not Started
+Feed,Posts,Create/View Social Feed Posts,Completed,Not Started
+Feed,Comments,Comment on Posts,Completed,Not Started
+Feed,Likes,Like/Unlike Posts,Completed,Not Started
+Analytics,Analytics Dashboard,Platform Usage Reports & Stats,Completed,Not Started
+Admin Panel,Settings,Global Platform Settings,Completed,Not Started
+Admin Panel,File Management,Upload/Serve Files & Documents,Completed,Not Started

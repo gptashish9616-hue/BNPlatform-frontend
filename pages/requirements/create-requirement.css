@@ -1,0 +1,24 @@
+/* breadcrumb */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.breadcrumb a {
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: color .15s;
+}
+.breadcrumb a:hover { color: var(--red); }
+.breadcrumb .fa-house { color: var(--red); }
+.breadcrumb .sep { color: var(--hint); font-size: 12px; }
+.breadcrumb .bc-current { color: var(--text); font-weight: 600; }
+
+@media (max-width: 991px) { #crqGrid { grid-template-columns: 1fr !important; } }
+.card .list-item i { width:18px; }

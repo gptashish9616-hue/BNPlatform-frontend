@@ -1,0 +1,82 @@
+<!-- Shared site navbar — edit here, reflects on every page -->
+<nav class="navbar navbar-expand-lg fixed-top custom-navbar">
+    <div class="container-fluid px-3 px-lg-2">
+
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+            <div class="ms-lg-5 logo-text">
+                <h4>BN<span>Platform</span></h4>
+            </div>
+        </a>
+
+        <button class="navbar-toggler shadow-none border-0" type="button"
+            data-bs-toggle="offcanvas" data-bs-target="#navMenu" aria-controls="navMenu" aria-label="Open menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <!-- On desktop (lg+) this renders inline; on mobile it slides in from the right -->
+        <div class="offcanvas offcanvas-end custom-offcanvas" data-bs-scroll="true" tabindex="-1" id="navMenu" aria-labelledby="navMenuLabel">
+
+            <div class="offcanvas-header d-lg-none">
+                <span class="logo-text" id="navMenuLabel">
+                    <h4 class="m-0">BN<span>Platform</span></h4>
+                </span>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+
+            <div class="offcanvas-body">
+
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+
+                    <li class="nav-separator"></li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            Explore
+                        </a>
+
+                        <ul class="dropdown-menu custom-dropdown">
+                            <li><a class="dropdown-item" href="members.html">Find Professionals</a></li>
+                            <li><a class="dropdown-item" href="how-it-works.html">How It Works</a></li>
+                            <li><a class="dropdown-item" href="refferal-program.html">Referral Program</a></li>
+                            <li><a class="dropdown-item" href="pricing.html">Pricing</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-separator"></li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            Company
+                        </a>
+
+                        <ul class="dropdown-menu custom-dropdown">
+                            <li><a class="dropdown-item" href="about.html">About Us</a></li>
+                            <li><a class="dropdown-item" href="contact.html">Contact Us</a></li>
+                            <li><a class="dropdown-item" href="help.html">Help &amp; Support</a></li>
+                            <li><a class="dropdown-item" href="blog.html">Blog</a></li>
+                            <li><a class="dropdown-item" href="newsletter.html">Newsletter</a></li>
+                        </ul>
+                    </li>
+
+                </ul>
+
+                <div class="d-flex flex-column flex-lg-row gap-2 mt-3 mt-lg-0  me-lg-5">
+                    <a href="pages/auth/login.html"
+                        class="btn btn-outline-dark rounded-pill d-inline-flex align-items-center justify-content-center gap-2">
+                        <i class="fa-solid fa-user"></i> Login
+                    </a>
+
+                    <a href="pages/auth/register.html"
+                        class="btn join-btn rounded-pill d-inline-flex align-items-center justify-content-center gap-2">
+                        <i class="fa-solid fa-user-plus"></i> Join Now
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</nav>

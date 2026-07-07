@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Users — BNPlatform Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+</head>
+
+<body class="app" data-require="admin">
+
+    <div id="sidebar-container" data-shell="admin"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>Users</h1>
+                <p>Manage all platform members</p>
+            </div>
+            <div class="topbar-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="auSearch" placeholder="Search users..." oninput="filterUsers()">
+            </div>
+            <div class="topbar-icon" id="adminBell"><i class="fa-solid fa-bell"></i><span class="bell-count-badge" id="adminBellDot" style="display:none;"></span></div>
+            <a href="profile.html"><img class="topbar-avatar" src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" alt="me" /></a>
+        </header>
+
+        <div class="app-content">
+
+            <!-- Stat boxes -->
+            <div class="grid grid-4" style="margin-bottom:18px;">
+                <div class="stat">
+                    <div class="stat-num" id="auTotal">—</div>
+                    <div class="stat-lbl">Total users</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num" id="auActive" style="color:var(--green);">—</div>
+                    <div class="stat-lbl">Active</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num" id="auPremium" style="color:var(--amber);">—</div>
+                    <div class="stat-lbl">Premium</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num" id="auSuspended" style="color:var(--red);">—</div>
+                    <div class="stat-lbl">Suspended</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    All users
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <select id="auPlanFilter" onchange="filterUsers()"
+                            style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;font-family:inherit;outline:none;">
+                            <option value="">All plans</option>
+                            <option value="Free">Free</option>
+                            <option value="Premium">Premium</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm" onclick="openAddUserModal()"><i class="fa-solid fa-plus"></i> Add user</button>
+                    </div>
+                </div>
+
+                <!-- Tabs: All / Active / Suspended -->
+                <div class="tabs" style="margin-bottom:16px;">
+                    <div class="tab" id="tabAll" onclick="setTab('all')">All</div>
+                    <div class="tab active" id="tabActive" onclick="setTab('active')">Active</div>
+                    <div class="tab" id="tabSuspended" onclick="setTab('suspended')">Suspended</div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="tbl tbl-stack">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Role</th>
+                                <th>City</th>
+                                <th>Points</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auRows">
+                            <tr>
+                                <td colspan="6" class="muted" style="text-align:center;padding:20px;">Loading…</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top:14px;font-size:13px;">
+                    <span class="muted" id="auCount">—</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/admin-bell.js"></script>
+    <script>
+        const ROLE_BADGE = {
+            SUPER_ADMIN: ["badge-red", "Super Admin"],
+            SUB_ADMIN: ["badge-red", "Admin"],
+            PREMIUM_USER: ["badge-amber", "Premium"],
+            FREE_USER: ["badge-gray", "Free"]
+        };
+
+        let allUsers = [];
+        let activeTab = "active"; // default tab = Active (suspended users hidden)
+
+        // Backend may omit status for new accounts — treat null/undefined as ACTIVE.
+        const normStatus = (s) => (s || "ACTIVE").toUpperCase();
+        const normRole = (r) => {
+            const role = (r || "FREE_USER").toUpperCase();
+            if (role === "PREMIUM") return "PREMIUM_USER";
+            if (role === "ADMIN") return "SUB_ADMIN";
+            if (role === "USER" || role === "BASIC") return "FREE_USER";
+            return role;
+        };
+        // Checks premium flag first (set by backend on UserCard), then role as fallback
+        const isPremium = (u) =>
+            u.premium === true ||
+            normRole(u.role) === "PREMIUM_USER" ||
+            (u.membershipType || "").toUpperCase().includes("PREMIUM");
+
+        // ── Load from API ─────────────────────────────────────────
+        async function loadUsers() {
+            const tbody = document.getElementById("auRows");
+            try {
+                allUsers = await Api.admin.users();
+                updateStats();
+                filterUsers();
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="6" class="muted" style="text-align:center;padding:20px;">
+                    Could not load users: ${BnpUtils.escape(e.message)}</td></tr>`;
+            }
+        }
+
+        // ── Stat boxes ────────────────────────────────────────────
+        function updateStats() {
+            document.getElementById("auTotal").textContent = allUsers.length;
+            document.getElementById("auActive").textContent = allUsers.filter(u => normStatus(u.status) === "ACTIVE").length;
+            document.getElementById("auPremium").textContent = allUsers.filter(u => isPremium(u)).length;
+            document.getElementById("auSuspended").textContent = allUsers.filter(u => normStatus(u.status) === "SUSPENDED").length;
+        }
+
+        // ── Tab switcher ─────────────────────────────────────────
+        function setTab(tab) {
+            activeTab = tab;
+            ["all", "active", "suspended"].forEach(t => {
+                const el = document.getElementById("tab" + t.charAt(0).toUpperCase() + t.slice(1));
+                if (el) el.classList.toggle("active", t === tab);
+            });
+            filterUsers();
+        }
+
+        // ── Filter + render ───────────────────────────────────────
+        function filterUsers() {
+            const q = document.getElementById("auSearch").value.trim().toLowerCase();
+            const plan = document.getElementById("auPlanFilter").value;
+
+            let list = allUsers.filter(u => {
+                const status = normStatus(u.status);
+                // Tab filter
+                if (activeTab === "active" && status === "SUSPENDED") return false;
+                if (activeTab === "suspended" && status !== "SUSPENDED") return false;
+
+                // Search
+                const text = [u.fullName, u.email, u.city].join(" ").toLowerCase();
+                if (q && !text.includes(q)) return false;
+
+                // Plan filter
+                const role = normRole(u.role);
+                const userIsAdmin = role === "SUB_ADMIN" || role === "SUPER_ADMIN";
+                if (plan === "Free" && (isPremium(u) || userIsAdmin)) return false;
+                if (plan === "Premium" && (!isPremium(u) || userIsAdmin)) return false;
+                if (plan === "Admin" && !userIsAdmin) return false;
+
+                return true;
+            });
+
+            renderTable(list);
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById("auRows");
+            document.getElementById("auCount").textContent =
+                `Showing ${list.length} of ${allUsers.length} users`;
+
+            if (!list.length) {
+                tbody.innerHTML = `<tr><td colspan="6" class="muted" style="text-align:center;padding:28px;">No users found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(u => {
+                const normR = normRole(u.role);
+                const isAdmin = normR === "SUPER_ADMIN" || normR === "SUB_ADMIN";
+                const role = isAdmin ? normR : (isPremium(u) ? "PREMIUM_USER" : normR);
+                const status = normStatus(u.status);
+                const [cls, lbl] = ROLE_BADGE[role] || ROLE_BADGE.FREE_USER;
+                const suspended = status === "SUSPENDED";
+
+                return `<tr${suspended ? ' style="opacity:.65;"' : ""}>
+                    <td>
+                        <div class="cell-user">
+                            <img src="${BnpUtils.avatarFor(u.avatarUrl, u.fullName)}" alt="">
+                            <div>
+                                <strong>${BnpUtils.escape(u.fullName)}</strong>
+                                <small>${BnpUtils.escape(u.email || "")}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td data-label="Role"><span class="badge ${cls}">${lbl}</span></td>
+                    <td data-label="City">${BnpUtils.escape(u.city || "—")}</td>
+                    <td data-label="Points">${(u.points ?? 0).toLocaleString("en-IN")}</td>
+                    <td data-label="Status">${BnpUtils.statusBadge(status)}</td>
+                    <td>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            <button class="btn btn-outline btn-sm"
+                                onclick="viewUser(${u.id})">
+                                View
+                            </button>
+                            <button class="btn ${suspended ? "btn-primary" : "btn-outline"} btn-sm"
+                                onclick="toggleStatus(${u.id},'${suspended ? "ACTIVE" : "SUSPENDED"}')">
+                                ${suspended ? "Activate" : "Suspend"}
+                            </button>
+                            <button class="btn btn-ghost btn-sm"
+                                onclick="toggleRole(${u.id},'${isAdmin ? "FREE_USER" : "SUB_ADMIN"}')">
+                                ${isAdmin ? "Revoke admin" : "Make admin"}
+                            </button>
+                            <button class="btn btn-ghost btn-sm"
+                                onclick="resetUserData(${u.id})">
+                                Reset data
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join("");
+        }
+
+        // ── Actions ───────────────────────────────────────────────
+        async function toggleStatus(id, newStatus) {
+            try {
+                await Api.admin.updateStatus(id, newStatus);
+
+                // Update local array immediately — don't wait for a re-fetch.
+                // This ensures counts and tab-filter reflect the change right away
+                // even if the backend's GET endpoint still returns null status.
+                const u = allUsers.find(x => x.id === id);
+                if (u) u.status = newStatus;
+
+                updateStats();   // recalculate stat boxes
+                filterUsers();   // re-render table (removes from current tab if needed)
+
+                BnpUtils.toast(
+                    newStatus === "ACTIVE" ? "User activated" : "User suspended",
+                    "success"
+                );
+            } catch (e) {
+                BnpUtils.toast(e.message, "error");
+            }
+        }
+
+        async function toggleRole(id, role) {
+            if (!confirm("Change this user's role to " + role + "?")) return;
+            try {
+                await Api.admin.updateRole(id, role);
+                const u = allUsers.find(x => x.id === id);
+                if (u) {
+                    u.role = role;
+                    if (role === "SUB_ADMIN") u.premium = false;
+                }
+                updateStats();
+                filterUsers();
+                BnpUtils.toast("Role updated", "success");
+            } catch (e) {
+                BnpUtils.toast(e.message, "error");
+            }
+        }
+
+        async function resetUserData(id) {
+            if (!confirm("Reset this user's earned activity? This deletes their referrals, reviews, requirements, invites, notifications and sets points to 0. This cannot be undone.")) return;
+            try {
+                await Api.admin.resetUserData(id);
+                const u = allUsers.find(x => x.id === id);
+                if (u) u.points = 0;
+                updateStats();
+                filterUsers();
+                BnpUtils.toast("User's test activity reset", "success");
+            } catch (e) {
+                BnpUtils.toast(e.message, "error");
+            }
+        }
+
+        async function viewUser(id) {
+            const modal = document.getElementById("viewUserModal");
+            const body = document.getElementById("vuBody");
+            body.innerHTML = `<div class="muted" style="text-align:center;padding:24px;">Loading…</div>`;
+            modal.style.display = "flex";
+            try {
+                const u = await Api.admin.user(id);
+                const normR = normRole(u.role);
+                const isAdmin = normR === "SUPER_ADMIN" || normR === "SUB_ADMIN";
+                const role = isAdmin ? normR : (isPremium(u) ? "PREMIUM_USER" : normR);
+                const [cls, lbl] = ROLE_BADGE[role] || ROLE_BADGE.FREE_USER;
+                const status = normStatus(u.status);
+
+                const row = (label, value, alignLeft) => `<tr><td>${label}</td><td${alignLeft ? ' style="text-align:left;"' : ""}>${value}</td></tr>`;
+
+                body.innerHTML = `
+                    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+                        <img src="${BnpUtils.avatarFor(u.avatarUrl, u.fullName)}" alt="" style="width:56px;height:56px;border-radius:50%;object-fit:cover;">
+                        <div>
+                            <div style="font-size:16px;font-weight:700;">${BnpUtils.escape(u.fullName)}</div>
+                            <div style="display:flex;gap:6px;margin-top:4px;">
+                                <span class="badge ${cls}">${lbl}</span>
+                                ${BnpUtils.statusBadge(status)}
+                            </div>
+                        </div>
+                    </div>
+                    <table class="tbl-detail"><tbody>
+                        ${row("Email", BnpUtils.escape(u.email || "—"))}
+                        ${row("Phone", BnpUtils.escape(u.phone || "—"))}
+                        ${row("Profession", BnpUtils.escape(u.profession || "—"))}
+                        ${row("Headline", BnpUtils.escape(u.headline || "—"))}
+                        ${row("City / State", BnpUtils.escape([u.city, u.state].filter(Boolean).join(", ") || "—"))}
+                        ${row("Points", (u.points ?? 0).toLocaleString("en-IN"))}
+                        ${row("Rating", `★ ${(u.avgRating ?? 0).toFixed(1)} (${u.reviewCount ?? 0} reviews)`)}
+                        ${row("Free months earned", u.freeMonthsEarned ?? 0)}
+                        ${row("User ID", u.id)}
+                        ${u.bio ? row("Bio", BnpUtils.escape(u.bio), true) : ""}
+                    </tbody></table>
+                `;
+            } catch (e) {
+                body.innerHTML = `<div class="muted" style="text-align:center;padding:24px;color:var(--red);">Could not load user: ${BnpUtils.escape(e.message)}</div>`;
+            }
+        }
+
+        function closeViewUserModal() {
+            document.getElementById("viewUserModal").style.display = "none";
+        }
+
+        window.toggleStatus = toggleStatus;
+        window.toggleRole = toggleRole;
+        window.resetUserData = resetUserData;
+        window.viewUser = viewUser;
+        window.closeViewUserModal = closeViewUserModal;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.BnpStorage?.isAuthenticated()) loadUsers();
+        });
+    </script>
+    <!-- ── View User Modal ──────────────────────────────────────── -->
+    <div id="viewUserModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:14px;padding:28px 28px 24px;width:100%;max-width:440px;max-height:85vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.18);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                <h2 style="font-size:17px;font-weight:700;margin:0;">User Details</h2>
+                <button onclick="closeViewUserModal()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#888;line-height:1;">&times;</button>
+            </div>
+            <div id="vuBody"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("viewUserModal").addEventListener("click", function (e) {
+            if (e.target === this) closeViewUserModal();
+        });
+    </script>
+
+    <!-- ── Add User Modal ───────────────────────────────────────── -->
+    <div id="addUserModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:14px;padding:28px 28px 24px;width:100%;max-width:440px;box-shadow:0 8px 40px rgba(0,0,0,.18);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                <h2 style="font-size:17px;font-weight:700;margin:0;">Add New User</h2>
+                <button onclick="closeAddUserModal()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#888;line-height:1;">&times;</button>
+            </div>
+            <form id="addUserForm" onsubmit="submitAddUser(event)" autocomplete="off">
+                <div style="display:flex;flex-direction:column;gap:13px;">
+                    <div>
+                        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px;">Full Name <span style="color:var(--red)">*</span></label>
+                        <input id="auFullName" type="text" placeholder="Enter full name" required
+                            style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;font-family:inherit;outline:none;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px;">Email <span style="color:var(--red)">*</span></label>
+                        <input id="auEmail" type="email" placeholder="Enter email address" required
+                            style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;font-family:inherit;outline:none;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px;">Phone</label>
+                        <input id="auPhone" type="tel" placeholder="Enter phone number"
+                            style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;font-family:inherit;outline:none;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px;">City</label>
+                        <input id="auCity" type="text" placeholder="Enter city"
+                            style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;font-family:inherit;outline:none;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px;">Password <span style="color:var(--red)">*</span></label>
+                        <input id="auPassword" type="password" placeholder="Set a password" required minlength="6"
+                            style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;font-family:inherit;outline:none;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px;">Role</label>
+                        <select id="auRole"
+                            style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;font-family:inherit;outline:none;box-sizing:border-box;">
+                            <option value="FREE_USER">Free User</option>
+                            <option value="PREMIUM_USER">Premium User</option>
+                            <option value="SUB_ADMIN">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="auModalError" style="display:none;margin-top:12px;padding:9px 12px;background:#fff0f0;border-radius:8px;color:var(--red);font-size:13px;"></div>
+                <div style="display:flex;gap:10px;margin-top:20px;">
+                    <button type="button" onclick="closeAddUserModal()"
+                        style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13.5px;font-family:inherit;">Cancel</button>
+                    <button type="submit" id="auSubmitBtn" class="btn btn-primary"
+                        style="flex:1;padding:10px;font-size:13.5px;">Create User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openAddUserModal() {
+            document.getElementById("addUserForm").reset();
+            document.getElementById("auModalError").style.display = "none";
+            document.getElementById("auSubmitBtn").disabled = false;
+            document.getElementById("auSubmitBtn").textContent = "Create User";
+            document.getElementById("addUserModal").style.display = "flex";
+        }
+
+        function closeAddUserModal() {
+            document.getElementById("addUserModal").style.display = "none";
+        }
+
+        // Close on backdrop click
+        document.getElementById("addUserModal").addEventListener("click", function (e) {
+            if (e.target === this) closeAddUserModal();
+        });
+
+        async function submitAddUser(e) {
+            e.preventDefault();
+            const errEl = document.getElementById("auModalError");
+            const btn = document.getElementById("auSubmitBtn");
+            errEl.style.display = "none";
+            btn.disabled = true;
+            btn.textContent = "Creating…";
+
+            const fullName = document.getElementById("auFullName").value.trim();
+            const email    = document.getElementById("auEmail").value.trim();
+            const phone    = document.getElementById("auPhone").value.trim();
+            const password = document.getElementById("auPassword").value;
+            const role     = document.getElementById("auRole").value;
+
+            try {
+                // Register the user via the public auth endpoint
+                const created = await Api.auth.register({ fullName, email, phone, password });
+
+                // If a non-default role was chosen, apply it now
+                if (role !== "FREE_USER" && created && created.id) {
+                    await Api.admin.updateRole(created.id, role);
+                }
+
+                closeAddUserModal();
+                BnpUtils.toast("User created successfully", "success");
+                await loadUsers();
+            } catch (err) {
+                errEl.textContent = err.message;
+                errEl.style.display = "block";
+                btn.disabled = false;
+                btn.textContent = "Create User";
+            }
+        }
+
+        window.openAddUserModal = openAddUserModal;
+        window.closeAddUserModal = closeAddUserModal;
+    </script>
+
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

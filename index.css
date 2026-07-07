@@ -1,0 +1,591 @@
+        body {
+            padding-top: 0;
+        }
+
+        /* ===== FULL-WIDTH MAP HERO ===== */
+        .map-hero {
+            position: relative;
+            width: 100%;
+            height: 520px;
+            margin-top: 72px;
+            /* clear fixed navbar */
+            overflow: hidden;
+            background: #e7ecf3;
+        }
+
+        #map {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* dark gradient at bottom for text readability */
+        .map-hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.55) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* ===== FLOATING SEARCH BAR (top of map) ===== */
+        .map-search-bar {
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(680px, calc(100% - 40px));
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .map-search-wrap {
+            flex: 1;
+            position: relative;
+        }
+
+        .map-search-wrap i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .map-search-wrap input {
+            width: 100%;
+            height: 46px;
+            border: none;
+            border-radius: 12px;
+            padding: 0 14px 0 38px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+            outline: none;
+        }
+
+        .map-search-wrap input::placeholder {
+            color: #aaa;
+        }
+
+        #memberSearchBtn {
+            height: 46px;
+            padding: 0 22px;
+            border: none;
+            border-radius: 12px;
+            background: #e31e24;
+            color: #fff;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(227, 30, 36, 0.35);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            white-space: nowrap;
+            transition: background .15s;
+        }
+
+        #memberSearchBtn:hover {
+            background: #c9171d;
+        }
+
+        /* ===== CATEGORY PILLS (on map) ===== */
+        .map-category-pills {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            z-index: 10;
+            pointer-events: none;
+            /* children override */
+        }
+
+        .map-pill {
+            pointer-events: auto;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1.5px solid transparent;
+            border-radius: 999px;
+            padding: 6px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            backdrop-filter: blur(6px);
+            transition: all .15s;
+        }
+
+        .map-pill:hover {
+            background: #fff;
+            border-color: #e31e24;
+            color: #e31e24;
+        }
+
+        .map-pill.active {
+            background: #e31e24;
+            color: #fff;
+            border-color: #e31e24;
+        }
+
+        /* ===== MORE PILL DROPDOWN ===== */
+        .more-pill-wrap {
+            position: relative;
+            pointer-events: auto;
+        }
+
+        .more-pill-dropdown {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+            padding: 8px;
+            min-width: 160px;
+            z-index: 20;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .more-pill-dropdown.open {
+            display: flex;
+        }
+
+        .more-pill-item {
+            background: none;
+            border: none;
+            text-align: left;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            transition: background .12s, color .12s;
+        }
+
+        .more-pill-item:hover {
+            background: #fde8e9;
+            color: #e31e24;
+        }
+
+        .more-pill-item.active {
+            background: #e31e24;
+            color: #fff;
+        }
+
+        /* ===== HERO TEXT (bottom-left of map) ===== */
+        .map-hero-text {
+            position: absolute;
+            left: 36px;
+            right: 36px;
+            bottom: 100px;
+            color: #fff;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .map-hero-text h1 {
+            font-size: 36px;
+            font-weight: 800;
+            margin: 0 0 6px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+        }
+
+        .map-hero-text p {
+            font-size: 15px;
+            margin: 0;
+            opacity: .9;
+            max-width: 480px;
+        }
+
+        /* ===== PROFESSIONALS NEAR YOU (below map) ===== */
+        #professionalsSection {
+            display: none;
+            background: #eef1f6;
+            padding: 36px 0 44px;
+        }
+
+        .professionals-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+
+        .professionals-header h2 {
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .professionals-header a {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e31e24;
+            text-decoration: none;
+        }
+
+        .professionals-header a:hover {
+            text-decoration: underline;
+        }
+
+        /* member cards grid */
+        .member-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #fff;
+            border-radius: 14px;
+            padding: 14px 16px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
+        }
+
+        .member-card img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .member-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .member-info h5 {
+            font-size: 15px;
+            font-weight: 700;
+            margin: 0 0 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .member-info span {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .member-info small {
+            display: block;
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .view-btn {
+            border: none;
+            background: #e31e24;
+            color: #fff;
+            padding: 7px 14px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* no-results state */
+        .no-results {
+            text-align: center;
+            padding: 32px;
+            color: #999;
+            font-size: 14px;
+            grid-column: 1 / -1;
+        }
+
+        /* ===== MOBILE ===== */
+        @media (max-width: 768px) {
+            .map-hero {
+                height: 500px;
+                margin-top: 60px;
+            }
+
+            /* search bar: keep row layout on mobile */
+            .map-search-bar {
+                top: 10px;
+                width: calc(100% - 24px);
+                flex-direction: row;
+                gap: 6px;
+            }
+
+            #memberSearchBtn {
+                padding: 0 14px;
+                font-size: 13px;
+            }
+
+            /* pills: two-row wrap on mobile */
+            .map-category-pills {
+                bottom: 10px;
+                left: 0;
+                right: 0;
+                transform: none;
+                width: 100%;
+                flex-wrap: wrap;
+                overflow-x: visible;
+                justify-content: center;
+                padding: 0 10px;
+                gap: 6px;
+            }
+
+            .map-pill {
+                flex-shrink: 0;
+                font-size: 11px;
+                padding: 5px 12px;
+            }
+
+            .more-pill-wrap {
+                flex-shrink: 0;
+            }
+
+            /* keep dropdown opening upward so it isn't clipped by map-hero overflow:hidden */
+            .more-pill-dropdown {
+                min-width: 150px;
+            }
+
+            /* hero text sits clearly above the pills */
+            .map-hero-text {
+                left: 14px;
+                right: 14px;
+                bottom: 95px;
+            }
+
+            .map-hero-text h1 {
+                font-size: 22px;
+                margin-bottom: 4px;
+            }
+
+            .map-hero-text p {
+                font-size: 13px;
+            }
+        }
+
+        /* push zoom control above category pills on mobile */
+        @media (max-width: 768px) {
+            .map-hero .leaflet-bottom.leaflet-right {
+                bottom: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .map-hero {
+                height: 440px;
+            }
+
+            .map-hero-text h1 {
+                font-size: 20px;
+            }
+
+            .map-search-bar {
+                top: 8px;
+            }
+        }
+
+        /* ===== MORE DROPDOWN — scrollable when tall ===== */
+        .more-pill-dropdown {
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        /* "Other" item inside dropdown — distinct style */
+        .more-pill-other {
+            border-top: 1px solid #f0f0f0;
+            margin-top: 4px;
+            padding-top: 10px !important;
+            color: #e31e24 !important;
+            font-weight: 700 !important;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .more-pill-other:hover {
+            background: #fde8e9 !important;
+        }
+
+        /* ===== OTHER PROFESSIONS MODAL ===== */
+        .other-prof-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .other-prof-modal-box {
+            background: #fff;
+            border-radius: 18px;
+            width: min(520px, 100%);
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .other-prof-modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 22px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .other-prof-modal-head button {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #888;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 6px;
+            transition: background .12s, color .12s;
+        }
+
+        .other-prof-modal-head button:hover {
+            background: #fde8e9;
+            color: #e31e24;
+        }
+
+        .other-prof-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
+            padding: 18px 22px 22px;
+            overflow-y: auto;
+        }
+
+        .other-prof-item {
+            background: #f5f6f8;
+            border: 1.5px solid transparent;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            text-align: center;
+            transition: all .14s;
+        }
+
+        .other-prof-item:hover {
+            background: #fde8e9;
+            border-color: #e31e24;
+            color: #e31e24;
+        }
+
+        .other-prof-item.active {
+            background: #e31e24;
+            border-color: #e31e24;
+            color: #fff;
+        }
+
+        @media (max-width: 480px) {
+            .other-prof-grid {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 14px 14px 18px;
+            }
+        }
+
+        /* FEATURES cards */
+
+        .feature-card {
+            padding: 20px;
+            border-radius: 12px;
+            min-height: 220px;
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            margin: 12px 0 8px;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+
+        .feature-icon {
+            width: 45px;
+            height: 45px;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+
+
+
+
+
+
+
+
+        .category-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: #fff;
+            padding: 18px 12px;
+            height: 150px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+            transition: all .3s ease;
+            cursor: pointer;
+        }
+
+        .category-card:hover {
+            transform: translateY(-8px);
+            /* Card upar uth jayega */
+            border-color: #e31e24;
+            box-shadow: 0 12px 25px rgba(227, 30, 36, 0.15);
+        }
+
+        .category-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            background: #fde8e9;
+            /* Same background for all */
+            color: #e31e24;
+            /* Same icon color for all */
+            font-size: 22px;
+            transition: all .3s ease;
+        }
+
+
+
+        .category-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+            transition: color .3s ease;
+        }

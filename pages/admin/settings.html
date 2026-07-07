@@ -1,0 +1,64 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings — BNPlatform Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="settings.css">
+</head>
+
+<body class="app" data-require="admin">
+
+    <div id="sidebar-container" data-shell="admin"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Settings</h1><p>Platform configuration</p></div>
+            <div class="topbar-icon" id="adminBell" style="margin-left:auto;"><i class="fa-solid fa-bell"></i><span class="bell-count-badge" id="adminBellDot" style="display:none;"></span></div>
+            <a href="profile.html"><img class="topbar-avatar" src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" alt="me" /></a>
+        </header>
+
+        <div class="app-content">
+            <div class="grid" style="grid-template-columns:1fr 1fr;align-items:start;" id="stGrid">
+
+                <!-- General -->
+                <div class="card">
+                    <div class="card-title">General</div>
+                    <div class="field"><label>Platform name</label><input type="text" value="BNPlatform"></div>
+                    <div class="field"><label>Support email</label><input type="email" value="support@bnplatform.com"></div>
+                    <div class="field"><label>Default city</label><input type="text" value="Mumbai"></div>
+                    <button class="btn btn-primary" onclick="alert('Settings saved!')"><i class="fa-solid fa-check"></i> Save</button>
+                </div>
+
+                <!-- Integrations -->
+                <div class="card">
+                    <div class="card-title">Integrations</div>
+                    <div class="field"><label>Google Maps API key</label><input type="password" placeholder="Enter your Maps API key"></div>
+                    <div class="field"><label>Payment gateway</label>
+                        <select><option>Razorpay</option><option>Stripe</option><option>Disabled (Phase 4)</option></select>
+                    </div>
+                    <button class="btn btn-outline btn-sm"><i class="fa-solid fa-plug"></i> Test connection</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/admin-bell.js"></script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

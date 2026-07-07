@@ -1,0 +1,197 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Profile — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="edit-profile.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Edit Profile</h1><p>Update your professional details</p></div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+            <form id="editProfileForm">
+                <div class="grid" style="grid-template-columns:1fr 320px;align-items:start;" id="editGrid">
+
+                    <div style="display:flex;flex-direction:column;gap:18px;">
+                        <!-- Personal -->
+                        <div class="card">
+                            <div class="card-title">Personal information</div>
+                            <div class="form-grid">
+                                <div class="field"><label>First name</label><input type="text" id="epFirstName"></div>
+                                <div class="field"><label>Last name</label><input type="text" id="epLastName"></div>
+                                <div class="field"><label>Email address</label><input type="email" id="epEmail" readonly style="background:var(--bg);"></div>
+                                <div class="field"><label>Phone number</label><input type="tel" id="epPhone"></div>
+                                <div class="field full"><label>Bio</label><textarea id="epBio" rows="4" maxlength="500" placeholder="Tell people about yourself..."></textarea><small id="epBioCount" style="color:var(--muted,#888);float:right">0 / 500</small></div>
+                            </div>
+                        </div>
+
+                        <!-- Professional -->
+                        <div class="card">
+                            <div class="card-title">Professional details</div>
+                            <div class="form-grid">
+                                <div class="field"><label>Profession / title</label><select id="epProfession"></select></div>
+                                <div class="field"><label>Headline</label><input type="text" id="epHeadline" placeholder="e.g. Helping startups stay compliant"></div>
+                                <div class="field"><label>State</label><input type="text" id="epState"></div>
+                                <div class="field"><label>City</label><input type="text" id="epCity"></div>
+                                <div class="field full"><label>Avatar URL <span class="muted">(optional)</span></label><input type="text" id="epAvatar" placeholder="https://..."></div>
+                            </div>
+                        </div>
+
+                        <!-- Social -->
+                        <div class="card">
+                            <div class="card-title">Social &amp; links</div>
+                            <div class="form-grid">
+                                <div class="field"><label><i class="fa-brands fa-linkedin"></i> LinkedIn</label><input type="text" placeholder="linkedin.com/in/..."></div>
+                                <div class="field"><label><i class="fa-solid fa-globe"></i> Website</label><input type="text" placeholder="https://"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photo + save -->
+                    <div style="display:flex;flex-direction:column;gap:18px;">
+                        <div class="card" style="text-align:center;">
+                            <div class="card-title" style="justify-content:center;">Profile photo</div>
+                            <img id="epPhoto" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" style="width:110px;height:110px;border-radius:50%;object-fit:cover;margin:6px auto 14px;">
+                            <div style="display:flex;gap:8px;justify-content:center;">
+                                <input type="file" id="epPhotoFile" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
+                                <button type="button" id="epPhotoChange" class="btn btn-outline btn-sm"><i class="fa-solid fa-upload"></i> Change</button>
+                                <button type="button" id="epPhotoRemove" class="btn btn-ghost btn-sm">Remove</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Visibility</div>
+                            <label style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:12px;">Show on map <input type="checkbox" checked style="accent-color:var(--red);width:16px;height:16px;"></label>
+                            <label style="display:flex;justify-content:space-between;align-items:center;font-size:13px;">Show contact to free users <input type="checkbox" style="accent-color:var(--red);width:16px;height:16px;"></label>
+                        </div>
+                        <div style="display:flex;gap:10px;">
+                            <button type="submit" class="btn btn-primary" style="flex:1;"><i class="fa-solid fa-check"></i> Save changes</button>
+                            <a href="profile.html" class="btn btn-outline">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/professions.js"></script>
+    <script>
+        BnpProfessions.fillSelect(document.getElementById("epProfession"), { placeholder: "Select profession" });
+
+        async function prefill() {
+            try {
+                const me = await Api.users.me();
+                const parts = (me.fullName || "").split(" ");
+                document.getElementById("epFirstName").value = parts[0] || "";
+                document.getElementById("epLastName").value = parts.slice(1).join(" ") || "";
+                document.getElementById("epEmail").value = me.email || "";
+                document.getElementById("epPhone").value = me.phone || "";
+                document.getElementById("epBio").value = me.bio || "";
+                document.getElementById("epProfession").value = me.profession || "";
+                document.getElementById("epHeadline").value = me.headline || "";
+                document.getElementById("epState").value = me.state || "";
+                document.getElementById("epCity").value = me.city || "";
+                document.getElementById("epAvatar").value = me.avatarUrl || "";
+                const photo = document.getElementById("epPhoto");
+                if (photo) photo.src = me.avatarUrl ? absoluteUrl(me.avatarUrl) : BnpUtils.avatar(me.fullName);
+            } catch (e) { console.warn(e); }
+        }
+
+        const epBio = document.getElementById("epBio");
+        const epBioCount = document.getElementById("epBioCount");
+        epBio.addEventListener("input", () => {
+            epBioCount.textContent = `${epBio.value.length} / 500`;
+            epBioCount.style.color = epBio.value.length >= 500 ? "red" : "var(--muted,#888)";
+        });
+
+        document.getElementById("editProfileForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const fullName = [document.getElementById("epFirstName").value.trim(), document.getElementById("epLastName").value.trim()].filter(Boolean).join(" ");
+            const btn = e.target.querySelector("button[type=submit]");
+            if (epBio.value.trim().length > 500) {
+                BnpUtils.toast("Bio must be 500 characters or fewer.", "error");
+                return;
+            }
+            BnpUtils.loading(btn, true, "Saving…");
+            try {
+                const updated = await Api.users.updateMe({
+                    fullName,
+                    phone: document.getElementById("epPhone").value.trim(),
+                    bio: document.getElementById("epBio").value.trim(),
+                    profession: document.getElementById("epProfession").value.trim(),
+                    headline: document.getElementById("epHeadline").value.trim(),
+                    state: document.getElementById("epState").value.trim(),
+                    city: document.getElementById("epCity").value.trim(),
+                    avatarUrl: document.getElementById("epAvatar").value.trim()
+                });
+                // keep cached name + avatar in sync for the sidebar/topbar
+                const cached = BnpStorage.getUser();
+                BnpStorage.setUser({ ...cached, fullName: updated.fullName, avatarUrl: updated.avatarUrl });
+                BnpUtils.toast("Profile saved successfully!", "success");
+                setTimeout(() => (location.href = "profile.html"), 700);
+            } catch (err) {
+                BnpUtils.loading(btn, false);
+                BnpUtils.toast(err.message, "error");
+            }
+        });
+
+        // --- Real avatar upload (stores the file on the server, fills the URL field) ---
+        function absoluteUrl(u) {
+            if (!u) return u;
+            return /^https?:\/\//i.test(u) ? u : (window.BNP_CONFIG.API_BASE_URL.replace(/\/$/, "") + u);
+        }
+        const photoFile = document.getElementById("epPhotoFile");
+        document.getElementById("epPhotoChange").addEventListener("click", () => photoFile.click());
+        document.getElementById("epPhotoRemove").addEventListener("click", () => {
+            document.getElementById("epAvatar").value = "";
+            document.getElementById("epPhoto").src = BnpUtils.avatar(
+                [document.getElementById("epFirstName").value, document.getElementById("epLastName").value].join(" ").trim());
+        });
+        photoFile.addEventListener("change", async () => {
+            const file = photoFile.files && photoFile.files[0];
+            if (!file) return;
+            const changeBtn = document.getElementById("epPhotoChange");
+            BnpUtils.loading(changeBtn, true, "Uploading…");
+            try {
+                const res = await Api.files.upload(file, "avatars");
+                document.getElementById("epAvatar").value = res.url;
+                document.getElementById("epPhoto").src = absoluteUrl(res.url);
+                BnpUtils.toast("Photo uploaded — click Save to apply.", "success");
+            } catch (err) {
+                BnpUtils.toast(err.message, "error");
+            } finally {
+                BnpUtils.loading(changeBtn, false);
+                photoFile.value = "";
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", () => { if (window.BnpStorage.isAuthenticated()) prefill(); });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

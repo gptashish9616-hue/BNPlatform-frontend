@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Profile — BNPlatform Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="profile.css">
+</head>
+
+<body class="app" data-require="admin">
+
+    <div id="sidebar-container" data-shell="admin"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>My Profile</h1><p>Your admin account details</p></div>
+            <div class="topbar-icon" id="adminBell" style="margin-left:auto;"><i class="fa-solid fa-bell"></i><span class="bell-count-badge" id="adminBellDot" style="display:none;"></span></div>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <!-- PROFILE HEADER -->
+            <div class="card ap-header-card" style="padding:0;overflow:hidden;margin-bottom:18px;">
+                <div class="ap-cover"></div>
+                <div style="padding:0 24px 22px;">
+                    <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px;margin-top:-44px;">
+                        <div style="position:relative;flex-shrink:0;">
+                            <img id="apAvatar" src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" alt="avatar"
+                                style="width:96px;height:96px;border-radius:50%;border:4px solid #fff;object-fit:cover;display:block;" />
+                            <span class="ap-shield-badge" title="Admin account"><i class="fa-solid fa-shield-halved"></i></span>
+                        </div>
+                        <div style="flex:1;min-width:200px;padding-bottom:4px;">
+                            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                                <h2 id="apName" style="margin:0;font-size:22px;font-weight:800;">—</h2>
+                                <span class="badge badge-red" id="apRole"><i class="fa-solid fa-user-shield"></i> —</span>
+                            </div>
+                            <p class="muted" id="apEmail" style="margin:4px 0 0;">—</p>
+                        </div>
+                        <div style="padding-bottom:4px;">
+                            <a href="edit-profile.html" class="btn btn-outline"><i class="fa-solid fa-pen"></i> Edit profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid" style="grid-template-columns:1.7fr 1fr;" id="adminProfileGrid">
+
+                <!-- LEFT -->
+                <div style="display:flex;flex-direction:column;gap:18px;">
+
+                    <!-- ACCOUNT DETAILS (read-only) -->
+                    <div class="card">
+                        <div class="card-title">Account details</div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Full name</span><strong id="apFullName">—</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Email address</span><strong id="apEmailInput">—</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;"><span class="muted">Phone number</span><strong id="apPhone">—</strong></div>
+                    </div>
+
+                    <!-- SECURITY -->
+                    <div class="card">
+                        <div class="card-title">Account security</div>
+                        <p class="muted" style="font-size:13px;line-height:1.7;margin-bottom:14px;">Send yourself a password reset link by email. Use this if you'd like to change your admin password.</p>
+                        <button class="btn btn-outline btn-sm" id="apResetPwBtn" onclick="sendPasswordReset()"><i class="fa-solid fa-key"></i> Send password reset link</button>
+                    </div>
+                </div>
+
+                <!-- RIGHT -->
+                <div style="display:flex;flex-direction:column;gap:18px;">
+                    <div class="card">
+                        <div class="card-title">Account info</div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Role</span><strong id="apStatRole">—</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Status</span><strong id="apStatStatus">—</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;"><span class="muted">Admin since</span><strong id="apStatSince">—</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/admin-bell.js"></script>
+    <script>
+        const ROLE_LABEL = { SUPER_ADMIN: "Super Admin", SUB_ADMIN: "Admin", PREMIUM_USER: "Premium", FREE_USER: "Free" };
+
+        function absoluteUrl(u) {
+            if (!u) return u;
+            return /^https?:\/\//i.test(u) ? u : (window.BNP_CONFIG.API_BASE_URL.replace(/\/$/, "") + u);
+        }
+
+        let currentAdmin = null;
+
+        async function loadAdminProfile() {
+            try {
+                const me = await Api.users.me();
+                currentAdmin = me;
+                const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+                set("apName", me.fullName || "Admin");
+                set("apEmail", me.email || "—");
+                document.getElementById("apRole").innerHTML = `<i class="fa-solid fa-user-shield"></i> ${ROLE_LABEL[me.role] || "Admin"}`;
+
+                const avatarSrc = me.avatarUrl ? absoluteUrl(me.avatarUrl) : BnpUtils.avatarFor(me.avatarUrl, me.fullName);
+                document.getElementById("apAvatar").src = avatarSrc;
+
+                set("apFullName", me.fullName || "—");
+                set("apEmailInput", me.email || "—");
+                set("apPhone", me.phone || "—");
+
+                set("apStatRole", ROLE_LABEL[me.role] || "Admin");
+                set("apStatStatus", me.status || "ACTIVE");
+                set("apStatSince", BnpUtils.date(me.createdAt));
+            } catch (e) { console.warn(e); }
+        }
+
+        async function sendPasswordReset() {
+            if (!currentAdmin || !currentAdmin.email) return;
+            const btn = document.getElementById("apResetPwBtn");
+            BnpUtils.loading(btn, true, "Sending…");
+            try {
+                await Api.auth.forgotPassword({ email: currentAdmin.email });
+                BnpUtils.toast("Password reset link sent to " + currentAdmin.email, "success");
+            } catch (err) {
+                BnpUtils.toast(err.message, "error");
+            } finally {
+                BnpUtils.loading(btn, false);
+            }
+        }
+        window.sendPasswordReset = sendPasswordReset;
+
+        document.addEventListener("DOMContentLoaded", () => { if (window.BnpStorage.isAuthenticated()) loadAdminProfile(); });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

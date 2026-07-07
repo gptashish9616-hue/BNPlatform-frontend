@@ -1,0 +1,788 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Membership Management — BNPlatform Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+        <link rel="stylesheet" href="membership-management.css">
+</head>
+
+<body class="app" data-require="admin">
+
+    <div id="sidebar-container" data-shell="admin"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>Membership Management</h1>
+                <p>Plans, pricing &amp; subscribers</p>
+            </div>
+            <div class="topbar-icon" id="adminBell" style="margin-left:auto;"><i class="fa-solid fa-bell"></i><span class="bell-count-badge" id="adminBellDot" style="display:none;"></span></div>
+            <a href="profile.html">
+                <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" alt="me" />
+            </a>
+        </header>
+
+        <div class="app-content">
+
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb" style="font-size:13px;color:var(--muted);margin-bottom:18px;display:flex;align-items:center;gap:6px;">
+                <i class="fa-solid fa-house" style="color:var(--red);"></i>
+                <span>Home</span>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span>Admin</span>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span style="color:var(--text);font-weight:600;">Membership Management</span>
+            </nav>
+
+            <!-- Stats — 4 cards -->
+            <div class="grid grid-4" style="margin-bottom:18px;">
+
+                <div class="stat stat-clickable" onclick="openSubModal('purchased')" title="View purchased subscription details">
+                    <div class="stat-top">
+                        <div class="stat-icon si-green"><i class="fa-solid fa-circle-check"></i></div>
+                    </div>
+                    <div class="stat-num" id="mmActive">—</div>
+                    <div class="stat-lbl">Active subscriptions</div>
+                    <div class="stat-hint"><i class="fa-solid fa-arrow-up-right-from-square"></i> View details</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-top">
+                        <div class="stat-icon si-amber"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    </div>
+                    <div class="stat-num" id="mmExpired" style="color:var(--amber);">—</div>
+                    <div class="stat-lbl">Expired / Cancelled</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-top">
+                        <div class="stat-icon si-purple"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                    </div>
+                    <div class="stat-num" id="mmRevenue" style="color:var(--green);">—</div>
+                    <div class="stat-lbl">Total revenue</div>
+                </div>
+
+                <div class="stat stat-clickable" onclick="openSubModal()" title="View all plans & subscribers">
+                    <div class="stat-top">
+                        <div class="stat-icon si-red"><i class="fa-solid fa-crown"></i></div>
+                    </div>
+                    <div class="stat-num" id="mmPlans">—</div>
+                    <div class="stat-lbl">Plans</div>
+                    <div class="stat-hint"><i class="fa-solid fa-arrow-up-right-from-square"></i> View details</div>
+                </div>
+
+            </div>
+
+            <!-- Plans table -->
+            <div class="card" style="margin-bottom:18px;">
+                <div class="card-title">
+                    Plans
+                    <span style="font-size:12px;color:var(--muted);font-weight:500;">
+                        Click subscriber count to filter details
+                    </span>
+                </div>
+                <div class="table-wrap">
+                    <table class="tbl tbl-stack">
+                        <thead>
+                            <tr>
+                                <th>Plan</th>
+                                <th>Price</th>
+                                <th>Billing</th>
+                                <th>Features</th>
+                                <th>Subscribers</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mmPlanRows">
+                            <tr><td colspan="7" class="muted" style="text-align:center;padding:28px;">
+                                <i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;"></i>Loading…
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Subscribers table -->
+            <div class="card">
+                <div class="card-title">
+                    Subscribers
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <select id="mmPlanFilter" onchange="filterSubscribers()"
+                            style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;font-family:inherit;outline:none;background:#fff;">
+                            <option value="">All plans</option>
+                        </select>
+                        <select id="mmStatusFilter" onchange="filterSubscribers()"
+                            style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;font-family:inherit;outline:none;background:#fff;">
+                            <option value="">All statuses</option>
+                            <option value="ACTIVE">Active</option>
+                            <option value="EXPIRED">Expired</option>
+                            <option value="CANCELLED">Cancelled</option>
+                        </select>
+                        <input type="text" id="mmSubSearch" placeholder="Search users…" oninput="filterSubscribers()"
+                            style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;font-family:inherit;outline:none;width:180px;">
+                        <button class="btn btn-ghost btn-sm" onclick="exportSubscribersCSV()" title="Export to CSV">
+                            <i class="fa-solid fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="tbl tbl-stack">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Plan</th>
+                                <th>Purchased On</th>
+                                <th>Valid Until</th>
+                                <th>Days Left</th>
+                                <th>City</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mmSubRows">
+                            <tr><td colspan="8" class="muted" style="text-align:center;padding:28px;">
+                                <i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;"></i>Loading…
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;font-size:13px;">
+                    <span class="muted" id="mmSubCount"></span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ====== SUBSCRIPTION DETAIL MODAL ====== -->
+    <div class="mm-overlay" id="mmOverlay" onclick="handleOverlayClick(event)">
+        <div class="mm-modal">
+
+            <div class="mm-modal-head">
+                <div class="mm-plan-icon"><i class="fa-solid fa-crown"></i></div>
+                <div style="flex:1;">
+                    <h3>Subscription Details</h3>
+                    <p>User &bull; Plan purchased &bull; Purchase date &bull; Validity</p>
+                </div>
+                <button class="mm-close-btn" onclick="closeSubModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="mm-modal-filters">
+                <select id="mmModalPlanFilter" onchange="filterModal(true)" style="min-width:140px;">
+                    <option value="">All plans</option>
+                </select>
+                <select id="mmModalStatusFilter" onchange="filterModal(true)" style="min-width:130px;">
+                    <option value="" selected>All statuses</option>
+                    <option value="ACTIVE">Active</option>
+                    <option value="EXPIRED">Expired</option>
+                    <option value="CANCELLED">Cancelled</option>
+                </select>
+                <input type="text" id="mmModalSearch" placeholder="Search by name or email…" oninput="filterModal(true)">
+            </div>
+
+            <div class="mm-modal-body">
+                <div class="table-wrap" style="margin:0;">
+                    <table class="tbl tbl-stack">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Plan</th>
+                                <th>Amount</th>
+                                <th>Purchased On</th>
+                                <th>Valid Until</th>
+                                <th>Days Left</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mmModalRows">
+                            <tr><td colspan="7" class="muted" style="text-align:center;padding:32px;">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mm-modal-foot">
+                <span id="mmModalCount">—</span>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn btn-ghost btn-sm" onclick="exportModalCSV()" title="Export visible rows to CSV">
+                        <i class="fa-solid fa-download"></i> Export
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="closeSubModal()">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/admin-bell.js"></script>
+    <script>
+        // ── shared state ──────────────────────────────────────────
+        let allSubscribers   = [];
+        let allSubDetails    = [];
+        let subDetailsLoaded = false;
+        let allPlans         = [];
+        let lastModalRows    = [];
+        let modalMode        = null; // 'purchased' = only paid subscribers
+
+        // ── helpers ───────────────────────────────────────────────
+        const normRole = r => {
+            const role = (r || "FREE_USER").toUpperCase();
+            if (role === "PREMIUM")  return "PREMIUM_USER";
+            if (role === "ADMIN")    return "SUB_ADMIN";
+            if (role === "USER" || role === "BASIC") return "FREE_USER";
+            return role;
+        };
+
+        function getPlanLabel(user) {
+            if (user.membershipType) return user.membershipType;
+            const role = normRole(user.role);
+            if (role === "SUPER_ADMIN" || role === "SUB_ADMIN") return "Admin";
+            if (role === "PREMIUM_USER") return "Premium";
+            return "Free";
+        }
+
+        function getPlanBadge(planLabel) {
+            const l = (planLabel || "").toLowerCase();
+            if (l.includes("annual"))  return "badge-amber";
+            if (l.includes("premium")) return "badge-amber";
+            if (l === "admin")         return "badge-red";
+            return "badge-gray";
+        }
+
+        function daysLeft(endDate) {
+            if (!endDate) return null;
+            return Math.ceil((new Date(endDate) - Date.now()) / 86400000);
+        }
+
+        function validityClass(days) {
+            if (days === null)  return "";
+            if (days < 0)   return "validity-exp";
+            if (days <= 7)  return "validity-soon";
+            return "validity-ok";
+        }
+
+        function daysLeftText(days) {
+            if (days === null)  return "—";
+            if (days < 0)   return `Expired ${Math.abs(days)}d ago`;
+            if (days === 0) return "Expires today";
+            return `${days} day${days !== 1 ? "s" : ""} left`;
+        }
+
+        // ── Subscribers table (main page) ─────────────────────────
+        function filterSubscribers() {
+            const q      = (document.getElementById("mmSubSearch").value  || "").trim().toLowerCase();
+            const plan   = (document.getElementById("mmPlanFilter").value || "").toLowerCase();
+            const status = (document.getElementById("mmStatusFilter").value || "").toUpperCase();
+
+            const subMap = {};
+            allSubDetails.forEach(s => { const uid = s.userId || s.user?.id; if (uid) subMap[uid] = s; });
+
+            const list = allSubscribers.filter(u => {
+                if (plan && getPlanLabel(u).toLowerCase() !== plan) return false;
+                if (status) {
+                    const sub = subMap[u.id] || {};
+                    const st  = (sub.status || u.membershipStatus || u.status || "ACTIVE").toUpperCase();
+                    if (st !== status) return false;
+                }
+                const text = [u.fullName, u.email, u.city].join(" ").toLowerCase();
+                return !q || text.includes(q);
+            });
+
+            renderSubscribers(list, subMap);
+        }
+
+        function renderSubscribers(list, subMap) {
+            const tbody = document.getElementById("mmSubRows");
+            document.getElementById("mmSubCount").textContent =
+                `Showing ${list.length} of ${allSubscribers.length} subscribers`;
+
+            if (!list.length) {
+                tbody.innerHTML = `<tr><td colspan="8">
+                    <div class="empty-state">
+                        <i class="fa-solid fa-users"></i>
+                        <h4>No subscribers found</h4>
+                        <p>Try adjusting your search or filter criteria.</p>
+                    </div>
+                </td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(u => {
+                const planLabel = getPlanLabel(u);
+                const status    = (u.status || "ACTIVE").toUpperCase();
+                const sub       = subMap[u.id] || {};
+                const startDate = sub.startDate || sub.createdAt || u.createdAt || null;
+                const endDate   = sub.endDate   || sub.expiryDate || null;
+                const days      = daysLeft(endDate);
+
+                return `<tr>
+                    <td>
+                        <div class="cell-user">
+                            <img src="${BnpUtils.avatarFor(u.avatarUrl, u.fullName)}" alt="">
+                            <div><strong>${BnpUtils.escape(u.fullName || "—")}</strong></div>
+                        </div>
+                    </td>
+                    <td data-label="Email" class="muted">${BnpUtils.escape(u.email || "—")}</td>
+                    <td data-label="Plan"><span class="badge ${getPlanBadge(planLabel)}">${BnpUtils.escape(planLabel)}</span></td>
+                    <td data-label="Purchased On" class="muted">${BnpUtils.date(startDate)}</td>
+                    <td data-label="Valid Until" class="muted">${BnpUtils.date(endDate)}</td>
+                    <td data-label="Days Left" class="${validityClass(days)}">${endDate ? daysLeftText(days) : "—"}</td>
+                    <td data-label="City" class="muted">${BnpUtils.escape(u.city || "—")}</td>
+                    <td data-label="Status">${BnpUtils.statusBadge(status)}</td>
+                </tr>`;
+            }).join("");
+        }
+
+        // ── Plan status toggle ────────────────────────────────────
+        async function togglePlanStatus(planId, currentActive) {
+            try {
+                await Api.request(`/api/admin/plans/${planId}/status`, {
+                    method: "PUT",
+                    body: { active: !currentActive }
+                });
+                BnpUtils.toast(`Plan ${!currentActive ? "enabled" : "disabled"}`, "success");
+                reloadPage();
+            } catch (e) {
+                BnpUtils.toast(e.message.includes("404") ? "Plan status toggle not supported by backend yet." : e.message, "error");
+            }
+        }
+
+        function reloadPage() {
+            // Re-fetch plans and users to refresh the table
+            Promise.all([Api.subscription.plans(), Api.admin.users()]).then(([plans, users]) => {
+                allPlans       = plans;
+                allSubscribers = users;
+                renderPlans(plans, users);
+                filterSubscribers();
+            }).catch(() => {});
+        }
+
+        // ── Plan rendering ────────────────────────────────────────
+        function renderPlans(plans, users) {
+            const planCountMap = {};
+            users.forEach(u => { const l = getPlanLabel(u); planCountMap[l] = (planCountMap[l] || 0) + 1; });
+
+            const tbody = document.getElementById("mmPlanRows");
+            if (!plans.length) {
+                tbody.innerHTML = `<tr><td colspan="7">
+                    <div class="empty-state">
+                        <i class="fa-solid fa-crown"></i>
+                        <h4>No plans found</h4>
+                        <p>No membership plans have been configured yet.</p>
+                    </div>
+                </td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = plans.map(p => {
+                const count    = planCountMap[p.name] ?? 0;
+                const feats    = (p.features || "").split(/\n+/).filter(Boolean);
+                const featHtml = feats.length
+                    ? `<div class="feature-pills">${feats.map(f => `<span class="feature-pill">${BnpUtils.escape(f)}</span>`).join("")}</div>`
+                    : `<span class="muted">—</span>`;
+
+                return `<tr>
+                    <td>
+                        <div class="cell-user">
+                            <div class="stat-icon si-red" style="width:34px;height:34px;border-radius:8px;font-size:13px;flex-shrink:0;">
+                                <i class="fa-solid fa-crown"></i>
+                            </div>
+                            <strong>${BnpUtils.escape(p.name)}</strong>
+                        </div>
+                    </td>
+                    <td data-label="Price"><strong>${BnpUtils.money(p.price)}</strong></td>
+                    <td data-label="Billing" class="muted">${BnpUtils.escape((p.billingCycle || "MONTHLY").toLowerCase())}</td>
+                    <td data-label="Features" style="max-width:220px;">${featHtml}</td>
+                    <td data-label="Subscribers">
+                        <span style="cursor:pointer;" onclick="openSubModalFor('${BnpUtils.escape(p.name)}')">
+                            <strong>${count}</strong>
+                            <span class="muted"> user${count !== 1 ? "s" : ""}</span>
+                            ${count > 0 ? '<i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px;color:var(--red);margin-left:4px;"></i>' : ""}
+                        </span>
+                    </td>
+                    <td data-label="Status">
+                        ${p.active
+                            ? `<span class="badge badge-green"><i class="fa-solid fa-circle" style="font-size:7px;"></i> Live</span>`
+                            : `<span class="badge badge-gray"><i class="fa-solid fa-circle" style="font-size:7px;"></i> Off</span>`}
+                    </td>
+                    <td>
+                        <button class="plan-toggle ${p.active ? "live" : "off"}"
+                            onclick="togglePlanStatus(${p.id}, ${p.active})"
+                            title="${p.active ? "Disable plan" : "Enable plan"}">
+                            <i class="fa-solid ${p.active ? "fa-ban" : "fa-circle-check"}"></i>
+                            ${p.active ? "Disable" : "Enable"}
+                        </button>
+                    </td>
+                </tr>`;
+            }).join("");
+        }
+
+        // ── Modal ─────────────────────────────────────────────────
+        function openSubModal(mode) {
+            modalMode = mode || null;
+            document.getElementById("mmOverlay").classList.add("open");
+            document.body.style.overflow = "hidden";
+
+            // When opened from "Active subscriptions" card → pre-filter to paid+active only
+            if (mode === 'purchased') {
+                document.getElementById("mmModalStatusFilter").value = "ACTIVE";
+                document.getElementById("mmModalPlanFilter").value   = "";
+                document.getElementById("mmModalSearch").value       = "";
+                // Update subtitle to reflect the filter
+                document.querySelector(".mm-modal-head p").textContent =
+                    "Showing only purchased (paid) memberships — Active";
+            } else {
+                // Reset to show all when opened from Plans card
+                document.getElementById("mmModalStatusFilter").value = "";
+                document.getElementById("mmModalPlanFilter").value   = "";
+                document.getElementById("mmModalSearch").value       = "";
+                document.querySelector(".mm-modal-head p").textContent =
+                    "Showing only purchased (paid) memberships — All statuses";
+            }
+
+            if (!subDetailsLoaded) loadSubDetails();
+            else filterModal();
+        }
+
+        function closeSubModal() {
+            document.getElementById("mmOverlay").classList.remove("open");
+            document.body.style.overflow = "";
+        }
+
+        function handleOverlayClick(e) {
+            if (e.target === document.getElementById("mmOverlay")) closeSubModal();
+        }
+
+        function normalizeSubResponse(raw) {
+            if (!raw) return [];
+            if (Array.isArray(raw)) return raw;
+            if (Array.isArray(raw.content)) return raw.content;
+            if (Array.isArray(raw.subscriptions)) return raw.subscriptions;
+            if (Array.isArray(raw.data)) return raw.data;
+            return [];
+        }
+
+        async function loadSubDetails() {
+            document.getElementById("mmModalRows").innerHTML =
+                `<tr><td colspan="7" class="muted" style="text-align:center;padding:32px;">
+                    <i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;"></i>Loading…</td></tr>`;
+
+            allSubDetails = [];
+
+            try {
+                const raw1 = await Api.admin.subscriptions();
+                allSubDetails = normalizeSubResponse(raw1);
+            } catch (_) {}
+
+            if (!allSubDetails.length) {
+                try {
+                    const token   = window.BnpStorage?.getToken();
+                    const baseUrl = (window.BNP_CONFIG?.API_BASE_URL || "").replace(/\/$/, "");
+                    const res     = await fetch(baseUrl + "/api/admin/subscriptions", {
+                        headers: { Accept: "application/json", ...(token ? { Authorization: "Bearer " + token } : {}) }
+                    });
+                    if (res.ok) allSubDetails = normalizeSubResponse(await res.json());
+                } catch (_) {}
+            }
+
+            if (!allSubDetails.length && allSubscribers.length) {
+                allSubDetails = allSubscribers.map(u => {
+                    const sub = u.subscription || u.currentSubscription || {};
+                    return {
+                        userId:    u.id,
+                        user:      u,
+                        planName:  u.membershipType || u.planName || sub.planName || getPlanLabel(u),
+                        startDate: sub.startDate  || u.membershipStart || u.subscriptionStart || u.purchaseDate || null,
+                        endDate:   sub.endDate    || u.membershipEnd   || u.subscriptionEnd   || u.expiryDate   || null,
+                        status:    (sub.status || u.membershipStatus || u.status || "ACTIVE").toUpperCase()
+                    };
+                });
+            }
+
+            subDetailsLoaded = true;
+
+            const planSet = new Set(allSubDetails.map(s => s.planName || s.plan?.name || getPlanLabel(s.user || {})));
+            const sel = document.getElementById("mmModalPlanFilter");
+            while (sel.options.length > 1) sel.remove(1);
+            [...planSet].sort().forEach(name => {
+                const opt = document.createElement("option");
+                opt.value = name.toLowerCase();
+                opt.textContent = name;
+                sel.appendChild(opt);
+            });
+
+            filterModal();
+        }
+
+        function filterModal(userTriggered) {
+            if (userTriggered) modalMode = null;
+            const q      = (document.getElementById("mmModalSearch").value      || "").trim().toLowerCase();
+            const plan   = (document.getElementById("mmModalPlanFilter").value  || "").toLowerCase();
+            const status = (document.getElementById("mmModalStatusFilter").value || "").toUpperCase();
+
+            const userMap = {};
+            allSubscribers.forEach(u => { userMap[u.id] = u; });
+
+            let list = allSubDetails.map(s => ({
+                ...s,
+                _user: s.user || userMap[s.userId] || userMap[s.user_id] || userMap[s.memberId] || {}
+            }));
+
+            list = list.filter(s => {
+                // Use USER's actual plan (role/membershipType) for accurate plan detection
+                // Subscription record's planName may be stale/incorrect from API
+                const userPlan  = getPlanLabel(s._user).toLowerCase();
+                const recPlan   = (s.planName || s.plan?.name || "").toLowerCase();
+                // Effective plan: prefer non-free value from either source
+                const planLabel = (recPlan && recPlan !== 'free') ? recPlan : (userPlan || recPlan || 'free');
+
+                // Always show only purchased (paid) plan users — never free or admin
+                if (userPlan === 'free' || userPlan === 'admin') return false;
+
+                if (plan && planLabel !== plan && userPlan !== plan) return false;
+
+                const st = (s.status || s._user?.status || "ACTIVE").toUpperCase();
+                // In purchased mode: treat any non-terminal status as "ACTIVE"
+                if (status) {
+                    if (status === "ACTIVE" && modalMode === 'purchased') {
+                        if (["EXPIRED", "CANCELLED", "DISABLED", "INACTIVE"].includes(st)) return false;
+                    } else if (st !== status) return false;
+                }
+
+                const text = [s._user.fullName, s._user.email, s._user.city, planLabel].join(" ").toLowerCase();
+                return !q || text.includes(q);
+            });
+
+            lastModalRows = list;
+            renderModal(list);
+        }
+
+        function renderModal(list) {
+            document.getElementById("mmModalCount").textContent =
+                `${list.length} subscription${list.length !== 1 ? "s" : ""}`;
+
+            const tbody = document.getElementById("mmModalRows");
+            if (!list.length) {
+                tbody.innerHTML = `<tr><td colspan="7">
+                    <div class="empty-state">
+                        <i class="fa-solid fa-crown"></i>
+                        <h4>No subscriptions found</h4>
+                        <p>Try adjusting your filters.</p>
+                    </div>
+                </td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(s => {
+                const u         = s._user;
+                const userPlan  = getPlanLabel(u);
+                const recPlan   = s.planName || s.plan?.name || "";
+                // Prefer actual user plan if subscription record shows Free
+                const planLabel = (recPlan && recPlan.toLowerCase() !== 'free') ? recPlan : userPlan;
+                const startDate = s.startDate || s.purchaseDate || s.createdAt || u.membershipStart || u.subscriptionStart || null;
+                const endDate   = s.endDate   || s.expiryDate  || u.membershipEnd || u.subscriptionEnd || null;
+                const st        = (s.status   || u.membershipStatus || u.status || "ACTIVE").toUpperCase();
+                const days      = daysLeft(endDate);
+                const planObj   = allPlans.find(p => (p.name || "").toLowerCase() === planLabel.toLowerCase());
+                const amount    = s.amount ?? s.price ?? s.totalAmount ?? s.planPrice ?? planObj?.price ?? null;
+
+                return `<tr>
+                    <td>
+                        <div class="cell-user">
+                            <img src="${BnpUtils.avatarFor(u.avatarUrl, u.fullName)}" alt="" style="width:34px;height:34px;">
+                            <div>
+                                <strong>${BnpUtils.escape(u.fullName || "—")}</strong>
+                                <small style="display:block;font-size:11.5px;color:var(--muted);">${BnpUtils.escape(u.email || "—")}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td data-label="Plan"><span class="badge ${getPlanBadge(planLabel)}">${BnpUtils.escape(planLabel)}</span></td>
+                    <td data-label="Amount"><strong>${amount != null ? BnpUtils.money(amount) : "—"}</strong></td>
+                    <td data-label="Purchased On" class="muted">${startDate ? BnpUtils.date(startDate) : "—"}</td>
+                    <td data-label="Valid Until" class="muted">${endDate   ? BnpUtils.date(endDate)   : "—"}</td>
+                    <td data-label="Days Left" class="${validityClass(days)}">${endDate ? daysLeftText(days) : "—"}</td>
+                    <td data-label="Status">${BnpUtils.statusBadge(st)}</td>
+                </tr>`;
+            }).join("");
+        }
+
+        // ── CSV export helpers ────────────────────────────────────
+        function toCSV(headers, rows) {
+            const esc = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+            return [headers.map(esc).join(","), ...rows.map(r => r.map(esc).join(","))].join("\r\n");
+        }
+
+        function downloadCSV(csv, filename) {
+            const a = document.createElement("a");
+            a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+            a.download = filename;
+            a.click();
+        }
+
+        function exportSubscribersCSV() {
+            const subMap = {};
+            allSubDetails.forEach(s => { const uid = s.userId || s.user?.id; if (uid) subMap[uid] = s; });
+            const q      = (document.getElementById("mmSubSearch").value  || "").trim().toLowerCase();
+            const plan   = (document.getElementById("mmPlanFilter").value || "").toLowerCase();
+            const status = (document.getElementById("mmStatusFilter").value || "").toUpperCase();
+
+            const list = allSubscribers.filter(u => {
+                if (plan && getPlanLabel(u).toLowerCase() !== plan) return false;
+                if (status) {
+                    const sub = subMap[u.id] || {};
+                    const st  = (sub.status || u.membershipStatus || u.status || "ACTIVE").toUpperCase();
+                    if (st !== status) return false;
+                }
+                const text = [u.fullName, u.email, u.city].join(" ").toLowerCase();
+                return !q || text.includes(q);
+            });
+
+            const headers = ["Name", "Email", "Plan", "Purchased On", "Valid Until", "Days Left", "City", "Status"];
+            const rows = list.map(u => {
+                const sub   = subMap[u.id] || {};
+                const start = sub.startDate || sub.createdAt || u.createdAt || null;
+                const end   = sub.endDate   || sub.expiryDate || null;
+                const days  = daysLeft(end);
+                return [
+                    u.fullName || "", u.email || "", getPlanLabel(u),
+                    start ? BnpUtils.date(start) : "",
+                    end   ? BnpUtils.date(end)   : "",
+                    end   ? daysLeftText(days)   : "",
+                    u.city || "",
+                    (u.status || "ACTIVE").toUpperCase()
+                ];
+            });
+
+            downloadCSV(toCSV(headers, rows), "subscribers.csv");
+        }
+
+        function exportModalCSV() {
+            const headers = ["Name", "Email", "Plan", "Amount", "Purchased On", "Valid Until", "Days Left", "Status"];
+            const rows = lastModalRows.map(s => {
+                const u        = s._user;
+                const planLabel= s.planName || s.plan?.name || getPlanLabel(u);
+                const planObj  = allPlans.find(p => (p.name || "").toLowerCase() === planLabel.toLowerCase());
+                const amount   = s.amount ?? s.price ?? s.totalAmount ?? s.planPrice ?? planObj?.price ?? null;
+                const start    = s.startDate || s.createdAt || null;
+                const end      = s.endDate   || s.expiryDate || null;
+                const days     = daysLeft(end);
+                return [
+                    u.fullName || "", u.email || "", planLabel,
+                    amount != null ? BnpUtils.money(amount) : "",
+                    start ? BnpUtils.date(start) : "",
+                    end   ? BnpUtils.date(end)   : "",
+                    end   ? daysLeftText(days)   : "",
+                    (s.status || u.status || "ACTIVE").toUpperCase()
+                ];
+            });
+            downloadCSV(toCSV(headers, rows), "subscriptions.csv");
+        }
+
+        // ── Open modal pre-filtered to a plan ─────────────────────
+        function openSubModalFor(planName) {
+            openSubModal();
+            const sel = document.getElementById("mmModalPlanFilter");
+            const trySet = () => {
+                for (let i = 0; i < sel.options.length; i++) {
+                    if (sel.options[i].value === planName.toLowerCase()) {
+                        sel.value = planName.toLowerCase();
+                        filterModal();
+                        return;
+                    }
+                }
+                setTimeout(trySet, 150);
+            };
+            trySet();
+        }
+
+        // ── Page init ─────────────────────────────────────────────
+        document.addEventListener("DOMContentLoaded", async () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            try {
+                const [stats, plans, users] = await Promise.all([
+                    Api.dashboard.admin(),
+                    Api.subscription.plans(),
+                    Api.admin.users()
+                ]);
+
+                allPlans       = plans;
+                allSubscribers = users;
+
+                // Build sub map for expiry calculations
+                const subMap = {};
+                allSubDetails.forEach(s => { const uid = s.userId || s.user?.id; if (uid) subMap[uid] = s; });
+
+                // Expired / cancelled count from users
+                const expiredCount = users.filter(u => {
+                    const sub = subMap[u.id] || {};
+                    const st  = (sub.status || u.membershipStatus || u.status || "ACTIVE").toUpperCase();
+                    const end = sub.endDate || sub.expiryDate || u.membershipEnd || null;
+                    const expired = end && daysLeft(end) < 0;
+                    return st === "EXPIRED" || st === "CANCELLED" || expired;
+                }).length;
+
+                // Stats
+                document.getElementById("mmActive").textContent  = (stats.activeSubscriptions ?? 0).toLocaleString("en-IN");
+                document.getElementById("mmExpired").textContent = expiredCount.toLocaleString("en-IN");
+                document.getElementById("mmRevenue").textContent = BnpUtils.money(stats.totalRevenue);
+                document.getElementById("mmPlans").textContent   = plans.length;
+
+                renderPlans(plans, users);
+
+                // Populate main plan filter
+                const planNames = [...new Set(users.map(getPlanLabel))].sort();
+                const sel = document.getElementById("mmPlanFilter");
+                planNames.forEach(name => {
+                    const opt = document.createElement("option");
+                    opt.value = name.toLowerCase();
+                    opt.textContent = name;
+                    sel.appendChild(opt);
+                });
+
+                filterSubscribers();
+
+            } catch (e) {
+                console.warn(e);
+                const errHtml = `<tr><td colspan="8" class="muted" style="text-align:center;padding:28px;">${BnpUtils.escape(e.message)}</td></tr>`;
+                document.getElementById("mmPlanRows").innerHTML = errHtml.replace("colspan=\"8\"", "colspan=\"7\"");
+                document.getElementById("mmSubRows").innerHTML  = errHtml;
+            }
+        });
+
+        // Escape key
+        document.addEventListener("keydown", e => {
+            if (e.key === "Escape") closeSubModal();
+        });
+
+        // Expose globals
+        window.filterSubscribers  = filterSubscribers;
+        window.openSubModal       = openSubModal;
+        window.openSubModalFor    = openSubModalFor;
+        window.closeSubModal      = closeSubModal;
+        window.handleOverlayClick = handleOverlayClick;
+        window.filterModal        = filterModal;
+        window.togglePlanStatus   = togglePlanStatus;
+        window.exportSubscribersCSV = exportSubscribersCSV;
+        window.exportModalCSV     = exportModalCSV;
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

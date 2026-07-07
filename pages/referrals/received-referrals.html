@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Referrals Received — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>Business Referrals — Received</h1>
+                <p>Client opportunities referred to you</p>
+            </div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span
+                    class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff"
+                alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:22px;">
+                <a href="../dashboard/user-dashboard.html"
+                    style="color:var(--muted);display:flex;align-items:center;gap:5px;">
+                    <i class="fa-solid fa-house" style="color:var(--red);"></i> Home
+                </a>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span>Referrals</span>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span style="color:var(--text);font-weight:600;">Received Referrals</span>
+            </nav>
+
+            <!-- Locked state (free tier) -->
+            <div class="card" id="rcLocked" style="display:none;text-align:center;padding:54px 24px;">
+                <div style="font-size:38px;color:var(--red);margin-bottom:14px;"><i class="fa-solid fa-lock"></i></div>
+                <h3 style="margin:0 0 8px;font-size:17px;">Business Referrals is a Premium feature</h3>
+                <p class="muted" style="max-width:440px;margin:0 auto 20px;line-height:1.65;">Receiving and accepting business referrals is available to Premium members. Upgrade to start receiving client opportunities from your network.</p>
+                <a href="../membership/plans.html" class="btn btn-primary"><i class="fa-solid fa-crown"></i> Upgrade to Premium</a>
+            </div>
+
+            <div id="rcMain">
+                <!-- Stats -->
+                <div class="grid grid-4" style="margin-bottom:18px;">
+                    <div class="stat" data-no-anim>
+                        <div class="stat-num" id="rcTotal">0</div>
+                        <div class="stat-lbl">Total received</div>
+                    </div>
+                    <div class="stat" data-no-anim>
+                        <div class="stat-num" id="rcAccepted" style="color:var(--green);">0</div>
+                        <div class="stat-lbl">Accepted</div>
+                    </div>
+                    <div class="stat" data-no-anim>
+                        <div class="stat-num" id="rcPendingCount" style="color:var(--amber);">0</div>
+                        <div class="stat-lbl">Awaiting you</div>
+                    </div>
+                    <div class="stat" data-no-anim>
+                        <div class="stat-num" id="rcDeclined" style="color:var(--red);">0</div>
+                        <div class="stat-lbl">Declined</div>
+                    </div>
+                </div>
+
+                <!-- Pending actions -->
+                <div class="card" style="margin-bottom:18px;">
+                    <div class="card-title">
+                        <span>Awaiting your response</span>
+                        <span class="badge badge-amber" id="rcPendingBadge" style="display:none;"></span>
+                    </div>
+                    <div id="rcPending">
+                        <div class="list-item">
+                            <div class="li-body muted">Loading…</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History table -->
+                <div class="card">
+                    <div class="card-title">History</div>
+                    <div class="table-wrap">
+                        <table class="tbl tbl-stack">
+                            <thead>
+                                <tr>
+                                    <th>From</th>
+                                    <th>Client / opportunity</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="rcHistory">
+                                <tr>
+                                    <td colspan="5" class="muted" style="text-align:center;padding:28px;">Loading…</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        const referrerNames = {};
+
+        async function resolveReferrers(rows) {
+            const ids = [...new Set(rows.map(r => r.referrerId))];
+            await Promise.all(ids.map(async id => {
+                try { referrerNames[id] = (await Api.users.get(id)).fullName; }
+                catch (e) { referrerNames[id] = "Member"; }
+            }));
+        }
+
+        async function loadReceived() {
+            const pendingBox = document.getElementById("rcPending");
+            const historyBody = document.getElementById("rcHistory");
+            const pendingBadge = document.getElementById("rcPendingBadge");
+            try {
+                const rows = await Api.referrals.received();
+                await resolveReferrers(rows);
+
+                const accepted = rows.filter(r => ["ACCEPTED", "COMPLETED"].includes(r.status));
+                const pending = rows.filter(r => r.status === "PENDING");
+                const declined = rows.filter(r => ["REJECTED", "EXPIRED"].includes(r.status));
+
+                document.getElementById("rcTotal").textContent = rows.length;
+                document.getElementById("rcAccepted").textContent = accepted.length;
+                document.getElementById("rcPendingCount").textContent = pending.length;
+                document.getElementById("rcDeclined").textContent = declined.length;
+
+                // Pending badge
+                if (pending.length) {
+                    pendingBadge.textContent = pending.length;
+                    pendingBadge.style.display = "";
+                } else {
+                    pendingBadge.style.display = "none";
+                }
+
+                // Awaiting response section
+                if (pending.length) {
+                    pendingBox.innerHTML = pending.map(r => `
+                        <div class="list-item" data-id="${r.id}">
+                            <img src="${BnpUtils.avatar(referrerNames[r.referrerId])}" style="width:44px;height:44px;border-radius:50%;flex-shrink:0;">
+                            <div class="li-body">
+                                <strong>${BnpUtils.escape(referrerNames[r.referrerId] || "A member")} referred you a client</strong>
+                                <p>
+                                    ${r.clientName ? BnpUtils.escape(r.clientName) : "—"}
+                                    ${r.category ? " · <span style='color:var(--blue);font-weight:600;'>" + BnpUtils.escape(r.category) + "</span>" : ""}
+                                    · <span class="muted">${BnpUtils.date(r.createdAt)}</span>
+                                </p>
+                            </div>
+                            <div style="display:flex;gap:8px;flex-shrink:0;">
+                                <button class="btn btn-primary btn-sm" onclick="setStatus(${r.id},'ACCEPTED')">
+                                    <i class="fa-solid fa-check"></i> Accept
+                                </button>
+                                <button class="btn btn-outline btn-sm" onclick="setStatus(${r.id},'REJECTED')">Decline</button>
+                            </div>
+                        </div>`).join("");
+                } else {
+                    pendingBox.innerHTML = `
+                        <div class="empty" style="padding:30px 20px;">
+                            <i class="fa-solid fa-inbox" style="font-size:32px;"></i>
+                            <p style="margin:10px 0 0;">Nothing awaiting your response.</p>
+                        </div>`;
+                }
+
+                // History section
+                const history = rows.filter(r => r.status !== "PENDING");
+                if (history.length) {
+                    historyBody.innerHTML = history.map(r => `
+                        <tr>
+                            <td>
+                                <div class="cell-user">
+                                    <img src="${BnpUtils.avatar(referrerNames[r.referrerId])}">
+                                    <strong>${BnpUtils.escape(referrerNames[r.referrerId] || "Member")}</strong>
+                                </div>
+                            </td>
+                            <td data-label="Client / opportunity">
+                                <div>
+                                    <strong>${BnpUtils.escape(r.clientName || "—")}</strong>
+                                    ${r.category ? '<br><small class="muted">' + BnpUtils.escape(r.category) + '</small>' : ""}
+                                </div>
+                            </td>
+                            <td data-label="Status">
+                                ${BnpUtils.statusBadge(r.status)}
+                                ${r.status === "ACCEPTED" ? ` <button class="btn btn-ghost btn-sm" style="margin-left:6px;" onclick="setStatus(${r.id},'COMPLETED')"><i class="fa-solid fa-flag-checkered"></i> Complete</button>` : ""}
+                            </td>
+                            <td data-label="Date" class="muted">${BnpUtils.date(r.createdAt)}</td>
+                            <td><a href="referral-details.html?id=${r.id}" class="btn btn-ghost btn-sm">View</a></td>
+                        </tr>`).join("");
+                } else {
+                    historyBody.innerHTML = `
+                        <tr><td colspan="5" style="padding:0;">
+                            <div class="empty">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                <h3>No history yet</h3>
+                                <p>No referral history yet.</p>
+                            </div>
+                        </td></tr>`;
+                }
+            } catch (e) {
+                pendingBox.innerHTML = `<div class="list-item"><div class="li-body muted">Could not load referrals. Please try again.</div></div>`;
+                historyBody.innerHTML = "";
+            }
+        }
+
+        async function setStatus(id, status) {
+            try {
+                await Api.referrals.updateStatus(id, status);
+                BnpUtils.toast("Referral " + status.toLowerCase().replace("_", " "), "success");
+                loadReceived();
+            } catch (e) {
+                BnpUtils.toast(e.message, "error");
+            }
+        }
+        window.setStatus = setStatus;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            if (!window.BnpStorage.isPremium()) {
+                document.getElementById("rcMain").style.display = "none";
+                document.getElementById("rcLocked").style.display = "";
+                return;
+            }
+            loadReceived();
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

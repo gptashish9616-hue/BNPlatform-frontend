@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Post Requirement — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="create-requirement.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Post a Requirement</h1><p>Describe what you need — pros will accept it</p></div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a href="../dashboard/user-dashboard.html"><i class="fa-solid fa-house"></i> Home</a>
+                <span class="sep">&rsaquo;</span>
+                <span>Requirements</span>
+                <span class="sep">&rsaquo;</span>
+                <span class="bc-current">Create Requirement</span>
+            </nav>
+
+            <div class="grid" style="grid-template-columns:1fr 320px;align-items:start;" id="crqGrid">
+
+                <form class="card" id="requirementForm">
+                    <div class="card-title">Requirement details</div>
+
+                    <div class="field"><label>Title</label><input type="text" id="rqTitle" placeholder="e.g. Need a CA for GST filing"></div>
+
+                    <div class="form-grid">
+                        <div class="field"><label>Category</label>
+                            <select id="rqCategory"></select>
+                        </div>
+                        <div class="field"><label>Budget (optional)</label><input type="text" id="rqBudget" placeholder="₹ Approx budget"></div>
+                    </div>
+
+                    <div class="field"><label>Description</label>
+                        <textarea id="rqDescription" rows="5" placeholder="Describe the work, timeline, and any specific requirements..."></textarea>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="field"><label>Location</label><input type="text" id="rqCity" placeholder="City / Remote"></div>
+                        <div class="field"><label>Needed by</label><input type="date" id="rqNeededBy"></div>
+                    </div>
+
+                    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:16px;color:var(--muted);">
+                        <input type="checkbox" id="rqNotify" checked style="accent-color:var(--red);width:15px;height:15px;">
+                        Notify matching professionals near me
+                    </label>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%;"><i class="fa-solid fa-bullhorn"></i> Post requirement</button>
+                </form>
+
+                <div style="display:flex;flex-direction:column;gap:18px;">
+                    <div class="card" style="background:var(--amber-light);border:none;">
+                        <div style="font-size:20px;color:var(--amber);margin-bottom:8px;"><i class="fa-solid fa-lightbulb"></i></div>
+                        <strong style="font-size:14px;">Earn points</strong>
+                        <p class="muted" style="font-size:12.5px;margin:8px 0 0;line-height:1.6;">When a professional accepts and completes your requirement, you earn credibility points that boost your rank.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Tips for a good post</div>
+                        <div class="list-item" style="padding:8px 0;"><i class="fa-solid fa-check text-red"></i><span style="font-size:13px;">Be specific about the deliverable</span></div>
+                        <div class="list-item" style="padding:8px 0;"><i class="fa-solid fa-check text-red"></i><span style="font-size:13px;">Add a realistic timeline</span></div>
+                        <div class="list-item" style="padding:8px 0;"><i class="fa-solid fa-check text-red"></i><span style="font-size:13px;">Mention your location preference</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/professions.js"></script>
+    <script>
+        BnpProfessions.fillSelect(document.getElementById("rqCategory"), { extraOptions: ["Other"] });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            if (!window.BnpStorage.isPremium()) {
+                document.querySelector(".app-content").innerHTML = `
+                    <nav class="breadcrumb">
+                        <a href="../dashboard/user-dashboard.html"><i class="fa-solid fa-house"></i> Home</a>
+                        <span class="sep">&rsaquo;</span>
+                        <span>Requirements</span>
+                        <span class="sep">&rsaquo;</span>
+                        <span class="bc-current">Create Requirement</span>
+                    </nav>
+                    <div class="card" style="text-align:center;padding:60px 30px;max-width:520px;margin:40px auto;">
+                        <div style="font-size:48px;color:var(--red);margin-bottom:16px;"><i class="fa-solid fa-lock"></i></div>
+                        <h2 style="font-size:20px;font-weight:700;margin-bottom:10px;">Premium Membership Required</h2>
+                        <p class="muted" style="font-size:14px;line-height:1.7;margin-bottom:24px;">Posting requirements is only available to premium members. Upgrade your plan to start connecting with professionals.</p>
+                        <a href="../membership/plans.html" class="btn btn-primary"><i class="fa-solid fa-crown"></i> Upgrade to Premium</a>
+                    </div>`;
+            }
+        });
+
+        document.getElementById("requirementForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const title = document.getElementById("rqTitle").value.trim();
+            if (!title) { BnpUtils.toast("Please enter a title.", "warning"); return; }
+
+            const description = document.getElementById("rqDescription").value.trim();
+            if (!description) { BnpUtils.toast("Please add a description.", "warning"); return; }
+
+            const btn = e.target.querySelector("button[type=submit]");
+            BnpUtils.loading(btn, true, "Posting…");
+            try {
+                await Api.requirements.create({
+                    title,
+                    category: document.getElementById("rqCategory").value,
+                    budget: document.getElementById("rqBudget").value.trim() || null,
+                    description,
+                    city: document.getElementById("rqCity").value.trim() || null,
+                    neededBy: document.getElementById("rqNeededBy").value || null
+                });
+                BnpUtils.toast("Requirement posted successfully!", "success");
+                setTimeout(() => (location.href = "my-requirements.html"), 700);
+            } catch (err) {
+                BnpUtils.loading(btn, false);
+                BnpUtils.toast(err.message, "error");
+            }
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

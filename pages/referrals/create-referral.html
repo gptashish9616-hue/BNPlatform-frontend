@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Business Referral — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="create-referral.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>Business Referral</h1>
+                <p>Refer a client or contact to a fellow professional</p>
+            </div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:22px;">
+                <a href="../dashboard/user-dashboard.html" style="color:var(--muted);display:flex;align-items:center;gap:5px;">
+                    <i class="fa-solid fa-house" style="color:var(--red);"></i> Home
+                </a>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span>Referrals</span>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span style="color:var(--text);font-weight:600;">Create Referral</span>
+            </nav>
+
+            <!-- Locked state (free tier) -->
+            <div class="card" id="crLocked" style="display:none;text-align:center;padding:54px 24px;">
+                <div style="font-size:38px;color:var(--red);margin-bottom:14px;"><i class="fa-solid fa-lock"></i></div>
+                <h3 style="margin:0 0 8px;font-size:17px;">Business Referrals is a Premium feature</h3>
+                <p class="muted" style="max-width:440px;margin:0 auto 20px;line-height:1.65;">Sending business referrals is available to Premium members. Upgrade to start building your referral network and earning credibility points.</p>
+                <a href="../membership/plans.html" class="btn btn-primary"><i class="fa-solid fa-crown"></i> Upgrade to Premium</a>
+            </div>
+
+            <div class="grid" style="grid-template-columns:1fr 320px;align-items:start;" id="crGrid">
+
+                <!-- Form -->
+                <form class="card" id="referralForm">
+                    <div class="card-title">Referral details</div>
+
+                    <div class="field">
+                        <label>Professional you're referring to</label>
+                        <div style="position:relative;">
+                            <input type="text" id="refSearch" placeholder="Search by name or profession…" style="width:100%;" autocomplete="off">
+                            <div id="refResults" style="display:none;position:absolute;z-index:5;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:9px;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,.08);max-height:240px;overflow:auto;"></div>
+                        </div>
+                        <div id="refSelected" style="display:none;margin-top:8px;"></div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="field">
+                            <label>Client name</label>
+                            <input type="text" id="refClientName" placeholder="Who is the lead/client?">
+                        </div>
+                        <div class="field">
+                            <label>Client contact</label>
+                            <input type="text" id="refClientContact" placeholder="Email or phone">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Category</label>
+                        <select id="refCategory">
+                            <option>Design</option>
+                            <option>Finance</option>
+                            <option>Marketing</option>
+                            <option>Legal</option>
+                            <option>IT &amp; Software</option>
+                            <option>Construction</option>
+                            <option>Healthcare</option>
+                            <option>Education</option>
+                            <option>Real Estate</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Why are you referring them?</label>
+                        <textarea id="refDescription" rows="4" placeholder="Add a short note about the opportunity or why they're a great fit…"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%;">
+                        <i class="fa-solid fa-paper-plane"></i> Send referral
+                    </button>
+                </form>
+
+                <!-- Sidebar -->
+                <div style="display:flex;flex-direction:column;gap:18px;">
+
+                    <!-- How it works -->
+                    <div class="card" style="background:var(--blue-light);border:none;">
+                        <div style="font-size:22px;color:var(--blue);margin-bottom:10px;">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </div>
+                        <strong style="font-size:14px;">How Business Referrals work</strong>
+                        <p class="muted" style="font-size:12.5px;margin:8px 0 0;line-height:1.65;">
+                            Connect your client with a professional on the platform (e.g. a developer referring a lawyer).
+                            When the deal closes, you earn credibility points that boost your leaderboard rank.
+                        </p>
+                    </div>
+
+                    <!-- Your impact (loaded dynamically) -->
+                    <div class="card">
+                        <div class="card-title">Your impact</div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+                            <span class="muted">Referrals given</span>
+                            <strong id="impactTotal">—</strong>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+                            <span class="muted">Acceptance rate</span>
+                            <strong id="impactRate" style="color:var(--green);">—</strong>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 0;">
+                            <span class="muted">Points earned</span>
+                            <strong id="impactPoints">—</strong>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        // ── Professional search ──────────────────────────────────────
+        let selectedReceiver = null;
+        let lastResults = [];
+        const searchInput = document.getElementById("refSearch");
+        const resultsBox  = document.getElementById("refResults");
+        const selectedBox = document.getElementById("refSelected");
+        let searchTimer;
+
+        searchInput.addEventListener("input", () => {
+            clearTimeout(searchTimer);
+            const q = searchInput.value.trim();
+            if (q.length < 2) { resultsBox.style.display = "none"; return; }
+            searchTimer = setTimeout(async () => {
+                try {
+                    const me = BnpStorage.getUser();
+                    lastResults = (await Api.users.search(q)).filter(u => u.id !== me?.userId).slice(0, 6);
+                    if (!lastResults.length) {
+                        resultsBox.innerHTML = `<div style="padding:10px 12px;" class="muted">No professionals found.</div>`;
+                    } else {
+                        resultsBox.innerHTML = lastResults.map((u, i) => `
+                            <div class="list-item" style="padding:10px 12px;cursor:pointer;margin:0;" data-idx="${i}">
+                                <img src="${u.avatarUrl || BnpUtils.avatar(u.fullName)}" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;">
+                                <div class="li-body">
+                                    <strong>${BnpUtils.escape(u.fullName)}</strong>
+                                    <p>${BnpUtils.escape(u.profession || "Professional")}${u.city ? " · " + BnpUtils.escape(u.city) : ""}</p>
+                                </div>
+                            </div>`).join("");
+                    }
+                    resultsBox.style.display = "block";
+                } catch (e) { console.warn(e); }
+            }, 250);
+        });
+
+        // Event delegation — no user data in HTML attributes
+        resultsBox.addEventListener("click", e => {
+            const row = e.target.closest("[data-idx]");
+            if (!row) return;
+            selectReceiver(lastResults[Number(row.dataset.idx)]);
+        });
+
+        function selectReceiver(u) {
+            if (!u) return;
+            selectedReceiver = u;
+            resultsBox.style.display = "none";
+            searchInput.value = "";
+            selectedBox.style.display = "block";
+            selectedBox.innerHTML = `
+                <div class="list-item" style="border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin:0;">
+                    <img src="${u.avatarUrl || BnpUtils.avatar(u.fullName)}" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;">
+                    <div class="li-body">
+                        <strong>${BnpUtils.escape(u.fullName)}</strong>
+                        <p>${BnpUtils.escape(u.profession || "Professional")}</p>
+                    </div>
+                    <span class="badge badge-green">Selected</span>
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="clearReceiver()" title="Remove" style="margin-left:4px;">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>`;
+        }
+
+        function clearReceiver() {
+            selectedReceiver = null;
+            selectedBox.style.display = "none";
+            searchInput.value = "";
+            searchInput.focus();
+        }
+        window.clearReceiver = clearReceiver;
+
+        // Close dropdown on outside click
+        document.addEventListener("click", e => {
+            if (!e.target.closest("#refSearch") && !e.target.closest("#refResults")) {
+                resultsBox.style.display = "none";
+            }
+        });
+
+        // ── Form submit ──────────────────────────────────────────────
+        document.getElementById("referralForm").addEventListener("submit", async e => {
+            e.preventDefault();
+            if (!selectedReceiver) { BnpUtils.toast("Please select a professional to refer to.", "warning"); return; }
+            const btn = e.target.querySelector("button[type=submit]");
+            BnpUtils.loading(btn, true, "Sending…");
+            try {
+                await Api.referrals.create({
+                    receiverId:     selectedReceiver.id,
+                    clientName:     document.getElementById("refClientName").value.trim(),
+                    clientContact:  document.getElementById("refClientContact").value.trim(),
+                    category:       document.getElementById("refCategory").value,
+                    description:    document.getElementById("refDescription").value.trim()
+                });
+                BnpUtils.toast("Referral sent!", "success");
+                setTimeout(() => { location.href = "given-referrals.html"; }, 700);
+            } catch (err) {
+                BnpUtils.loading(btn, false);
+                BnpUtils.toast(err.message, "error");
+            }
+        });
+
+        // ── Your impact stats ────────────────────────────────────────
+        async function loadImpact() {
+            try {
+                const rows = await Api.referrals.given();
+                const total    = rows.length;
+                const accepted = rows.filter(r => ["ACCEPTED", "COMPLETED"].includes(r.status)).length;
+                const points   = rows.reduce((sum, r) => sum + (r.pointsAwarded || 0), 0);
+                const rate     = total > 0 ? Math.round((accepted / total) * 100) : 0;
+
+                document.getElementById("impactTotal").textContent  = total;
+                document.getElementById("impactRate").textContent   = rate + "%";
+                document.getElementById("impactPoints").textContent = points > 0 ? "+" + points : "0";
+            } catch (e) {
+                document.getElementById("impactTotal").textContent  = "—";
+                document.getElementById("impactRate").textContent   = "—";
+                document.getElementById("impactPoints").textContent = "—";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            if (!window.BnpStorage.isPremium()) {
+                document.getElementById("crGrid").style.display = "none";
+                document.getElementById("crLocked").style.display = "";
+                return;
+            }
+            loadImpact();
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!--
+  DASHBOARD LAYOUT TEMPLATE (logged-in user app pages)
+  Copy this into pages/<section>/<your-page>.html (must be two levels deep
+  so the ../../ asset paths resolve). app-shell.js injects the user sidebar
+  into #sidebar-container and wires the mobile toggle + active link.
+-->
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page Title — BNPlatform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+</head>
+
+<body class="app">
+
+    <!-- Shared user sidebar -->
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+
+        <!-- Topbar -->
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>Page Title</h1>
+                <p>Optional subtitle</p>
+            </div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://i.pravatar.cc/80?img=12" alt="me" />
+        </header>
+
+        <!-- ============ PAGE CONTENT ============ -->
+        <div class="app-content">
+
+            <div class="grid grid-4" style="margin-bottom:18px;">
+                <div class="stat"><div class="stat-num">0</div><div class="stat-lbl">Metric</div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Section title</div>
+                <!-- your content here -->
+            </div>
+
+        </div>
+        <!-- ========== END PAGE CONTENT ========== -->
+
+    </div>
+
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../assets/js/animate.js"></script>
+</body>
+
+</html>

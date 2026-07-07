@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Messages — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="chat.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>Messages</h1>
+                <p>Chat with your professional network</p>
+            </div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:14px;">
+                <a href="../dashboard/user-dashboard.html" style="color:var(--muted);display:flex;align-items:center;gap:5px;">
+                    <i class="fa-solid fa-house" style="color:var(--red);"></i> Home
+                </a>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span style="color:var(--text);font-weight:600;">Chat</span>
+            </nav>
+
+            <!-- Premium gate -->
+            <div id="chatGate" class="card chat-gate" style="display:none;">
+                <div class="cg-icon"><i class="fa-solid fa-lock"></i></div>
+                <h2 style="margin:0 0 8px;font-size:20px;">Messaging is a Premium Feature</h2>
+                <p class="muted" style="max-width:380px;margin:0 auto 22px;font-size:13.5px;line-height:1.6;">
+                    Upgrade to a premium plan to chat directly with professionals in your network.
+                </p>
+                <a href="../membership/plans.html" class="btn btn-primary">
+                    <i class="fa-solid fa-crown"></i> Upgrade now
+                </a>
+            </div>
+
+            <!-- Chat shell -->
+            <div id="chatWrap" class="chat-shell" style="display:none;">
+
+                <!-- ── Left: Conversation sidebar ── -->
+                <aside class="chat-sidebar">
+                    <div class="chat-sidebar-head">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                            <h3 style="margin:0;">Conversations</h3>
+                            <button class="new-msg-btn" id="newMsgBtn" title="New Message">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                        </div>
+                        <div class="chat-search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="convSearch" placeholder="Search conversations…" autocomplete="off">
+                        </div>
+                    </div>
+                    <div id="convList" class="conv-list">
+                        <div class="muted" style="padding:20px 16px;font-size:13px;">Loading…</div>
+                    </div>
+                </aside>
+
+                <!-- ── Right: Message panel ── -->
+                <section class="chat-panel" id="chatPanel">
+
+                    <!-- Empty state -->
+                    <div class="chat-empty" id="chatEmpty">
+                        <div class="ce-icon"><i class="fa-solid fa-comments"></i></div>
+                        <h3>Your Messages</h3>
+                        <p>Select a conversation on the left or start a new one.</p>
+                        <button class="btn btn-primary" style="margin-top:16px;" onclick="openNewMsgModal()">
+                            <i class="fa-solid fa-pen-to-square"></i> New Message
+                        </button>
+                    </div>
+
+                    <!-- Active thread (hidden until conversation selected) -->
+                    <div id="chatThread" style="display:none;flex-direction:column;height:100%;">
+
+                        <!-- Thread header -->
+                        <div class="thread-head" id="threadHead">
+                            <!-- filled by JS -->
+                        </div>
+
+                        <!-- Message list -->
+                        <div class="msg-list" id="msgList">
+                            <!-- filled by JS -->
+                        </div>
+
+                        <!-- Composer -->
+                        <form class="composer" id="composer">
+                            <input
+                                id="msgInput"
+                                class="composer-input"
+                                type="text"
+                                autocomplete="off"
+                                placeholder="Type a message…"
+                            >
+                            <button type="submit" class="composer-send" title="Send">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </form>
+
+                    </div>
+                </section>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- New Message Modal -->
+    <div id="newMsgModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#fff;border-radius:18px;width:min(460px,100%);max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden;">
+            <!-- Header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;border-bottom:1px solid var(--border);">
+                <strong style="font-size:16px;">New Message</strong>
+                <button id="newMsgClose" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:2px 6px;border-radius:6px;line-height:1;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <!-- Search box -->
+            <div style="padding:14px 22px;border-bottom:1px solid var(--border);">
+                <div style="position:relative;">
+                    <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--hint);font-size:13px;"></i>
+                    <input id="memberSearch" type="text" placeholder="Search by name or profession…"
+                        style="width:100%;padding:10px 12px 10px 34px;border:1.5px solid var(--border);border-radius:10px;font:inherit;font-size:13.5px;outline:none;box-sizing:border-box;"
+                        autocomplete="off">
+                </div>
+            </div>
+            <!-- Results -->
+            <div id="memberResults" style="overflow-y:auto;flex:1;padding:8px 0;">
+                <div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">
+                    <i class="fa-solid fa-magnifying-glass" style="font-size:22px;margin-bottom:8px;display:block;"></i>
+                    Type a name to find professionals
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Delete Confirm Modal (used for both single message and whole chat deletion) -->
+    <div id="confirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#fff;border-radius:16px;width:min(380px,100%);padding:26px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+            <div style="width:56px;height:56px;border-radius:50%;background:var(--red-light);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 16px;">
+                <i class="fa-solid fa-trash"></i>
+            </div>
+            <h3 id="confirmModalTitle" style="margin:0 0 8px;font-size:16px;">Delete message?</h3>
+            <p id="confirmModalText" class="muted" style="font-size:13px;margin:0 0 20px;line-height:1.5;">This cannot be undone.</p>
+            <div style="display:flex;gap:10px;justify-content:center;">
+                <button class="btn btn-outline" id="confirmModalCancel">Cancel</button>
+                <button class="btn btn-primary" id="confirmModalConfirm" style="background:var(--red);border-color:var(--red);">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        const ME      = window.BnpStorage.getUser() || {};
+        const MY_ID   = ME.id || ME.userId;
+        let activeConvId  = null;
+        let activeOther   = null;
+        let allConvs      = [];       // full list for search filter
+        const userCache   = {};
+        let pollTimer     = null;
+        let lastMsgCount  = -1;
+        let unreadCounts  = {};
+        let seenUpTo      = JSON.parse(localStorage.getItem('bnp_chat_seen') || '{}');
+        let prevLastMsgAt = {};
+        let convPollTimer = null;
+        let wsConnected    = false;
+        let stompClient    = null;
+        function saveSeenUpTo() { localStorage.setItem('bnp_chat_seen', JSON.stringify(seenUpTo)); }
+
+        function saveMsgUnread() {
+            const total = Object.values(unreadCounts).reduce((s, v) => s + v, 0);
+            localStorage.setItem('bnp_msg_unread', String(total));
+            if (window.updateMsgBadge) window.updateMsgBadge();
+        }
+
+        // ── User resolver (cached) ───────────────────────────────────
+        async function resolveUser(id) {
+            if (userCache[id]) return userCache[id];
+            try { userCache[id] = await Api.users.get(id); }
+            catch (e) { userCache[id] = { id, fullName: "User #" + id, avatarUrl: null, profession: "" }; }
+            return userCache[id];
+        }
+
+        function otherIdOf(conv) {
+            return conv.userOneId === MY_ID ? conv.userTwoId : conv.userOneId;
+        }
+
+        // ── Time helpers ─────────────────────────────────────────────
+        function shortTime(iso) {
+            if (!iso) return "";
+            const d = new Date(iso);
+            if (isNaN(d)) return "";
+            const now  = new Date();
+            const diff = now - d;
+            if (diff < 60000)         return "now";
+            if (diff < 3600000)       return Math.floor(diff / 60000) + "m";
+            if (diff < 86400000)      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+            if (diff < 604800000)     return d.toLocaleDateString([], { weekday: "short" });
+            return d.toLocaleDateString([], { day: "2-digit", month: "short" });
+        }
+
+        function msgTime(iso) {
+            if (!iso) return "";
+            const d = new Date(iso);
+            return isNaN(d) ? "" : d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        }
+
+        function dateSep(iso) {
+            if (!iso) return "";
+            const d   = new Date(iso);
+            const now = new Date();
+            const today     = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const yesterday = new Date(today - 86400000);
+            const msgDay    = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            if (msgDay.getTime() === today.getTime())     return "Today";
+            if (msgDay.getTime() === yesterday.getTime()) return "Yesterday";
+            return d.toLocaleDateString([], { day: "2-digit", month: "long", year: "numeric" });
+        }
+
+        // ── Render conversation list ─────────────────────────────────
+        function renderConvList(convs) {
+            const box = document.getElementById("convList");
+            if (!convs.length) {
+                box.innerHTML = `
+                    <div style="padding:32px 16px;text-align:center;">
+                        <i class="fa-solid fa-inbox" style="font-size:28px;color:var(--hint);margin-bottom:10px;"></i>
+                        <p class="muted" style="font-size:13px;margin:0;">No conversations yet.<br>Start one from a member's profile.</p>
+                    </div>`;
+                return;
+            }
+            box.innerHTML = convs.map(item => {
+                const unread = unreadCounts[item.conv.id] || 0;
+                return `
+                <div class="conv-item ${item.conv.id === activeConvId ? "active" : ""}${unread > 0 ? " has-unread" : ""}"
+                     data-id="${item.conv.id}" data-other="${item.other.id}">
+                    <img class="ci-avatar"
+                         src="${BnpUtils.avatarFor(item.other.avatarUrl, item.other.fullName)}"
+                         alt="${BnpUtils.escape(item.other.fullName)}">
+                    <div class="ci-body">
+                        <div class="ci-name">${BnpUtils.escape(item.other.fullName || "User")}</div>
+                        <div class="ci-last">${BnpUtils.escape(item.conv.lastMessage || "No messages yet")}</div>
+                    </div>
+                    <div class="ci-right">
+                        <div class="ci-time">${shortTime(item.conv.lastMessageAt || item.conv.createdAt)}</div>
+                        ${unread > 0 ? `<div class="ci-unread">${unread > 99 ? "99+" : unread}</div>` : ""}
+                    </div>
+                </div>`;
+            }).join("");
+
+            box.querySelectorAll(".conv-item").forEach(el => {
+                el.addEventListener("click", () => {
+                    openConversation(Number(el.dataset.id), Number(el.dataset.other));
+                });
+            });
+        }
+
+        async function loadConversations(selectId) {
+            const box = document.getElementById("convList");
+            let convs;
+            try {
+                convs = await Api.chat.conversations();
+            } catch (e) {
+                if (/premium/i.test(e.message)) { showGate(); return; }
+                box.innerHTML = `<div class="muted" style="padding:16px;font-size:13px;">Could not load conversations.</div>`;
+                return;
+            }
+
+            convs.sort((a, b) => new Date(b.lastMessageAt || b.createdAt) - new Date(a.lastMessageAt || a.createdAt));
+
+            // Detect unread counts for non-active conversations
+            const toFetch = [];
+            convs.forEach(c => {
+                const currAt = c.lastMessageAt || c.createdAt;
+                if (!seenUpTo[c.id]) { seenUpTo[c.id] = c.createdAt; saveSeenUpTo(); }
+                if (c.id === activeConvId) {
+                    unreadCounts[c.id] = 0;
+                } else {
+                    const hasNew = new Date(currAt) > new Date(seenUpTo[c.id]);
+                    const changed = currAt !== prevLastMsgAt[c.id];
+                    if (!hasNew) {
+                        unreadCounts[c.id] = 0;
+                    } else if (changed || unreadCounts[c.id] === undefined) {
+                        toFetch.push({ convId: c.id, seenAt: seenUpTo[c.id] });
+                    }
+                }
+                prevLastMsgAt[c.id] = currAt;
+            });
+            if (toFetch.length) {
+                await Promise.all(toFetch.map(({ convId, seenAt }) =>
+                    Api.chat.messages(convId).then(msgs => {
+                        unreadCounts[convId] = msgs.filter(m =>
+                            m.senderId !== MY_ID &&
+                            new Date(m.createdAt) > new Date(seenAt)
+                        ).length;
+                    }).catch(() => {})
+                ));
+            }
+
+            // Resolve other-user details
+            const resolved = await Promise.all(convs.map(async c => ({
+                conv: c,
+                other: await resolveUser(otherIdOf(c))
+            })));
+            allConvs = resolved;
+
+            // Re-apply search filter if active
+            const searchQ = document.getElementById("convSearch").value.toLowerCase().trim();
+            if (searchQ) {
+                renderConvList(resolved.filter(item =>
+                    item.other.fullName?.toLowerCase().includes(searchQ) ||
+                    item.conv.lastMessage?.toLowerCase().includes(searchQ)
+                ));
+            } else {
+                renderConvList(resolved);
+            }
+            saveMsgUnread();
+
+            if (selectId) {
+                const target = convs.find(c => c.id === selectId) || convs[0];
+                if (target) openConversation(target.id, otherIdOf(target));
+            }
+        }
+
+        // ── Search filter ────────────────────────────────────────────
+        document.getElementById("convSearch").addEventListener("input", e => {
+            const q = e.target.value.toLowerCase().trim();
+            if (!q) { renderConvList(allConvs); return; }
+            const filtered = allConvs.filter(item =>
+                item.other.fullName?.toLowerCase().includes(q) ||
+                item.conv.lastMessage?.toLowerCase().includes(q)
+            );
+            renderConvList(filtered);
+        });
+
+        // ── Open conversation ────────────────────────────────────────
+        async function openConversation(convId, otherId) {
+            activeConvId = convId;
+            // Mark as read immediately — remove badge from DOM
+            unreadCounts[convId] = 0;
+            seenUpTo[convId] = new Date().toISOString();
+            saveSeenUpTo();
+            saveMsgUnread();
+            const convEl = document.querySelector(`.conv-item[data-id="${convId}"]`);
+            if (convEl) {
+                convEl.classList.remove('has-unread');
+                const badge = convEl.querySelector('.ci-unread');
+                if (badge) badge.remove();
+            }
+            activeOther  = await resolveUser(otherId);
+            lastMsgCount = -1;
+
+            // Highlight selected conversation
+            document.querySelectorAll(".conv-item").forEach(el =>
+                el.classList.toggle("active", Number(el.dataset.id) === convId));
+
+            // Thread header
+            document.getElementById("threadHead").innerHTML = `
+                <img class="th-avatar"
+                     src="${BnpUtils.avatarFor(activeOther.avatarUrl, activeOther.fullName)}"
+                     alt="${BnpUtils.escape(activeOther.fullName)}">
+                <div>
+                    <div class="th-name">${BnpUtils.escape(activeOther.fullName || "User")}</div>
+                    <div class="th-sub">${BnpUtils.escape(activeOther.profession || "Member")}</div>
+                </div>
+                <div class="th-actions">
+                    <a href="../profile/profile.html?id=${activeOther.id}" class="btn btn-ghost btn-sm" title="View profile">
+                        <i class="fa-solid fa-user"></i> Profile
+                    </a>
+                </div>`;
+
+            // Show thread, hide empty state
+            document.getElementById("chatEmpty").style.display  = "none";
+            const thread = document.getElementById("chatThread");
+            thread.style.display = "flex";
+
+            await loadMessages(true);
+            startPolling();
+        }
+
+        // ── Render messages ──────────────────────────────────────────
+        async function loadMessages(scroll) {
+            if (!activeConvId) return;
+            let msgs;
+            try { msgs = await Api.chat.messages(activeConvId); }
+            catch (e) { return; }
+            if (msgs.length === lastMsgCount) return;
+            lastMsgCount = msgs.length;
+
+            const list = document.getElementById("msgList");
+
+            if (!msgs.length) {
+                list.innerHTML = `
+                    <div style="margin:auto;text-align:center;color:var(--hint);">
+                        <i class="fa-regular fa-hand-wave" style="font-size:28px;margin-bottom:10px;display:block;"></i>
+                        <p style="font-size:13px;margin:0;">Say hello to ${BnpUtils.escape(activeOther?.fullName || "them")} 👋</p>
+                    </div>`;
+                return;
+            }
+
+            // Group messages by date and sender for bubble grouping
+            let html = "";
+            let lastDate = null;
+
+            msgs.forEach(m => {
+                const mine  = m.senderId === MY_ID;
+                const side  = mine ? "me" : "them";
+                const mDate = dateSep(m.createdAt);
+
+                if (mDate !== lastDate) {
+                    html += `<div class="msg-date-sep">${mDate}</div>`;
+                    lastDate = mDate;
+                }
+
+                const canDelete = mine && !m.deleted;
+                html += `
+                    <div class="bubble-group ${side}">
+                        <div class="bubble ${side}${m.deleted ? " deleted" : ""}">
+                            ${canDelete ? `<button class="bubble-delete-btn" data-id="${m.id}" title="Delete message"><i class="fa-solid fa-trash"></i></button>` : ""}
+                            ${m.deleted ? `<i class="fa-solid fa-ban" style="margin-right:5px;"></i>This message was deleted` : BnpUtils.escape(m.content || "")}
+                            <small class="b-time">${msgTime(m.createdAt)}</small>
+                        </div>
+                    </div>`;
+            });
+
+            list.innerHTML = html;
+            if (scroll) list.scrollTop = list.scrollHeight;
+
+            list.querySelectorAll(".bubble-delete-btn").forEach(btn => {
+                btn.addEventListener("click", e => {
+                    e.stopPropagation();
+                    askDeleteMessage(Number(btn.dataset.id));
+                });
+            });
+        }
+
+        // ── Delete message (custom confirm modal, no native confirm()) ──
+        let pendingDeleteMsgId = null;
+
+        function askDeleteMessage(messageId) {
+            pendingDeleteMsgId = messageId;
+            document.getElementById("deleteMsgModal").style.display = "flex";
+        }
+
+        function closeDeleteMsgModal() {
+            document.getElementById("deleteMsgModal").style.display = "none";
+            pendingDeleteMsgId = null;
+        }
+
+        document.getElementById("deleteMsgCancel").addEventListener("click", closeDeleteMsgModal);
+        document.getElementById("deleteMsgModal").addEventListener("click", e => {
+            if (e.target === document.getElementById("deleteMsgModal")) closeDeleteMsgModal();
+        });
+        document.getElementById("deleteMsgConfirm").addEventListener("click", async () => {
+            if (!pendingDeleteMsgId || !activeConvId) { closeDeleteMsgModal(); return; }
+            const messageId = pendingDeleteMsgId;
+            closeDeleteMsgModal();
+            try {
+                await Api.chat.deleteMessage(activeConvId, messageId);
+                lastMsgCount = -1;
+                await loadMessages(true);
+                loadConversations();
+            } catch (err) {
+                BnpUtils.toast(err.message, "error");
+            }
+        });
+
+        // ── Polling (fallback for when the WebSocket isn't connected) ──
+        function startPolling() {
+            if (pollTimer) clearInterval(pollTimer);
+            if (wsConnected) return;
+            pollTimer = setInterval(() => { if (!wsConnected) loadMessages(true); }, 4000);
+        }
+
+        function startConvPolling() {
+            if (convPollTimer) clearInterval(convPollTimer);
+            convPollTimer = setInterval(() => { if (!wsConnected) loadConversations(); }, 10000);
+        }
+
+        // ── Live messaging over WebSocket (STOMP) ───────────────────
+        function handleIncomingMessage(msg) {
+            if (msg.conversationId === activeConvId) {
+                lastMsgCount = -1;
+                loadMessages(true);
+                seenUpTo[activeConvId] = new Date().toISOString();
+                saveSeenUpTo();
+            } else {
+                unreadCounts[msg.conversationId] = (unreadCounts[msg.conversationId] || 0) + (msg.senderId !== MY_ID ? 1 : 0);
+                saveMsgUnread();
+            }
+            loadConversations();
+        }
+
+        function connectWs() {
+            if (!window.StompJs) return;
+            const token = window.BnpStorage.getToken();
+            if (!token) return;
+            const wsBase = (window.BNP_CONFIG?.API_BASE_URL || "").replace(/\/$/, "").replace(/^http/, "ws");
+
+            stompClient = new StompJs.Client({
+                brokerURL: `${wsBase}/ws?token=${encodeURIComponent(token)}`,
+                reconnectDelay: 5000,
+                onConnect: () => {
+                    wsConnected = true;
+                    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+                    stompClient.subscribe('/user/queue/messages', frame => {
+                        try { handleIncomingMessage(JSON.parse(frame.body)); } catch (e) {}
+                    });
+                },
+                onWebSocketClose: () => {
+                    wsConnected = false;
+                    if (activeConvId) startPolling();
+                },
+                onStompError: () => { wsConnected = false; }
+            });
+            stompClient.activate();
+        }
+
+        // ── Send message ─────────────────────────────────────────────
+        document.getElementById("composer").addEventListener("submit", async e => {
+            e.preventDefault();
+            const input = document.getElementById("msgInput");
+            const text  = input.value.trim();
+            if (!text || !activeConvId) return;
+            input.value = "";
+            input.focus();
+            try {
+                await Api.chat.send(activeConvId, text);
+                lastMsgCount = -1;
+                await loadMessages(true);
+                loadConversations();   // refresh last-message preview
+            } catch (err) {
+                BnpUtils.toast(err.message, "error");
+                input.value = text;
+            }
+        });
+
+        // Also send on Enter (not Shift+Enter)
+        document.getElementById("msgInput").addEventListener("keydown", e => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                document.getElementById("composer").requestSubmit();
+            }
+        });
+
+        // ── Premium gate ─────────────────────────────────────────────
+        function showGate() {
+            document.getElementById("chatWrap").style.display = "none";
+            document.getElementById("chatGate").style.display = "block";
+        }
+
+        // ── Init ─────────────────────────────────────────────────────
+        async function init() {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            const to = BnpUtils.param("to");
+            try {
+                document.getElementById("chatWrap").style.display = "grid";
+                if (to) {
+                    const conv = await Api.chat.start(Number(to));
+                    await loadConversations(conv.id);
+                } else {
+                    await loadConversations();
+                }
+                startConvPolling();
+                connectWs();
+            } catch (e) {
+                if (/premium/i.test(e.message)) showGate();
+                else BnpUtils.toast(e.message, "error");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", init);
+
+        // ── New Message Modal ────────────────────────────────────────
+        let memberSearchTimer = null;
+
+        function openNewMsgModal() {
+            document.getElementById("newMsgModal").style.display = "flex";
+            setTimeout(() => document.getElementById("memberSearch").focus(), 80);
+        }
+
+        function closeNewMsgModal() {
+            document.getElementById("newMsgModal").style.display = "none";
+            document.getElementById("memberSearch").value = "";
+            document.getElementById("memberResults").innerHTML = `
+                <div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">
+                    <i class="fa-solid fa-magnifying-glass" style="font-size:22px;margin-bottom:8px;display:block;"></i>
+                    Type a name to find professionals
+                </div>`;
+        }
+
+        window.openNewMsgModal = openNewMsgModal;
+
+        document.getElementById("newMsgBtn").addEventListener("click", openNewMsgModal);
+        document.getElementById("newMsgClose").addEventListener("click", closeNewMsgModal);
+        document.getElementById("newMsgModal").addEventListener("click", e => {
+            if (e.target === document.getElementById("newMsgModal")) closeNewMsgModal();
+        });
+
+        document.getElementById("memberSearch").addEventListener("input", e => {
+            clearTimeout(memberSearchTimer);
+            const q = e.target.value.trim();
+            const box = document.getElementById("memberResults");
+
+            if (!q) {
+                box.innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;"><i class="fa-solid fa-magnifying-glass" style="font-size:22px;margin-bottom:8px;display:block;"></i>Type a name to find professionals</div>`;
+                return;
+            }
+
+            box.innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;"><i class="fa-solid fa-spinner fa-spin"></i> Searching…</div>`;
+
+            memberSearchTimer = setTimeout(async () => {
+                try {
+                    const results = await Api.users.search(q);
+                    const me = window.BnpStorage.getUser();
+                    const filtered = results.filter(u => String(u.id) !== String(me?.userId));
+
+                    if (!filtered.length) {
+                        box.innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">No members found for "<strong>${BnpUtils.escape(q)}</strong>"</div>`;
+                        return;
+                    }
+
+                    box.innerHTML = filtered.map(u => `
+                        <div class="member-result-item" data-id="${u.id}" style="display:flex;align-items:center;gap:12px;padding:12px 22px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .12s;">
+                            <img src="${BnpUtils.avatarFor(u.avatarUrl, u.fullName)}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-weight:600;font-size:13.5px;">${BnpUtils.escape(u.fullName || "Member")}</div>
+                                <div style="font-size:12px;color:var(--muted);margin-top:1px;">${BnpUtils.escape(u.profession || "")}${u.city ? " · " + BnpUtils.escape(u.city) : ""}</div>
+                            </div>
+                            <span style="font-size:12px;color:var(--red);font-weight:600;">Message</span>
+                        </div>`).join("");
+
+                    box.querySelectorAll(".member-result-item").forEach(el => {
+                        el.addEventListener("mouseenter", () => el.style.background = "var(--bg)");
+                        el.addEventListener("mouseleave", () => el.style.background = "");
+                        el.addEventListener("click", async () => {
+                            const uid = Number(el.dataset.id);
+                            el.style.opacity = "0.6";
+                            try {
+                                const conv = await Api.chat.start(uid);
+                                closeNewMsgModal();
+                                document.getElementById("chatWrap").style.display = "grid";
+                                await loadConversations(conv.id);
+                            } catch (err) {
+                                BnpUtils.toast(err.message, "error");
+                                el.style.opacity = "";
+                            }
+                        });
+                    });
+                } catch (err) {
+                    box.innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">Could not search members.</div>`;
+                }
+            }, 350);
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Referrals — BNPlatform Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+</head>
+
+<body class="app" data-require="admin">
+
+    <div id="sidebar-container" data-shell="admin"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Referrals</h1><p>Monitor referral activity across the platform</p></div>
+            <div class="topbar-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="arSearch" placeholder="Search by user, client, category…" oninput="filterReferrals()">
+            </div>
+            <div class="topbar-icon" id="adminBell"><i class="fa-solid fa-bell"></i><span class="bell-count-badge" id="adminBellDot" style="display:none;"></span></div>
+            <a href="profile.html"><img class="topbar-avatar" src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" alt="me" /></a>
+        </header>
+
+        <div class="app-content">
+
+            <!-- Stat boxes -->
+            <div class="grid grid-4" style="margin-bottom:18px;">
+                <div class="stat">
+                    <div class="stat-num" id="arTotal">—</div>
+                    <div class="stat-lbl">Total referrals</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num" id="arAccepted" style="color:var(--green);">—</div>
+                    <div class="stat-lbl">Accepted</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num" id="arPending" style="color:var(--amber);">—</div>
+                    <div class="stat-lbl">Pending</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num" id="arRejected" style="color:var(--red);">—</div>
+                    <div class="stat-lbl">Rejected</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    Referral activity
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <select id="arStatusFilter" onchange="filterReferrals()"
+                            style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;font-family:inherit;outline:none;">
+                            <option value="">All statuses</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="ACCEPTED">Accepted</option>
+                            <option value="COMPLETED">Completed</option>
+                            <option value="REJECTED">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs" style="margin-bottom:16px;">
+                    <div class="tab active" id="tabAll"      onclick="setTab('all')">All</div>
+                    <div class="tab"        id="tabPending"  onclick="setTab('pending')">Pending</div>
+                    <div class="tab"        id="tabAccepted" onclick="setTab('accepted')">Accepted</div>
+                    <div class="tab"        id="tabRejected" onclick="setTab('rejected')">Rejected</div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="tbl tbl-stack">
+                        <thead>
+                            <tr>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Client</th>
+                                <th>Category</th>
+                                <th>Points</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="arRows">
+                            <tr><td colspan="8" class="muted" style="text-align:center;padding:28px;">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top:14px;font-size:13px;">
+                    <span class="muted" id="arCount">—</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Detail Modal ────────────────────────────────────────── -->
+    <div id="arModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:14px;padding:0;width:100%;max-width:520px;box-shadow:0 8px 40px rgba(0,0,0,.18);max-height:90vh;overflow-y:auto;">
+
+            <!-- Modal header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border);">
+                <div>
+                    <h2 style="font-size:16px;font-weight:700;margin:0;" id="mdTitle">Referral Details</h2>
+                    <p class="muted" style="font-size:12.5px;margin:2px 0 0;" id="mdSub"></p>
+                </div>
+                <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;font-size:20px;color:#888;line-height:1;">&times;</button>
+            </div>
+
+            <!-- From → To -->
+            <div style="padding:18px 24px 0;">
+                <div style="display:flex;align-items:center;gap:10px;padding:14px;background:var(--bg);border-radius:10px;">
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;flex:1;">
+                        <img id="mdFromImg" src="" style="width:42px;height:42px;border-radius:50%;object-fit:cover;">
+                        <strong id="mdFromName" style="font-size:13px;text-align:center;margin-top:4px;"></strong>
+                        <span class="muted" style="font-size:11.5px;">Referred from</span>
+                    </div>
+                    <div style="font-size:22px;color:var(--border);flex-shrink:0;"><i class="fa-solid fa-arrow-right"></i></div>
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;flex:1;">
+                        <img id="mdToImg" src="" style="width:42px;height:42px;border-radius:50%;object-fit:cover;">
+                        <strong id="mdToName" style="font-size:13px;text-align:center;margin-top:4px;"></strong>
+                        <span class="muted" style="font-size:11.5px;">Referred to</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Details grid -->
+            <div style="padding:16px 24px;">
+                <table class="tbl-detail">
+                    <tbody>
+                        <tr><td>Status</td><td><span id="mdStatus"></span></td></tr>
+                        <tr><td>Client name</td><td><strong id="mdClient">—</strong></td></tr>
+                        <tr><td>Client contact</td><td><strong id="mdContact">—</strong></td></tr>
+                        <tr><td>Category</td><td><strong id="mdCategory">—</strong></td></tr>
+                        <tr><td>Points awarded</td><td><strong id="mdPoints" style="color:var(--green);">—</strong></td></tr>
+                        <tr><td>Created</td><td><strong id="mdDate">—</strong></td></tr>
+                        <tr id="mdNoteWrap" style="display:none;">
+                            <td>Note</td>
+                            <td style="text-align:left;"><p id="mdNote" style="margin:0;line-height:1.55;color:var(--text);"></p></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Status note (read-only: only the referral receiver can change status) -->
+            <div id="mdActions" style="padding:0 24px 20px;"></div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/admin-bell.js"></script>
+    <script>
+        let allReferrals = [];
+        let userCache = {};   // id → { fullName, avatarUrl }
+        let activeTab = "all";
+        let currentRef = null;
+
+        // ── Load ─────────────────────────────────────────────────
+        async function loadReferrals() {
+            const tbody = document.getElementById("arRows");
+            try {
+                allReferrals = await Api.admin.referrals();
+                BnpStorage.initSeenBaseline("referrals", allReferrals.map(r => r.id));
+
+                // Prefetch all unique user profiles in parallel
+                const ids = [...new Set(allReferrals.flatMap(r => [r.referrerId, r.receiverId].filter(Boolean)))];
+                await Promise.all(ids.map(async id => {
+                    try { userCache[id] = await Api.admin.user(id); }
+                    catch (e) { userCache[id] = { fullName: "#" + id, avatarUrl: null }; }
+                }));
+
+                updateStats();
+                filterReferrals();
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="8" class="muted" style="text-align:center;padding:28px;">
+                    Could not load referrals: ${BnpUtils.escape(e.message)}</td></tr>`;
+            }
+        }
+
+        // ── Stats ─────────────────────────────────────────────────
+        function updateStats() {
+            const accepted = allReferrals.filter(r => ["ACCEPTED", "COMPLETED"].includes(r.status)).length;
+            const pending  = allReferrals.filter(r => r.status === "PENDING").length;
+            const rejected = allReferrals.filter(r => r.status === "REJECTED").length;
+            document.getElementById("arTotal").textContent    = allReferrals.length;
+            document.getElementById("arAccepted").textContent = accepted;
+            document.getElementById("arPending").textContent  = pending;
+            document.getElementById("arRejected").textContent = rejected;
+        }
+
+        // ── Tab ───────────────────────────────────────────────────
+        function setTab(tab) {
+            activeTab = tab;
+            ["all","pending","accepted","rejected"].forEach(t => {
+                const el = document.getElementById("tab" + t.charAt(0).toUpperCase() + t.slice(1));
+                if (el) el.classList.toggle("active", t === tab);
+            });
+            // Sync the dropdown to match the tab
+            const map = { pending:"PENDING", accepted:"ACCEPTED", rejected:"REJECTED" };
+            document.getElementById("arStatusFilter").value = map[tab] || "";
+            filterReferrals();
+        }
+
+        // ── Filter + render ───────────────────────────────────────
+        function filterReferrals() {
+            const q      = document.getElementById("arSearch").value.trim().toLowerCase();
+            const status = document.getElementById("arStatusFilter").value;
+
+            const list = allReferrals.filter(r => {
+                // Status filter (dropdown drives tab-level filter too)
+                if (status && r.status !== status) return false;
+
+                // Search across names, client, category
+                const fromName = (userCache[r.referrerId]?.fullName || "").toLowerCase();
+                const toName   = (userCache[r.receiverId]?.fullName || "").toLowerCase();
+                const client   = (r.clientName || "").toLowerCase();
+                const category = (r.category   || "").toLowerCase();
+                if (q && ![fromName, toName, client, category].some(s => s.includes(q))) return false;
+
+                return true;
+            });
+
+            renderTable(list);
+        }
+
+        function userName(id) {
+            return userCache[id]?.fullName || ("#" + id);
+        }
+        function userAvatar(id) {
+            const u = userCache[id];
+            return BnpUtils.avatarFor(u?.avatarUrl, u?.fullName || ("User " + id));
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById("arRows");
+            document.getElementById("arCount").textContent =
+                `Showing ${list.length} of ${allReferrals.length} referrals`;
+
+            if (!list.length) {
+                tbody.innerHTML = `<tr><td colspan="8" class="muted" style="text-align:center;padding:28px;">No referrals found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(r => {
+                const isNew = !BnpStorage.isSeen("referrals", r.id);
+                return `
+                <tr class="${isNew ? "row-new" : ""}">
+                    <td>
+                        <div class="cell-user">
+                            <img src="${userAvatar(r.referrerId)}" alt="">
+                            <strong>${BnpUtils.escape(userName(r.referrerId))}</strong>
+                            ${isNew ? '<span class="badge badge-new">New</span>' : ""}
+                        </div>
+                    </td>
+                    <td data-label="To">${BnpUtils.escape(userName(r.receiverId))}</td>
+                    <td data-label="Client">
+                        <div><strong>${BnpUtils.escape(r.clientName || "—")}</strong></div>
+                        ${r.clientContact ? `<small class="muted">${BnpUtils.escape(r.clientContact)}</small>` : ""}
+                    </td>
+                    <td data-label="Category" class="muted">${BnpUtils.escape(r.category || "—")}</td>
+                    <td data-label="Points">${r.pointsAwarded ? '<span style="color:var(--green);font-weight:600;">+' + r.pointsAwarded + '</span>' : '<span class="muted">—</span>'}</td>
+                    <td data-label="Status">${BnpUtils.statusBadge(r.status)}</td>
+                    <td data-label="Date" class="muted">${BnpUtils.date(r.createdAt)}</td>
+                    <td>
+                        <button class="btn btn-ghost btn-sm" onclick="openModal(${r.id})">
+                            <i class="fa-solid fa-eye"></i> View
+                        </button>
+                    </td>
+                </tr>`;
+            }).join("");
+        }
+
+        // ── Detail Modal ──────────────────────────────────────────
+        function openModal(id) {
+            currentRef = allReferrals.find(r => r.id === id);
+            if (!currentRef) return;
+            const r = currentRef;
+
+            if (!BnpStorage.isSeen("referrals", id)) {
+                BnpStorage.markSeen("referrals", id);
+                filterReferrals();
+            }
+
+            document.getElementById("mdTitle").textContent = "Referral #RF-" + r.id;
+            document.getElementById("mdSub").textContent   = "Created " + BnpUtils.date(r.createdAt);
+
+            // From / To avatars
+            document.getElementById("mdFromImg").src  = userAvatar(r.referrerId);
+            document.getElementById("mdFromName").textContent = userName(r.referrerId);
+            document.getElementById("mdToImg").src    = userAvatar(r.receiverId);
+            document.getElementById("mdToName").textContent = userName(r.receiverId);
+
+            // Details
+            document.getElementById("mdStatus").innerHTML  = BnpUtils.statusBadge(r.status);
+            document.getElementById("mdClient").textContent   = r.clientName    || "—";
+            document.getElementById("mdContact").textContent  = r.clientContact || "—";
+            document.getElementById("mdCategory").textContent = r.category      || "—";
+            document.getElementById("mdPoints").textContent   = r.pointsAwarded ? "+" + r.pointsAwarded : "—";
+            document.getElementById("mdDate").textContent     = BnpUtils.date(r.createdAt);
+
+            const noteWrap = document.getElementById("mdNoteWrap");
+            const noteEl   = document.getElementById("mdNote");
+            if (r.description) {
+                noteEl.textContent = r.description;
+                noteWrap.style.display = "";
+            } else {
+                noteWrap.style.display = "none";
+            }
+
+            renderModalActions(r.status);
+            document.getElementById("arModal").style.display = "flex";
+        }
+
+        function renderModalActions(status) {
+            const box = document.getElementById("mdActions");
+            if (status === "PENDING" || status === "ACCEPTED") {
+                box.innerHTML = `<div class="muted" style="font-size:12.5px;background:var(--bg);border-radius:8px;padding:10px 12px;">
+                    <i class="fa-solid fa-circle-info"></i> Only the referral receiver can accept, reject, or complete this referral.
+                </div>`;
+            } else {
+                box.innerHTML = "";
+            }
+        }
+
+        function closeModal() {
+            document.getElementById("arModal").style.display = "none";
+            currentRef = null;
+        }
+
+        // Close on backdrop click
+        document.getElementById("arModal").addEventListener("click", function (e) {
+            if (e.target === this) closeModal();
+        });
+
+        window.openModal      = openModal;
+        window.closeModal     = closeModal;
+        window.setTab         = setTab;
+        window.filterReferrals = filterReferrals;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.BnpStorage?.isAuthenticated()) loadReferrals();
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

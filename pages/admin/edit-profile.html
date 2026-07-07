@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Profile — BNPlatform Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="profile.css">
+</head>
+
+<body class="app" data-require="admin">
+
+    <div id="sidebar-container" data-shell="admin"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Edit Profile</h1><p>Update your admin account details</p></div>
+            <div class="topbar-icon" id="adminBell" style="margin-left:auto;"><i class="fa-solid fa-bell"></i><span class="bell-count-badge" id="adminBellDot" style="display:none;"></span></div>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+            <form id="epForm">
+                <div class="grid" style="grid-template-columns:1fr 320px;align-items:start;" id="editAdminGrid">
+
+                    <!-- LEFT -->
+                    <div style="display:flex;flex-direction:column;gap:18px;">
+                        <div class="card">
+                            <div class="card-title">Account details</div>
+                            <div class="form-grid">
+                                <div class="field"><label>Full name</label><input type="text" id="epFullName" required></div>
+                                <div class="field"><label>Email address</label><input type="email" id="epEmail" readonly style="background:var(--bg);"></div>
+                                <div class="field"><label>Phone number</label><input type="tel" id="epPhone"></div>
+                                <div class="field"><label>Avatar URL <span class="muted">(optional)</span></label><input type="text" id="epAvatarUrl" placeholder="https://..."></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT -->
+                    <div style="display:flex;flex-direction:column;gap:18px;">
+                        <div class="card" style="text-align:center;">
+                            <div class="card-title" style="justify-content:center;">Photo</div>
+                            <img id="epPhoto" src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" style="width:96px;height:96px;border-radius:50%;object-fit:cover;margin:6px auto 14px;">
+                            <div style="display:flex;gap:8px;justify-content:center;">
+                                <input type="file" id="epPhotoFile" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
+                                <button type="button" id="epPhotoChange" class="btn btn-outline btn-sm"><i class="fa-solid fa-upload"></i> Change</button>
+                                <button type="button" id="epPhotoRemove" class="btn btn-ghost btn-sm">Remove</button>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:10px;">
+                            <button type="submit" class="btn btn-primary" style="flex:1;"><i class="fa-solid fa-check"></i> Save changes</button>
+                            <a href="profile.html" class="btn btn-outline">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/admin-bell.js"></script>
+    <script>
+        function absoluteUrl(u) {
+            if (!u) return u;
+            return /^https?:\/\//i.test(u) ? u : (window.BNP_CONFIG.API_BASE_URL.replace(/\/$/, "") + u);
+        }
+
+        async function prefill() {
+            try {
+                const me = await Api.users.me();
+                document.getElementById("epFullName").value = me.fullName || "";
+                document.getElementById("epEmail").value = me.email || "";
+                document.getElementById("epPhone").value = me.phone || "";
+                document.getElementById("epAvatarUrl").value = me.avatarUrl || "";
+                document.getElementById("epPhoto").src = me.avatarUrl ? absoluteUrl(me.avatarUrl) : BnpUtils.avatarFor(me.avatarUrl, me.fullName);
+            } catch (e) { console.warn(e); }
+        }
+
+        document.getElementById("epForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector("button[type=submit]");
+            BnpUtils.loading(btn, true, "Saving…");
+            try {
+                const updated = await Api.users.updateMe({
+                    fullName: document.getElementById("epFullName").value.trim(),
+                    phone: document.getElementById("epPhone").value.trim(),
+                    avatarUrl: document.getElementById("epAvatarUrl").value.trim()
+                });
+                const cached = BnpStorage.getUser();
+                BnpStorage.setUser({ ...cached, fullName: updated.fullName, avatarUrl: updated.avatarUrl });
+                BnpUtils.toast("Profile saved successfully!", "success");
+                setTimeout(() => (location.href = "profile.html"), 700);
+            } catch (err) {
+                BnpUtils.loading(btn, false);
+                BnpUtils.toast(err.message, "error");
+            }
+        });
+
+        const epPhotoFile = document.getElementById("epPhotoFile");
+        document.getElementById("epPhotoChange").addEventListener("click", () => epPhotoFile.click());
+        document.getElementById("epPhotoRemove").addEventListener("click", () => {
+            document.getElementById("epAvatarUrl").value = "";
+            document.getElementById("epPhoto").src = BnpUtils.avatar(document.getElementById("epFullName").value.trim() || "Admin");
+        });
+        epPhotoFile.addEventListener("change", async () => {
+            const file = epPhotoFile.files && epPhotoFile.files[0];
+            if (!file) return;
+            const changeBtn = document.getElementById("epPhotoChange");
+            BnpUtils.loading(changeBtn, true, "Uploading…");
+            try {
+                const res = await Api.files.upload(file, "avatars");
+                document.getElementById("epAvatarUrl").value = res.url;
+                document.getElementById("epPhoto").src = absoluteUrl(res.url);
+                BnpUtils.toast("Photo uploaded — click Save changes to apply.", "success");
+            } catch (err) {
+                BnpUtils.toast(err.message, "error");
+            } finally {
+                BnpUtils.loading(changeBtn, false);
+                epPhotoFile.value = "";
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", () => { if (window.BnpStorage.isAuthenticated()) prefill(); });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,460 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Groups — BNPlatform Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+        <link rel="stylesheet" href="groups.css">
+</head>
+
+<body class="app" data-require="admin">
+
+    <div id="sidebar-container" data-shell="admin"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>Groups</h1>
+                <p>City &amp; category communities</p>
+            </div>
+            <div class="topbar-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="grpSearch" placeholder="Search groups…" oninput="filterGroups()">
+            </div>
+            <div class="topbar-icon" id="adminBell"><i class="fa-solid fa-bell"></i><span class="bell-count-badge" id="adminBellDot" style="display:none;"></span></div>
+            <a href="profile.html">
+                <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" alt="me" />
+            </a>
+        </header>
+
+        <div class="app-content">
+
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb" style="font-size:13px;color:var(--muted);margin-bottom:18px;display:flex;align-items:center;gap:6px;">
+                <i class="fa-solid fa-house" style="color:var(--red);"></i>
+                <span>Home</span>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span>Admin</span>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span style="color:var(--text);font-weight:600;">Groups</span>
+            </nav>
+
+            <!-- Stats -->
+            <div class="grid grid-4" style="margin-bottom:18px;">
+                <div class="stat">
+                    <div class="stat-top">
+                        <div class="stat-icon"><i class="fa-solid fa-users-rectangle"></i></div>
+                    </div>
+                    <div class="stat-num" id="grpTotal">—</div>
+                    <div class="stat-lbl">Total groups</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-top">
+                        <div class="stat-icon si-blue"><i class="fa-solid fa-city"></i></div>
+                    </div>
+                    <div class="stat-num" id="grpCity" style="color:var(--blue);">—</div>
+                    <div class="stat-lbl">City groups</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-top">
+                        <div class="stat-icon si-amber"><i class="fa-solid fa-tags"></i></div>
+                    </div>
+                    <div class="stat-num" id="grpCategory" style="color:var(--amber);">—</div>
+                    <div class="stat-lbl">Category groups</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-top">
+                        <div class="stat-icon si-green"><i class="fa-solid fa-circle-check"></i></div>
+                    </div>
+                    <div class="stat-num" id="grpActive" style="color:var(--green);">—</div>
+                    <div class="stat-lbl">Active</div>
+                </div>
+            </div>
+
+            <!-- Table card -->
+            <div class="card">
+                <div class="card-title">
+                    All groups
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <select id="grpTypeFilter" onchange="filterGroups()"
+                            style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;font-family:inherit;outline:none;background:#fff;">
+                            <option value="">All types</option>
+                            <option value="CITY">City</option>
+                            <option value="CATEGORY">Category</option>
+                        </select>
+                        <select id="grpStatusFilter" onchange="filterGroups()"
+                            style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;font-family:inherit;outline:none;background:#fff;">
+                            <option value="">All statuses</option>
+                            <option value="ACTIVE">Active</option>
+                            <option value="INACTIVE">Inactive</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm" onclick="openCreateModal()">
+                            <i class="fa-solid fa-plus"></i> Add group
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="tbl tbl-stack">
+                        <thead>
+                            <tr>
+                                <th>Group</th>
+                                <th>Type</th>
+                                <th>City / Category</th>
+                                <th>Members</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grpRows">
+                            <tr>
+                                <td colspan="7" style="text-align:center;padding:40px;" class="muted">
+                                    <i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;"></i>Loading…
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top:14px;font-size:13px;">
+                    <span class="muted" id="grpCount">—</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== CREATE / EDIT MODAL ====== -->
+    <div id="grpModal" class="overlay">
+        <div class="form-modal">
+            <div class="modal-head">
+                <div class="stat-icon" style="width:40px;height:40px;border-radius:10px;font-size:16px;flex-shrink:0;">
+                    <i class="fa-solid fa-users-rectangle"></i>
+                </div>
+                <h3 id="grpModalTitle">Create group</h3>
+                <button class="modal-close-btn" onclick="closeModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="grpForm" onsubmit="submitGroup(event)">
+                    <div class="field">
+                        <label>Group Name</label>
+                        <input id="gName" type="text" placeholder="e.g. Mumbai Professionals" required />
+                    </div>
+                    <div class="field">
+                        <label>Description</label>
+                        <textarea id="gDesc" rows="3" placeholder="Short description of this group"></textarea>
+                    </div>
+                    <div class="field">
+                        <label>Type</label>
+                        <select id="gType" onchange="toggleTypeFields()" required>
+                            <option value="">Select type</option>
+                            <option value="CITY">City</option>
+                            <option value="CATEGORY">Category</option>
+                        </select>
+                    </div>
+                    <div class="field" id="gCityField" style="display:none;">
+                        <label>City</label>
+                        <input id="gCity" type="text" placeholder="e.g. Mumbai" />
+                    </div>
+                    <div class="field" id="gCategoryField" style="display:none;">
+                        <label>Category</label>
+                        <select id="gCategory"></select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-foot">
+                <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                <button type="submit" form="grpForm" class="btn btn-primary" id="grpSubmitBtn">
+                    Create group
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== DELETE CONFIRM MODAL ====== -->
+    <div id="grpConfirmOverlay" class="overlay">
+        <div class="confirm-box">
+            <div class="confirm-icon"><i class="fa-solid fa-trash"></i></div>
+            <h3>Delete group?</h3>
+            <p id="grpConfirmMsg">This action cannot be undone.</p>
+            <div class="confirm-row">
+                <button class="btn btn-outline" onclick="closeConfirm()">Cancel</button>
+                <button class="btn btn-primary" id="grpConfirmBtn"
+                    style="background:var(--red);border-color:var(--red);"
+                    onclick="confirmDelete()">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/admin-bell.js"></script>
+    <script src="../../assets/js/professions.js"></script>
+    <script>
+        BnpProfessions.fillSelect(document.getElementById("gCategory"), { placeholder: "Select category" });
+
+        let allGroups      = [];
+        let editingId      = null;
+        let pendingDeleteId = null;
+
+        // ── Load ────────────────────────────────────────────────
+        async function loadGroups() {
+            const tbody = document.getElementById("grpRows");
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;" class="muted">
+                <i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;"></i>Loading…</td></tr>`;
+            try {
+                allGroups = await Api.admin.groups();
+                updateStats();
+                filterGroups();
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:28px;" class="muted">
+                    <i class="fa-solid fa-circle-exclamation" style="margin-right:6px;color:var(--red);"></i>
+                    ${BnpUtils.escape(e.message)}</td></tr>`;
+            }
+        }
+
+        function updateStats() {
+            document.getElementById("grpTotal").textContent    = allGroups.length;
+            document.getElementById("grpCity").textContent     = allGroups.filter(g => g.type === "CITY").length;
+            document.getElementById("grpCategory").textContent = allGroups.filter(g => g.type === "CATEGORY").length;
+            document.getElementById("grpActive").textContent   = allGroups.filter(g => g.status === "ACTIVE").length;
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById("grpRows");
+            const n = list.length;
+            document.getElementById("grpCount").textContent = `Showing ${n} group${n !== 1 ? "s" : ""}`;
+
+            if (!n) {
+                tbody.innerHTML = `<tr><td colspan="7">
+                    <div class="empty-state">
+                        <i class="fa-solid fa-users-rectangle"></i>
+                        <h4>No groups found</h4>
+                        <p>Try adjusting your filters or create a new group.</p>
+                        <button class="btn btn-primary btn-sm" onclick="openCreateModal()">
+                            <i class="fa-solid fa-plus"></i> Add group
+                        </button>
+                    </div>
+                </td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(g => {
+                const isCity    = g.type === "CITY";
+                const typeBadge = isCity
+                    ? `<span class="badge badge-blue"><i class="fa-solid fa-city"></i> City</span>`
+                    : `<span class="badge badge-amber"><i class="fa-solid fa-tags"></i> Category</span>`;
+                const tag      = BnpUtils.escape(isCity ? (g.city || "—") : (g.category || "—"));
+                const isActive = g.status === "ACTIVE";
+                const count    = (g.memberCount ?? 0).toLocaleString("en-IN");
+
+                return `<tr>
+                    <td>
+                        <div class="cell-user">
+                            <div class="grp-icon" style="background:${isCity ? "var(--blue-light)" : "var(--amber-light)"};color:${isCity ? "var(--blue)" : "var(--amber)"};">
+                                <i class="fa-solid ${isCity ? "fa-city" : "fa-layer-group"}"></i>
+                            </div>
+                            <div>
+                                <strong>${BnpUtils.escape(g.name)}</strong>
+                                <small>${BnpUtils.escape(g.description || "—")}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td data-label="Type">${typeBadge}</td>
+                    <td data-label="City / Category" class="muted">${tag}</td>
+                    <td data-label="Members"><strong>${count}</strong></td>
+                    <td data-label="Status">${BnpUtils.statusBadge(g.status)}</td>
+                    <td data-label="Created" class="muted">${BnpUtils.date(g.createdAt)}</td>
+                    <td>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            <button class="btn btn-ghost btn-sm" title="Edit"
+                                onclick="openEditModal(${g.id})">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button class="btn ${isActive ? "btn-outline" : "btn-primary"} btn-sm"
+                                onclick="toggleStatus(${g.id},'${isActive ? "INACTIVE" : "ACTIVE"}')"
+                                title="${isActive ? "Disable group" : "Enable group"}">
+                                <i class="fa-solid ${isActive ? "fa-ban" : "fa-circle-check"}"></i>
+                                ${isActive ? "Disable" : "Enable"}
+                            </button>
+                            <button class="btn btn-ghost btn-sm" title="Delete"
+                                style="color:var(--red);" onclick="askDelete(${g.id})">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join("");
+        }
+
+        // ── Filter ──────────────────────────────────────────────
+        function filterGroups() {
+            const q      = (document.getElementById("grpSearch").value || "").trim().toLowerCase();
+            const type   = document.getElementById("grpTypeFilter").value;
+            const status = document.getElementById("grpStatusFilter").value;
+            const filtered = allGroups.filter(g => {
+                const text = [g.name, g.city, g.category, g.description].join(" ").toLowerCase();
+                return (!q      || text.includes(q))
+                    && (!type   || g.type   === type)
+                    && (!status || g.status === status);
+            });
+            renderTable(filtered);
+        }
+
+        // ── Form modal ───────────────────────────────────────────
+        function openCreateModal() {
+            editingId = null;
+            document.getElementById("grpModalTitle").textContent = "Create group";
+            document.getElementById("grpSubmitBtn").textContent  = "Create group";
+            document.getElementById("grpForm").reset();
+            toggleTypeFields();
+            document.getElementById("grpModal").classList.add("open");
+            document.body.style.overflow = "hidden";
+        }
+
+        function openEditModal(id) {
+            const g = allGroups.find(x => x.id === id);
+            if (!g) return;
+            editingId = id;
+            document.getElementById("grpModalTitle").textContent = "Edit group";
+            document.getElementById("grpSubmitBtn").textContent  = "Save changes";
+            document.getElementById("gName").value     = g.name        || "";
+            document.getElementById("gDesc").value     = g.description || "";
+            document.getElementById("gType").value     = g.type        || "";
+            document.getElementById("gCity").value     = g.city        || "";
+            document.getElementById("gCategory").value = g.category    || "";
+            toggleTypeFields();
+            document.getElementById("grpModal").classList.add("open");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeModal() {
+            document.getElementById("grpModal").classList.remove("open");
+            document.body.style.overflow = "";
+        }
+
+        function toggleTypeFields() {
+            const type = document.getElementById("gType").value;
+            document.getElementById("gCityField").style.display     = type === "CITY"     ? "" : "none";
+            document.getElementById("gCategoryField").style.display = type === "CATEGORY" ? "" : "none";
+        }
+
+        // ── Delete confirm modal ─────────────────────────────────
+        function askDelete(id) {
+            const g = allGroups.find(x => x.id === id);
+            pendingDeleteId = id;
+            document.getElementById("grpConfirmMsg").textContent =
+                `"${g?.name}" will be permanently removed. This cannot be undone.`;
+            document.getElementById("grpConfirmOverlay").classList.add("open");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeConfirm() {
+            document.getElementById("grpConfirmOverlay").classList.remove("open");
+            document.body.style.overflow = "";
+            pendingDeleteId = null;
+        }
+
+        async function confirmDelete() {
+            if (!pendingDeleteId) return;
+            const btn = document.getElementById("grpConfirmBtn");
+            BnpUtils.loading(btn, true, "Deleting…");
+            try {
+                await Api.admin.deleteGroup(pendingDeleteId);
+                BnpUtils.toast("Group deleted", "success");
+                closeConfirm();
+                loadGroups();
+            } catch (e) {
+                BnpUtils.toast(e.message, "error");
+            } finally {
+                BnpUtils.loading(btn, false);
+            }
+        }
+
+        // ── CRUD ────────────────────────────────────────────────
+        async function submitGroup(e) {
+            e.preventDefault();
+            const btn  = document.getElementById("grpSubmitBtn");
+            const type = document.getElementById("gType").value;
+            const payload = {
+                name:        document.getElementById("gName").value.trim(),
+                description: document.getElementById("gDesc").value.trim() || undefined,
+                type,
+                city:     type === "CITY"     ? document.getElementById("gCity").value.trim()     || undefined : undefined,
+                category: type === "CATEGORY" ? document.getElementById("gCategory").value.trim() || undefined : undefined
+            };
+            BnpUtils.loading(btn, true, editingId ? "Saving…" : "Creating…");
+            try {
+                if (editingId) {
+                    await Api.admin.updateGroup(editingId, payload);
+                    BnpUtils.toast("Group updated", "success");
+                } else {
+                    await Api.admin.createGroup(payload);
+                    BnpUtils.toast("Group created", "success");
+                }
+                closeModal();
+                loadGroups();
+            } catch (err) {
+                BnpUtils.toast(err.message, "error");
+            } finally {
+                BnpUtils.loading(btn, false);
+            }
+        }
+
+        async function toggleStatus(id, status) {
+            try {
+                await Api.admin.updateGroupStatus(id, status);
+                BnpUtils.toast("Group " + (status === "ACTIVE" ? "enabled" : "disabled"), "success");
+                loadGroups();
+            } catch (e) {
+                BnpUtils.toast(e.message, "error");
+            }
+        }
+
+        // Close modals on backdrop click
+        document.getElementById("grpModal").addEventListener("click", function(e) {
+            if (e.target === this) closeModal();
+        });
+        document.getElementById("grpConfirmOverlay").addEventListener("click", function(e) {
+            if (e.target === this) closeConfirm();
+        });
+
+        // Escape key
+        document.addEventListener("keydown", e => {
+            if (e.key !== "Escape") return;
+            closeModal();
+            closeConfirm();
+        });
+
+        // Expose to inline onclick handlers
+        window.openCreateModal = openCreateModal;
+        window.openEditModal   = openEditModal;
+        window.toggleStatus    = toggleStatus;
+        window.askDelete       = askDelete;
+        window.confirmDelete   = confirmDelete;
+        window.closeConfirm    = closeConfirm;
+        window.filterGroups    = filterGroups;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.BnpStorage?.isAuthenticated()) loadGroups();
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Points System — BNPlatform Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+</head>
+
+<body class="app" data-require="admin">
+
+    <div id="sidebar-container" data-shell="admin"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Points System</h1><p>Configure credibility point rules</p></div>
+            <div class="topbar-icon" id="adminBell" style="margin-left:auto;"><i class="fa-solid fa-bell"></i><span class="bell-count-badge" id="adminBellDot" style="display:none;"></span></div>
+            <a href="profile.html"><img class="topbar-avatar" src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" alt="me" /></a>
+        </header>
+
+        <div class="app-content">
+
+            <div class="card" style="background:var(--blue-light);border:none;margin-bottom:18px;display:flex;gap:12px;align-items:center;">
+                <i class="fa-solid fa-circle-info" style="color:var(--blue);font-size:18px;"></i>
+                <p style="margin:0;font-size:13px;color:#0d47a1;">Points are <strong>credibility-only</strong> and cannot be redeemed. They rank users on city &amp; state leaderboards.</p>
+            </div>
+
+            <div class="card" style="margin-bottom:18px;">
+                <div class="card-title">Point rules <span class="muted" style="font-size:12px;">(live values from the backend)</span></div>
+                <div class="table-wrap">
+                    <table class="tbl tbl-stack">
+                        <thead><tr><th>Action</th><th>Points awarded</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Deal referral completed</strong><br><small class="muted">Referrer earns when the receiver marks it completed</small></td><td data-label="Points awarded"><strong>+100</strong></td></tr>
+                            <tr><td><strong>Requirement fulfilled</strong><br><small class="muted">Poster earns when their requirement is fulfilled</small></td><td data-label="Points awarded"><strong>+75</strong></td></tr>
+                            <tr><td><strong>App referral (invite) accepted</strong><br><small class="muted">Inviter earns when an invitee registers (plus 1 free month)</small></td><td data-label="Points awarded"><strong>+50</strong></td></tr>
+                            <tr><td><strong>Review received</strong><br><small class="muted">Each review left on your profile</small></td><td data-label="Points awarded"><strong>+10</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Top earners <span class="muted" style="font-size:12px;">(global leaderboard)</span></div>
+                <div class="table-wrap">
+                    <table class="tbl tbl-stack">
+                        <thead><tr><th>#</th><th>Member</th><th>City</th><th>Points</th></tr></thead>
+                        <tbody id="psLeaders"><tr><td colspan="4" class="muted" style="text-align:center;padding:20px;">Loading…</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/admin-bell.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            const tbody = document.getElementById("psLeaders");
+            try {
+                const leaders = await Api.points.leaderboard();
+                tbody.innerHTML = leaders.length ? leaders.slice(0, 15).map((u, i) => `
+                    <tr>
+                        <td data-label="Rank"><strong>${i + 1}</strong></td>
+                        <td><div class="cell-user"><img src="${u.avatarUrl || BnpUtils.avatar(u.fullName)}"><strong>${BnpUtils.escape(u.fullName)}</strong></div></td>
+                        <td data-label="City" class="muted">${BnpUtils.escape(u.city || "—")}</td>
+                        <td data-label="Points"><strong>${(u.points ?? 0).toLocaleString("en-IN")}</strong></td>
+                    </tr>`).join("") : `<tr><td colspan="4" class="muted" style="text-align:center;padding:20px;">No members yet.</td></tr>`;
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="4" class="muted" style="text-align:center;padding:20px;">Could not load leaderboard.</td></tr>`;
+            }
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

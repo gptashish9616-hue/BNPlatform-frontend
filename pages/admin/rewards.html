@@ -1,0 +1,133 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rewards — BNPlatform Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="rewards.css">
+</head>
+
+<body class="app" data-require="admin">
+
+    <div id="sidebar-container" data-shell="admin"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Rewards</h1><p>Referral rewards &amp; recognition</p></div>
+            <div class="topbar-icon" id="adminBell" style="margin-left:auto;"><i class="fa-solid fa-bell"></i><span class="bell-count-badge" id="adminBellDot" style="display:none;"></span></div>
+            <a href="profile.html"><img class="topbar-avatar" src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" alt="me" /></a>
+        </header>
+
+        <div class="app-content">
+
+            <div class="grid grid-3" style="margin-bottom:18px;">
+                <div class="stat"><div class="stat-num" id="rwFreeMonths">—</div><div class="stat-lbl">Free months granted</div></div>
+                <div class="stat"><div class="stat-num" id="rwPremium">—</div><div class="stat-lbl">Premium members</div></div>
+                <div class="stat"><div class="stat-num" id="rwMembers" style="color:var(--green);">—</div><div class="stat-lbl">Total members</div></div>
+            </div>
+
+            <div class="grid" style="grid-template-columns:1fr;align-items:start;" id="rwGrid">
+
+                <!-- Referral reward rules (live backend logic, admin-editable) -->
+                <div class="card">
+                    <div class="card-title">Application Referral reward <span class="muted" style="font-size:12px;">(live logic)</span></div>
+
+                    <div class="list-item" style="padding:10px 0;">
+                        <div class="li-icon" style="background:var(--green-light);color:var(--green);"><i class="fa-solid fa-gift"></i></div>
+                        <div class="li-body">
+                            <strong>+1 free month</strong>
+                            <p>Granted to the inviter when an invitee registers, for the first
+                                <input type="number" id="rwFreeMonthCap" min="0" style="width:56px;padding:3px 6px;border:1.5px solid var(--green);background:var(--green-light);border-radius:6px;font-size:12.5px;font-weight:700;color:var(--green);">
+                                accepted invites</p>
+                        </div>
+                    </div>
+                    <div class="list-item" style="padding:10px 0;">
+                        <div class="li-icon" style="background:var(--amber-light);color:var(--amber);"><i class="fa-solid fa-star"></i></div>
+                        <div class="li-body">
+                            <strong>Credibility points</strong>
+                            <p>
+                                <input type="number" id="rwPointsWithFreeMonth" min="0" style="width:64px;padding:3px 6px;border:1.5px solid var(--amber);background:var(--amber-light);border-radius:6px;font-size:12.5px;font-weight:700;color:var(--amber);">
+                                points also awarded to the inviter on a successful invite (while within the cap above)</p>
+                        </div>
+                    </div>
+                    <div class="list-item" style="padding:10px 0;">
+                        <div class="li-icon" style="background:var(--blue-light);color:var(--blue);"><i class="fa-solid fa-star"></i></div>
+                        <div class="li-body">
+                            <strong>Points after cap</strong>
+                            <p>Once the free-month cap is reached, each further accepted invite still earns
+                                <input type="number" id="rwPointsAfterCap" min="0" style="width:64px;padding:3px 6px;border:1.5px solid var(--blue);background:var(--blue-light);border-radius:6px;font-size:12.5px;font-weight:700;color:var(--blue);">
+                                points</p>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+                        <button class="btn btn-primary btn-sm" id="rwSaveBtn" onclick="saveRewardConfig()"><i class="fa-solid fa-floppy-disk"></i> Save changes</button>
+                    </div>
+                    <p class="muted" style="font-size:12.5px;margin:10px 0 0;line-height:1.6;">These values are enforced server-side in the invite module and take effect immediately for new invite acceptances.</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script src="../../assets/js/admin-bell.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            try {
+                const [users, stats, rewardConfig] = await Promise.all([
+                    Api.admin.users(), Api.dashboard.admin(), Api.admin.rewardConfig()
+                ]);
+                const freeMonths = users.reduce((s, u) => s + (u.freeMonthsEarned || 0), 0);
+                document.getElementById("rwFreeMonths").textContent = freeMonths.toLocaleString("en-IN");
+                document.getElementById("rwPremium").textContent = (stats.premiumUsers ?? 0).toLocaleString("en-IN");
+                document.getElementById("rwMembers").textContent = (stats.totalUsers ?? 0).toLocaleString("en-IN");
+
+                document.getElementById("rwFreeMonthCap").value = rewardConfig.freeMonthCap;
+                document.getElementById("rwPointsWithFreeMonth").value = rewardConfig.pointsWithFreeMonth;
+                document.getElementById("rwPointsAfterCap").value = rewardConfig.pointsAfterCap;
+            } catch (e) { console.warn(e); }
+        });
+
+        async function saveRewardConfig() {
+            const btn = document.getElementById("rwSaveBtn");
+            const freeMonthCap = parseInt(document.getElementById("rwFreeMonthCap").value, 10);
+            const pointsWithFreeMonth = parseInt(document.getElementById("rwPointsWithFreeMonth").value, 10);
+            const pointsAfterCap = parseInt(document.getElementById("rwPointsAfterCap").value, 10);
+
+            if ([freeMonthCap, pointsWithFreeMonth, pointsAfterCap].some(n => isNaN(n) || n < 0)) {
+                BnpUtils.toast("Please enter valid non-negative numbers", "error");
+                return;
+            }
+
+            btn.disabled = true;
+            try {
+                await Api.admin.updateRewardConfig({ freeMonthCap, pointsWithFreeMonth, pointsAfterCap });
+                BnpUtils.toast("Reward rules updated", "success");
+            } catch (e) {
+                BnpUtils.toast(e.message || "Could not update reward rules", "error");
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        window.saveRewardConfig = saveRewardConfig;
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

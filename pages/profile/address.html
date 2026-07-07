@@ -1,0 +1,124 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Addresses — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="address.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Addresses</h1><p>Manage your saved locations</p></div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+            <div class="grid" style="grid-template-columns:1fr 380px;align-items:start;" id="addrGrid">
+
+                <!-- Saved addresses -->
+                <div class="card">
+                    <div class="card-title">Saved addresses</div>
+                    <div id="addrList">
+                        <div class="list-item"><div class="li-body muted">Loading…</div></div>
+                    </div>
+                </div>
+
+                <!-- Add address -->
+                <div class="card">
+                    <div class="card-title">Add new address</div>
+                    <form id="addrForm">
+                        <div class="field"><label>Label</label>
+                            <select id="adLabel"><option>Office</option><option>Home</option><option>Other</option></select>
+                        </div>
+                        <div class="field"><label>Address line</label><input type="text" id="adLine1" placeholder="Building, street, area"></div>
+                        <div class="form-grid">
+                            <div class="field"><label>City</label><input type="text" id="adCity" placeholder="Mumbai"></div>
+                            <div class="field"><label>Pincode</label><input type="text" id="adPincode" placeholder="400076"></div>
+                        </div>
+                        <div class="field"><label>State</label><input type="text" id="adState" placeholder="Maharashtra"></div>
+                        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:16px;color:var(--muted);"><input type="checkbox" id="adPrimary" style="accent-color:var(--red);width:15px;height:15px;"> Set as primary address</label>
+                        <button type="submit" class="btn btn-primary" style="width:100%;"><i class="fa-solid fa-plus"></i> Add address</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        async function loadAddresses() {
+            const box = document.getElementById("addrList");
+            try {
+                const list = await Api.profile.addresses();
+                if (!list.length) { box.innerHTML = `<div class="list-item"><div class="li-body muted">No saved addresses yet.</div></div>`; return; }
+                box.innerHTML = list.map((a) => {
+                    const line = [a.line1, a.line2, a.city, a.state, a.pincode].filter(Boolean).join(", ");
+                    const icon = (a.label || "").toLowerCase() === "home" ? "house" : "briefcase";
+                    return `
+                    <div class="list-item">
+                        <div class="li-icon" style="background:var(--red-light);color:var(--red);"><i class="fa-solid fa-${icon}"></i></div>
+                        <div class="li-body">
+                            <strong>${BnpUtils.escape(a.label || "Address")} ${a.primaryAddress ? '<span class="badge badge-green" style="margin-left:6px;">Primary</span>' : ""}</strong>
+                            <p>${BnpUtils.escape(line || "—")}</p>
+                        </div>
+                        <div style="display:flex;gap:6px;">
+                            <button class="btn btn-ghost btn-sm" onclick="delAddress(${a.id})"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>`;
+                }).join("");
+            } catch (e) { box.innerHTML = `<div class="list-item"><div class="li-body muted">Could not load addresses.</div></div>`; }
+        }
+
+        async function delAddress(id) {
+            if (!confirm("Delete this address?")) return;
+            try { await Api.profile.deleteAddress(id); BnpUtils.toast("Address deleted.", "success"); loadAddresses(); }
+            catch (e) { BnpUtils.toast(e.message, "error"); }
+        }
+        window.delAddress = delAddress;
+
+        document.getElementById("addrForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector("button[type=submit]");
+            BnpUtils.loading(btn, true, "Adding…");
+            try {
+                await Api.profile.addAddress({
+                    label: document.getElementById("adLabel").value,
+                    line1: document.getElementById("adLine1").value.trim(),
+                    city: document.getElementById("adCity").value.trim(),
+                    pincode: document.getElementById("adPincode").value.trim(),
+                    state: document.getElementById("adState").value.trim(),
+                    primaryAddress: document.getElementById("adPrimary").checked
+                });
+                BnpUtils.toast("Address added!", "success");
+                e.target.reset();
+                loadAddresses();
+            } catch (err) { BnpUtils.toast(err.message, "error"); }
+            finally { BnpUtils.loading(btn, false); }
+        });
+
+        document.addEventListener("DOMContentLoaded", () => { if (window.BnpStorage.isAuthenticated()) loadAddresses(); });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

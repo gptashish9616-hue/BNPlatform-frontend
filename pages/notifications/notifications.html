@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notifications — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="notifications.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Notifications</h1><p>Stay on top of your network</p></div>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" style="margin-left:auto;" />
+        </header>
+
+        <div class="app-content">
+            <div class="grid" style="grid-template-columns:1fr 300px;align-items:start;" id="ntGrid">
+
+                <!-- Main notifications panel -->
+                <div class="card" style="padding:0;overflow:hidden;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);">
+                        <div class="card-title" style="margin:0;">Notifications</div>
+                        <button class="btn btn-ghost btn-sm" onclick="markAllRead()"><i class="fa-solid fa-check-double"></i> Mark all read</button>
+                    </div>
+
+                    <!-- Filter tabs -->
+                    <div class="tabs" style="margin:0;padding:0 22px;border-bottom:1px solid var(--border);">
+                        <div class="tab active" data-filter="all" onclick="applyFilter('all', this)">All</div>
+                        <div class="tab" data-filter="REQUIREMENT" onclick="applyFilter('REQUIREMENT', this)">Requirements</div>
+                        <div class="tab" data-filter="REFERRAL" onclick="applyFilter('REFERRAL', this)">Referrals</div>
+                        <div class="tab" data-filter="SYSTEM" onclick="applyFilter('SYSTEM', this)">System</div>
+                    </div>
+
+                    <!-- Filter dropdown (mobile only) -->
+                    <div class="tabs-mobile-select" style="padding:10px 22px;border-bottom:1px solid var(--border);">
+                        <select id="ntFilterSelect" onchange="applyFilterFromSelect(this.value)" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;font-weight:600;color:var(--text);background:#fff;">
+                            <option value="all">All</option>
+                            <option value="REQUIREMENT">Requirements</option>
+                            <option value="REFERRAL">Referrals</option>
+                            <option value="SYSTEM">System</option>
+                        </select>
+                    </div>
+
+                    <div id="ntList" style="padding:4px 0;"></div>
+                </div>
+
+                <!-- Settings panel -->
+                <div style="display:flex;flex-direction:column;gap:18px;">
+                    <!-- Unread summary -->
+                    <div class="card" id="unreadSummary" style="display:none;">
+                        <div class="card-title">Unread</div>
+                        <div style="text-align:center;padding:8px 0;">
+                            <div id="unreadNum" style="font-size:34px;font-weight:800;color:var(--red);">0</div>
+                            <p class="muted" style="margin:4px 0 0;font-size:13px;">unread notifications</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" style="width:100%;margin-top:10px;" onclick="markAllRead()">Clear all</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        /* ---- same ReqNotifStore as dashboard ---- */
+        const RNS = {
+            _k(uid) { return `bnp_rn_${uid || "g"}`; },
+            get(uid) { try { return JSON.parse(localStorage.getItem(this._k(uid)) || "[]"); } catch { return []; } },
+            save(uid, list) { localStorage.setItem(this._k(uid), JSON.stringify(list.slice(0, 60))); },
+            markOne(uid, id) { this.save(uid, this.get(uid).map(n => n.id === id ? { ...n, read: true } : n)); },
+            markAll(uid) { this.save(uid, this.get(uid).map(n => ({ ...n, read: true }))); },
+            remove(uid, id) { this.save(uid, this.get(uid).filter(n => n.id !== id)); },
+            unread(uid) { return this.get(uid).filter(n => !n.read).length; }
+        };
+
+        const NT_ICON = {
+            REFERRAL:     ["green",  "handshake"],
+            REQUIREMENT:  ["amber",  "layer-group"],
+            CHAT:         ["blue",   "comment"],
+            REVIEW:       ["amber",  "star"],
+            SUBSCRIPTION: ["purple", "crown"],
+            POINTS:       ["amber",  "star"],
+            SYSTEM:       ["hint",   "bell"]
+        };
+
+        let allItems = [];  // merged list
+        let activeFilter = "all";
+        let me = null;
+        const fromUserCache = {};  // fromUserId → { fullName, avatarUrl }
+
+        /* Build a unified list from backend notifications + local req notifications */
+        async function loadAllNotifications() {
+            const box = document.getElementById("ntList");
+            box.innerHTML = `<div class="list-item" style="padding:16px 22px;"><div class="li-body muted"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</div></div>`;
+
+            const backendItems = [];
+            try {
+                const raw = await Api.notifications.list(false);
+                raw.forEach(n => backendItems.push({
+                    source: "backend",
+                    id: n.id,
+                    type: n.type || "SYSTEM",
+                    title: n.title || "Notification",
+                    message: n.message || "",
+                    at: n.createdAt,
+                    read: !!n.readFlag,
+                    linkId: n.requirementId || n.referralId || null,
+                    fromUserId: n.fromUserId || null
+                }));
+            } catch (e) { console.warn("Backend notifications:", e); }
+
+            /* local requirement notifications — same shape as backend items so
+               they render identically (avatar row, title, message) */
+            const localItems = RNS.get(me?.userId).map(n => ({
+                source: "local",
+                id: n.id,
+                type: "REQUIREMENT",
+                title: "New requirement posted",
+                message: n.sub ? `Posted "${n.title || ""}" · ${n.sub}` : n.title,
+                at: n.at,
+                read: n.read,
+                linkId: n.reqId,
+                fromUserId: n.fromUserId || null
+            }));
+
+            // Pre-fetch all fromUser names/avatars in parallel (backend + local sources)
+            const fromIds = [...new Set([...backendItems, ...localItems].map(n => n.fromUserId).filter(Boolean))];
+            await Promise.all(fromIds.map(async id => {
+                try {
+                    const u = await Api.users.get(id);
+                    fromUserCache[id] = { fullName: u.fullName, avatarUrl: u.avatarUrl };
+                } catch (e) { fromUserCache[id] = { fullName: "Member", avatarUrl: null }; }
+            }));
+
+            /* merge, deduplicate by reqId where backend already has one */
+            const backendReqIds = new Set(
+                backendItems.filter(n => n.type === "REQUIREMENT" && n.linkId).map(n => String(n.linkId))
+            );
+            const filteredLocal = localItems.filter(n => !backendReqIds.has(String(n.linkId)));
+
+            /* combine and sort newest first */
+            allItems = [...backendItems, ...filteredLocal]
+                .sort((a, b) => new Date(b.at) - new Date(a.at));
+
+            const unread = allItems.filter(n => !n.read).length;
+            const summary = document.getElementById("unreadSummary");
+            const numEl = document.getElementById("unreadNum");
+            if (unread > 0) {
+                summary.style.display = "";
+                numEl.textContent = unread;
+            } else {
+                summary.style.display = "none";
+            }
+
+            renderList();
+        }
+
+        function renderList() {
+            const box = document.getElementById("ntList");
+            const filtered = activeFilter === "all"
+                ? allItems
+                : allItems.filter(n => n.type === activeFilter);
+
+            if (!filtered.length) {
+                box.innerHTML = `
+                    <div style="padding:40px 22px;">
+                        <div class="empty">
+                            <i class="fa-solid fa-bell-slash"></i>
+                            <h3>No notifications</h3>
+                            <p>${activeFilter === "all" ? "You're all caught up — no notifications yet." : `No ${activeFilter.toLowerCase()} notifications.`}</p>
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            box.innerHTML = filtered.map(n => {
+                const [color, ic] = NT_ICON[n.type] || NT_ICON.SYSTEM;
+                const unread = !n.read;
+                const link = n.type === "REQUIREMENT" && n.linkId
+                    ? `../requirements/requirement-details.html?id=${n.linkId}`
+                    : (n.type === "REFERRAL" && n.linkId)
+                        ? `../referrals/referral-details.html?id=${n.linkId}`
+                        : null;
+
+                const fromUser = n.fromUserId ? fromUserCache[n.fromUserId] : null;
+                return `
+                <div class="nt-row ${unread ? "nt-unread" : ""}"
+                     onclick="handleNotifClick('${n.source}', '${n.id}', ${JSON.stringify(link)}, this)">
+                    <div class="nt-icon-wrap" style="background:var(--${color}-light);color:var(--${color});">
+                        <i class="fa-solid fa-${ic}"></i>
+                    </div>
+                    <div class="nt-body">
+                        ${fromUser ? `
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+                            <img src="${BnpUtils.avatarFor(fromUser.avatarUrl, fromUser.fullName)}"
+                                 style="width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+                            <span style="font-size:12.5px;font-weight:600;color:var(--text);">${BnpUtils.escape(fromUser.fullName)}</span>
+                        </div>` : ""}
+                        <strong>${BnpUtils.escape(n.title)}</strong>
+                        <p>${BnpUtils.escape(n.message)}</p>
+                        <span class="nt-time"><i class="fa-regular fa-clock"></i> ${BnpUtils.dateTime(n.at)}</span>
+                    </div>
+                    <div class="nt-right">
+                        ${unread ? `<span class="nt-dot"></span>` : ""}
+                        <button class="nt-del-btn" title="Delete notification"
+                            onclick="event.stopPropagation(); deleteNotification('${n.source}', '${n.id}', this)">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                        ${link ? `<i class="fa-solid fa-chevron-right muted" style="font-size:11px;"></i>` : ""}
+                    </div>
+                </div>`;
+            }).join("");
+        }
+
+        async function handleNotifClick(source, id, link, el) {
+            /* mark read */
+            if (source === "backend") {
+                try { await Api.notifications.markRead(id); } catch (e) { /* ignore */ }
+            } else {
+                RNS.markOne(me?.userId, id);
+            }
+            /* update UI */
+            el.classList.remove("nt-unread");
+            const dot = el.querySelector(".nt-dot");
+            if (dot) dot.remove();
+            /* sync count */
+            const unread = allItems.filter(n => !n.read).length - (el.classList.contains("nt-unread") ? 0 : 1);
+            const numEl = document.getElementById("unreadNum");
+            if (numEl) numEl.textContent = Math.max(0, parseInt(numEl.textContent) - 1);
+            /* navigate */
+            if (link) setTimeout(() => location.href = link, 120);
+        }
+
+        async function deleteNotification(source, id, btn) {
+            const row = btn.closest(".nt-row");
+            if (row) row.style.pointerEvents = "none";
+
+            if (source === "backend") {
+                try { await Api.notifications.delete(id); }
+                catch (e) {
+                    BnpUtils.toast(e.message || "Could not delete notification", "error");
+                    if (row) row.style.pointerEvents = "";
+                    return;
+                }
+            } else {
+                RNS.remove(me?.userId, id);
+            }
+
+            const wasUnread = row?.classList.contains("nt-unread");
+            allItems = allItems.filter(n => String(n.id) !== String(id));
+
+            if (row) row.remove();
+
+            if (wasUnread) {
+                const numEl = document.getElementById("unreadNum");
+                const summary = document.getElementById("unreadSummary");
+                const remaining = allItems.filter(n => !n.read).length;
+                if (remaining > 0 && numEl) numEl.textContent = remaining;
+                else if (summary) summary.style.display = "none";
+            }
+
+            const filtered = activeFilter === "all" ? allItems : allItems.filter(n => n.type === activeFilter);
+            if (!filtered.length) renderList();
+        }
+
+        async function markAllRead() {
+            try { await Api.notifications.markAllRead(); } catch (e) { /* ignore */ }
+            RNS.markAll(me?.userId);
+            allItems = allItems.map(n => ({ ...n, read: true }));
+            renderList();
+            const summary = document.getElementById("unreadSummary");
+            if (summary) summary.style.display = "none";
+            BnpUtils.toast("All notifications marked as read", "success");
+        }
+
+        function applyFilter(filter, el) {
+            activeFilter = filter;
+            document.querySelectorAll(".tabs .tab").forEach(t => t.classList.remove("active"));
+            el.classList.add("active");
+            const sel = document.getElementById("ntFilterSelect");
+            if (sel) sel.value = filter;
+            renderList();
+        }
+
+        function applyFilterFromSelect(filter) {
+            activeFilter = filter;
+            document.querySelectorAll(".tabs .tab").forEach(t => t.classList.toggle("active", t.dataset.filter === filter));
+            renderList();
+        }
+
+        window.handleNotifClick = handleNotifClick;
+        window.deleteNotification = deleteNotification;
+        window.markAllRead = markAllRead;
+        window.applyFilter = applyFilter;
+        window.applyFilterFromSelect = applyFilterFromSelect;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            me = window.BnpStorage.getUser();
+            loadAllNotifications();
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+
+    <style>
+        /* Notification row — card style */
+        .nt-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 18px;
+            margin: 10px 16px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, .05);
+            transition: box-shadow .15s, transform .15s, background .15s;
+        }
+        .nt-row:first-child { margin-top: 12px; }
+        .nt-row:last-child { margin-bottom: 12px; }
+        .nt-row:hover { box-shadow: 0 4px 14px rgba(15, 23, 42, .09); transform: translateY(-1px); }
+        .nt-row.nt-unread {
+            background: rgba(227, 30, 36, .035);
+            border-left: 3px solid var(--red);
+            padding-left: 15px;
+        }
+        .nt-row.nt-unread:hover { background: rgba(227, 30, 36, .06); }
+
+        .nt-icon-wrap {
+            width: 40px; height: 40px; flex-shrink: 0;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .nt-body { flex: 1; min-width: 0; }
+        .nt-body strong { font-size: 13.5px; font-weight: 600; display: block; }
+        .nt-body p { font-size: 12.5px; color: var(--muted); margin: 3px 0 5px; line-height: 1.5; }
+        .nt-time { font-size: 11.5px; color: var(--hint); }
+
+        .nt-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .nt-dot {
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            background: var(--red);
+            flex-shrink: 0;
+        }
+        .nt-del-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--hint);
+            font-size: 13px;
+            padding: 6px;
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            transition: color .12s, background .12s;
+        }
+        .nt-del-btn:hover { color: var(--red); background: var(--red-light); }
+
+        /* Responsive */
+        @media (max-width: 860px) {
+            #ntGrid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 480px) {
+            .nt-row { padding: 12px 14px; margin: 8px 12px; }
+            .nt-row.nt-unread { padding-left: 11px; }
+        }
+    </style>
+</body>
+
+</html>

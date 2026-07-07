@@ -1,0 +1,138 @@
+    /* breadcrumb */
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb a {
+        color: var(--muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: color .15s;
+    }
+
+    .breadcrumb a:hover {
+        color: var(--red);
+    }
+
+    .breadcrumb .fa-house {
+        color: var(--red);
+    }
+
+    .breadcrumb .sep {
+        color: var(--hint);
+        font-size: 12px;
+    }
+
+    .breadcrumb .bc-current {
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    /* filter badge hover */
+    .req-filter {
+        transition: background .15s, color .15s;
+        user-select: none;
+    }
+
+    /* Own requirement card highlight */
+    .own-req-card {
+        border-left: 4px solid var(--red) !important;
+        background: linear-gradient(135deg, #fff5f5 0%, #ffffff 60%) !important;
+        position: relative;
+    }
+
+    .own-req-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--red);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 20px;
+        letter-spacing: 0.3px;
+    }
+
+    /* More dropdown */
+    .req-more-wrap {
+        position: relative;
+    }
+
+    .req-more-dropdown {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
+        z-index: 1000;
+        min-width: 188px;
+        max-height: 320px;
+        overflow-y: auto;
+        padding: 6px;
+    }
+
+    .req-more-dropdown.open {
+        display: flex;
+    }
+
+    .req-more-item {
+        background: none;
+        border: none;
+        padding: 8px 12px;
+        text-align: left;
+        font-size: 13px;
+        cursor: pointer;
+        border-radius: 6px;
+        color: var(--text);
+        font-family: inherit;
+        white-space: nowrap;
+    }
+
+    .req-more-item:hover {
+        background: #f5f5f5;
+    }
+
+    .req-more-other {
+        color: var(--muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Other professions modal items */
+    .req-other-item {
+        background: #f9f9f9;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 13px;
+        cursor: pointer;
+        color: var(--text);
+        font-family: inherit;
+        text-align: left;
+        transition: background .15s, border-color .15s;
+    }
+
+    .req-other-item:hover {
+        background: #fff0f0;
+        border-color: var(--red);
+        color: var(--red);
+    }
+
+    @media (max-width: 991px) {
+        #reqGrid {
+            grid-template-columns: 1fr !important;
+        }
+    }

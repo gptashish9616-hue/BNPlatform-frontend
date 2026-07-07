@@ -1,0 +1,114 @@
+@media (max-width: 991px) { #planGrid { grid-template-columns: 1fr !important; } }
+#planGrid li i { width: 16px; }
+
+/* Single plan — center it */
+#planGrid.single-plan {
+    display: flex;
+    justify-content: center;
+}
+
+/* Red-featured upgrade card */
+.plan-card-upgrade {
+    border: 2px solid var(--red) !important;
+    border-radius: 16px;
+    overflow: hidden;
+    padding: 0 !important;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(227, 30, 36, 0.18);
+    position: relative;
+}
+
+.plan-card-upgrade .plan-upgrade-header {
+    background: linear-gradient(135deg, var(--red) 0%, #b71c20 100%);
+    padding: 28px 28px 24px;
+    text-align: center;
+    color: #fff;
+}
+
+.plan-card-upgrade .plan-upgrade-header .plan-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.22);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+}
+
+.plan-card-upgrade .plan-upgrade-header h3 {
+    font-size: 22px;
+    font-weight: 800;
+    margin: 0 0 4px;
+    color: #fff;
+}
+
+.plan-card-upgrade .plan-upgrade-header p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.82);
+    margin: 0 0 18px;
+}
+
+.plan-card-upgrade .plan-upgrade-header .plan-price {
+    font-size: 42px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+}
+
+.plan-card-upgrade .plan-upgrade-header .plan-price span {
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.75);
+}
+
+.plan-card-upgrade .plan-upgrade-body {
+    padding: 24px 28px 28px;
+    background: #fff;
+}
+
+.plan-card-upgrade .plan-upgrade-body ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.plan-card-upgrade .plan-upgrade-body ul li i {
+    color: var(--red);
+    margin-right: 8px;
+    width: 16px;
+}
+
+.plan-card-upgrade .btn-upgrade {
+    display: block;
+    width: 100%;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.12s;
+    text-align: center;
+}
+
+.plan-card-upgrade .btn-upgrade:hover {
+    background: var(--red-dark);
+    transform: translateY(-1px);
+}
+
+.plan-card-upgrade .btn-upgrade:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}

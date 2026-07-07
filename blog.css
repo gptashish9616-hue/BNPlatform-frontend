@@ -1,0 +1,327 @@
+        /* ====================================================================
+           BLOG PAGE — page-specific styles
+           SECTIONS:  Blog layout · Post card · Sidebar widgets · Responsive
+           ==================================================================== */
+        .blog-layout {
+            padding: 64px 0;
+        }
+
+        /* ---- main post card ---- */
+        .blog-post {
+            background: #fff;
+            border: 1px solid var(--s-border);
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 44px;
+            transition: box-shadow .3s ease, transform .3s ease;
+        }
+
+        .blog-post:hover {
+            box-shadow: 0 18px 44px rgba(15, 23, 42, .10);
+            transform: translateY(-3px);
+        }
+
+        .blog-post__media {
+            position: relative;
+        }
+
+        .blog-post__media img {
+            width: 100%;
+            height: 340px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .blog-post__badge {
+            position: absolute;
+            left: 24px;
+            bottom: -22px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .14);
+            display: flex;
+            align-items: stretch;
+            overflow: hidden;
+        }
+
+        .blog-post__badge .d {
+            text-align: center;
+            padding: 8px 16px;
+            line-height: 1.1;
+        }
+
+        .blog-post__badge .d b {
+            display: block;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--s-red);
+        }
+
+        .blog-post__badge .d span {
+            font-size: 11px;
+            color: var(--s-muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .blog-post__badge .by {
+            display: flex;
+            align-items: center;
+            padding: 0 18px;
+            font-size: 13px;
+            color: var(--s-muted);
+            border-left: 1px solid var(--s-border);
+        }
+
+        .blog-post__body {
+            padding: 42px 30px 30px;
+        }
+
+        .blog-post__body h2 {
+            font-size: 23px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            line-height: 1.35;
+        }
+
+        .blog-post__body h2 a {
+            color: var(--s-text);
+            text-decoration: none;
+            transition: color .2s;
+        }
+
+        .blog-post__body h2 a:hover {
+            color: var(--s-red);
+        }
+
+        .blog-post__body p {
+            color: var(--s-muted);
+            line-height: 1.75;
+            margin-bottom: 22px;
+        }
+
+        .read-more {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1.5px solid var(--s-border);
+            color: var(--s-text);
+            padding: 9px 12px 9px 22px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            transition: .25s ease;
+        }
+
+        .read-more i {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--s-red);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            transition: .25s ease;
+        }
+
+        .read-more:hover {
+            border-color: var(--s-red);
+            color: var(--s-red);
+        }
+
+        .read-more:hover i {
+            transform: translateX(2px);
+        }
+
+        /* ---- sidebar widgets ---- */
+        .widget {
+            background: #fff;
+            border: 1px solid var(--s-border);
+            border-radius: 18px;
+            padding: 26px;
+            margin-bottom: 30px;
+        }
+
+        .widget__title {
+            font-size: 17px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .widget__title::after {
+            content: "";
+            flex: 0 0 28px;
+            height: 2px;
+            background: var(--s-red);
+            border-radius: 2px;
+        }
+
+        .search-widget {
+            display: flex;
+        }
+
+        .search-widget input {
+            flex: 1;
+            border: 1px solid var(--s-border);
+            border-right: none;
+            border-radius: 10px 0 0 10px;
+            padding: 0 14px;
+            height: 46px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-widget button {
+            border: none;
+            background: var(--s-red);
+            color: #fff;
+            width: 52px;
+            border-radius: 0 10px 10px 0;
+            cursor: pointer;
+        }
+
+        .cat-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .cat-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 11px 14px;
+            border: 1px solid var(--s-border);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: .2s ease;
+            color: var(--s-text);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .cat-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .cat-list li:hover {
+            background: var(--s-red);
+            color: #fff;
+            border-color: var(--s-red);
+        }
+
+        .cat-list li .count {
+            background: var(--s-bg);
+            border-radius: 6px;
+            padding: 1px 9px;
+            font-size: 12px;
+            color: var(--s-muted);
+        }
+
+        .cat-list li:hover .count {
+            background: rgba(255, 255, 255, .25);
+            color: #fff;
+        }
+
+        .recent {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .recent:last-child {
+            margin-bottom: 0;
+        }
+
+        .recent img {
+            width: 64px;
+            height: 64px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex: 0 0 64px;
+        }
+
+        .recent a {
+            text-decoration: none;
+            color: var(--s-text);
+        }
+
+        .recent h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 2px 0 4px;
+            line-height: 1.45;
+            transition: color .2s;
+        }
+
+        .recent a:hover h4 {
+            color: var(--s-red);
+        }
+
+        .recent small {
+            color: var(--s-muted);
+            font-size: 12px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tags a {
+            font-size: 13px;
+            padding: 7px 14px;
+            border: 1px solid var(--s-border);
+            border-radius: 8px;
+            color: var(--s-muted);
+            text-decoration: none;
+            transition: .2s ease;
+        }
+
+        .tags a:hover {
+            background: var(--s-red);
+            color: #fff;
+            border-color: var(--s-red);
+        }
+
+        .pager {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .pager a {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--s-border);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--s-text);
+            font-weight: 700;
+            transition: .2s ease;
+        }
+
+        .pager a:hover,
+        .pager a.active {
+            background: var(--s-red);
+            color: #fff;
+            border-color: var(--s-red);
+        }
+
+        @media (max-width: 991px) {
+            .blog-post__media img {
+                height: 240px;
+            }
+        }

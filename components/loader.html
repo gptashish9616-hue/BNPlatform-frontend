@@ -1,0 +1,15 @@
+﻿<link rel="stylesheet" href="loader.css">
+<!-- Reusable full-screen loading overlay.
+     Usage: drop the markup into a page (or inject it), then call
+     showLoader() / hideLoader(). Self-contained styles + script. -->
+<div id="appLoader" class="app-loader" role="status" aria-live="polite" aria-label="Loading">
+    <div class="app-loader__spinner"></div>
+    <p class="app-loader__text">Loading…</p>
+</div>
+
+
+
+<script>
+    function showLoader() { document.getElementById('appLoader')?.classList.add('show'); }
+    function hideLoader() { document.getElementById('appLoader')?.classList.remove('show'); }
+</script>

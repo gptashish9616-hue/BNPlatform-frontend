@@ -1,0 +1,27 @@
+﻿<link rel="stylesheet" href="notification.css">
+<!-- Reusable toast notifications.
+     Usage: include this once on a page, then call
+     notify('Saved successfully', 'success')   // success | error | info | warning
+     Self-contained styles + script. -->
+<div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+
+
+<script>
+    function notify(message, type = 'info', timeout = 3500) {
+        const stack = document.getElementById('toastStack');
+        if (!stack) return;
+        const icons = { success: '✓', error: '✕', warning: '!', info: 'i' };
+        const el = document.createElement('div');
+        el.className = 'toast toast--' + type;
+        el.innerHTML =
+            '<span class="toast__icon">' + (icons[type] || icons.info) + '</span>' +
+            '<div class="toast__body">' + message + '</div>' +
+            '<button class="toast__close" aria-label="Dismiss">&times;</button>';
+        stack.appendChild(el);
+        requestAnimationFrame(() => el.classList.add('show'));
+        const remove = () => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); };
+        el.querySelector('.toast__close').addEventListener('click', remove);
+        if (timeout) setTimeout(remove, timeout);
+    }
+</script>

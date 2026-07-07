@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BNPlatform Navbar</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=I  nter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" hr ef="assets/css/site.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/site.css">
+
+    <!-- Leaflet (free, no API key / no billing required) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+
+
+    <!-- Shared navbar is injected here by assets/js/include.js -->
+    <div id="navbar-container"></div>
+
+    <!-- ===================== FULL-WIDTH MAP HERO ===================== -->
+    <div class="map-hero">
+
+        <!-- Leaflet map fills the entire box -->
+        <div id="map"></div>
+
+        <!-- Floating search bar -->
+        <div class="map-search-bar">
+            <div class="map-search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="memberSearch" placeholder="Search by name, profession or city…">
+            </div>
+            <button id="memberSearchBtn">
+                <i class="fa-solid fa-magnifying-glass"></i> Search
+            </button>
+        </div>
+
+        <!-- Category filter pills (populated from assets/js/professions.js) -->
+        <div class="map-category-pills" id="mapCategoryPills">
+            <div class="more-pill-wrap">
+                <button class="map-pill more-pill-btn" id="morePillBtn">More <i class="fa-solid fa-chevron-down"
+                        style="font-size:10px;"></i></button>
+                <div class="more-pill-dropdown" id="morePillDropdown">
+                    <button class="more-pill-item more-pill-other" id="otherPillBtn">Other <i
+                            class="fa-solid fa-chevron-right" style="font-size:10px;"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other professions modal -->
+        <div id="otherProfModal" class="other-prof-modal" style="display:none;">
+            <div class="other-prof-modal-box">
+                <div class="other-prof-modal-head">
+                    <span>Other Professions</span>
+                    <button id="otherProfClose"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="other-prof-grid" id="otherProfGrid"></div>
+            </div>
+        </div>
+
+        <!-- Hero text overlay -->
+        <div class="map-hero-text">
+            <h1>Grow Your Network</h1>
+            <p>Connect with professionals, share opportunities, and grow your business.</p>
+        </div>
+
+    </div>
+
+    <!-- ===================== PROFESSIONALS NEAR YOU (shown after search) ===================== -->
+    <section id="professionalsSection">
+        <div class="container">
+            <div class="professionals-header">
+                <h2>Professionals near you</h2>
+                <a href="members.html">Show all</a>
+            </div>
+            <div id="memberResults" class="row g-3"></div>
+        </div>
+    </section>
+
+
+    <!-- ===================== STATS BAR ===================== -->
+    <section style="background:#e31e24;padding:35px 0;">
+        <div class="container">
+            <div class="row text-center g-4 text-white">
+                <div class="col-6 col-md-3">
+                    <div style="font-size:34px;font-weight:800;">18,000+</div>
+                    <div style="opacity:.85;font-size:14px;">Active members</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div style="font-size:34px;font-weight:800;">40+</div>
+                    <div style="opacity:.85;font-size:14px;">Cities covered</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div style="font-size:34px;font-weight:800;">7,800+</div>
+                    <div style="opacity:.85;font-size:14px;">Referrals / month</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div style="font-size:34px;font-weight:800;">4.9★</div>
+                    <div style="opacity:.85;font-size:14px;">Avg. member rating</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===================== FEATURES ===================== -->
+    <section class="site-section pt-4">
+        <div class="container">
+            <div class="section-head">
+                <div class="eyebrow">Why BNPlatform</div>
+                <h2>Everything you need to grow your network</h2>
+                <p>A complete toolkit to find professionals, exchange referrals, and build a credible reputation.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#fde8e9;color:#e31e24;"><i
+                                class="fa-solid fa-location-dot"></i></div>
+                        <h3>Local discovery</h3>
+                        <p>Find verified professionals near you on an interactive map, filtered by category and
+                            distance.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#e8f0fe;color:#1a73e8;"><i
+                                class="fa-solid fa-handshake"></i></div>
+                        <h3>Smart referrals</h3>
+                        <p>Give and receive trusted referrals. Earn rewards and credibility points with every
+                            connection.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#e6f4ea;color:#1e8e3e;"><i
+                                class="fa-solid fa-shield-halved"></i></div>
+                        <h3>Verified profiles</h3>
+                        <p>Document-backed authenticity so you always know who you're dealing with.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#fef7e0;color:#b06000;"><i
+                                class="fa-solid fa-comments"></i></div>
+                        <h3>Direct messaging</h3>
+                        <p>Chat with professionals in real time and discuss work without leaving the platform.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#ede7ff;color:#7c4dff;"><i
+                                class="fa-solid fa-star"></i></div>
+                        <h3>Ratings &amp; reviews</h3>
+                        <p>Build a reputation that speaks for itself with verified reviews on your profile.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#e8f0fe;color:#1a73e8;"><i
+                                class="fa-solid fa-trophy"></i></div>
+                        <h3>Leaderboards</h3>
+                        <p>Climb city &amp; state-wise rankings as you earn credibility points.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===================== HOW IT WORKS ===================== -->
+    <section class="site-section alt pt-4">
+        <div class="container">
+            <div class="section-head">
+                <div class="eyebrow">Simple process</div>
+                <h2>Get started in four steps</h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-3 text-center">
+                    <div class="feature-icon mx-auto"
+                        style="background:#fde8e9;color:#e31e24;width:64px;height:64px;font-size:24px;">1</div>
+                    <h3 style="font-size:16px;font-weight:700;margin:14px 0 6px;">Create your profile</h3>
+                    <p class="text-muted" style="font-size:14px;">Add your profession, skills, and verify with
+                        documents.</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="feature-icon mx-auto"
+                        style="background:#e8f0fe;color:#1a73e8;width:64px;height:64px;font-size:24px;">2</div>
+                    <h3 style="font-size:16px;font-weight:700;margin:14px 0 6px;">Discover professionals</h3>
+                    <p class="text-muted" style="font-size:14px;">Find verified pros near you on the map.</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="feature-icon mx-auto"
+                        style="background:#e6f4ea;color:#1e8e3e;width:64px;height:64px;font-size:24px;">3</div>
+                    <h3 style="font-size:16px;font-weight:700;margin:14px 0 6px;">Refer or post needs</h3>
+                    <p class="text-muted" style="font-size:14px;">Send referrals or post a requirement.</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="feature-icon mx-auto"
+                        style="background:#fef7e0;color:#b06000;width:64px;height:64px;font-size:24px;">4</div>
+                    <h3 style="font-size:16px;font-weight:700;margin:14px 0 6px;">Earn credibility</h3>
+                    <p class="text-muted" style="font-size:14px;">Every closed connection boosts your rank.</p>
+                </div>
+            </div>
+            <div class="text-center mt-5">
+                <a href="how-it-works.html" class="btn-site btn-site-outline">Learn more <i
+                        class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===================== REFERRAL TYPES ===================== -->
+    <section class="site-section pt-4">
+        <div class="container">
+            <div class="section-head">
+                <div class="eyebrow">Two ways to refer</div>
+                <h2>Referrals that reward everyone</h2>
+            </div>
+            <div class="row g-4 justify-content-center ">
+                <div class="col-lg-5">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#ede7ff;color:#7c4dff;"><i
+                                class="fa-solid fa-user-plus"></i></div>
+                        <h3>App Referral</h3>
+                        <p style="margin-bottom:14px;">Invite a peer to join. When they sign up &amp; verify, you both
+                            get rewarded — including a <strong>free subscription month</strong>.</p>
+                        <span class="chip-soft"><i class="fa-solid fa-gift"></i> Reward: 1 free month</span>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#e8f0fe;color:#1a73e8;"><i
+                                class="fa-solid fa-handshake"></i></div>
+                        <h3>Deal Referral</h3>
+                        <p style="margin-bottom:14px;">Post a requirement for a service you need. A matching pro accepts
+                            it, and you earn <strong>credibility points</strong> when the deal closes.</p>
+                        <span class="chip-soft"><i class="fa-solid fa-star"></i> Reward: credibility points</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===================== EXPLORE CATEGORIES ===================== -->
+    <section class="site-section alt pt-4">
+        <div class="container">
+            <div class="section-head">
+                <div class="eyebrow">Explore</div>
+                <h2>Find professionals by category</h2>
+            </div>
+            <div class="row g-3">
+                <div class="col-6 col-md-3"><a href="members.html"
+                        class="category-card d-block text-center text-decoration-none text-dark">
+                        <div class="category-icon"><i class="fa-solid fa-calculator"></i></div>
+                        <h3>Finance &amp; CA</h3>
+                    </a></div>
+                <div class="col-6 col-md-3"><a href="members.html"
+                        class="category-card d-block text-center text-decoration-none text-dark">
+                        <div class="category-icon"><i class="fa-solid fa-palette"></i></div>
+                        <h3>Design</h3>
+                    </a></div>
+                <div class="col-6 col-md-3"><a href="members.html"
+                        class="category-card d-block text-center text-decoration-none text-dark">
+                        <div class="category-icon"><i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <h3>Legal</h3>
+                    </a></div>
+                <div class="col-6 col-md-3"><a href="members.html"
+                        class="category-card d-block text-center text-decoration-none text-dark">
+                        <div class="category-icon "><i class="fa-solid fa-bullhorn"></i></div>
+                        <h3>Marketing</h3>
+                    </a></div>
+                <div class="col-6 col-md-3"><a href="members.html"
+                        class="category-card d-block text-center text-decoration-none text-dark">
+                        <div class="category-icon "><i class="fa-solid fa-laptop-code"></i></div>
+                        <h3>IT &amp; Software</h3>
+                    </a></div>
+                <div class="col-6 col-md-3"><a href="members.html"
+                        class="category-card d-block text-center text-decoration-none text-dark">
+                        <div class="category-icon "><i class="fa-solid fa-building-columns"></i></div>
+                        <h3>Architecture</h3>
+                    </a></div>
+                <div class="col-6 col-md-3"><a href="members.html"
+                        class="category-card d-block text-center text-decoration-none text-dark">
+                        <div class="category-icon "><i class="fa-solid fa-stethoscope"></i></div>
+                        <h3>Healthcare</h3>
+                    </a></div>
+                <div class="col-6 col-md-3"><a href="members.html"
+                        class="category-card d-block text-center text-decoration-none text-dark">
+                        <div class="category-icon "><i class="fa-solid fa-ellipsis"></i></div>
+                        <h3>More</h3>
+                    </a></div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===================== TESTIMONIALS ===================== -->
+    <section class="site-section pt-4">
+        <div class="container">
+            <div class="section-head">
+                <div class="eyebrow">Success stories</div>
+                <h2>Loved by professionals across India</h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div style="color:#f59e0b;margin-bottom:10px;">★★★★★</div>
+                        <p style="font-style:italic;">"I referred 12 people in my first month. The dashboard is clear
+                            and payouts are fast."</p>
+                        <div class="d-flex align-items-center gap-2 mt-3"><img src="https://i.pravatar.cc/40?img=45"
+                                style="width:38px;height:38px;border-radius:50%;">
+                            <div><strong style="font-size:14px;">Sneha Rao</strong>
+                                <div class="text-muted" style="font-size:12px;">Chartered Accountant, Pune</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div style="color:#f59e0b;margin-bottom:10px;">★★★★★</div>
+                        <p style="font-style:italic;">"Reached Gold tier in three months. The local discovery feature is
+                            a game changer."</p>
+                        <div class="d-flex align-items-center gap-2 mt-3"><img src="https://i.pravatar.cc/40?img=33"
+                                style="width:38px;height:38px;border-radius:50%;">
+                            <div><strong style="font-size:14px;">Arjun Kapoor</strong>
+                                <div class="text-muted" style="font-size:12px;">Consultant, Mumbai</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div style="color:#f59e0b;margin-bottom:10px;">★★★★★</div>
+                        <p style="font-style:italic;">"BNPlatform adds real value to people I refer, so recommending it
+                            feels authentic."</p>
+                        <div class="d-flex align-items-center gap-2 mt-3"><img src="https://i.pravatar.cc/40?img=21"
+                                style="width:38px;height:38px;border-radius:50%;">
+                            <div><strong style="font-size:14px;">Priya Mehta</strong>
+                                <div class="text-muted" style="font-size:12px;">Marketing Director, Bangalore</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===================== PRICING TEASER ===================== -->
+    <section class="site-section alt pt-4">
+        <div class="container">
+            <div class="section-head">
+                <div class="eyebrow">Membership</div>
+                <h2>Start free, upgrade when you're ready</h2>
+                <p>Unlock the map, unlimited chat, and premium tools with a plan that fits you.</p>
+            </div>
+            <div class="text-center">
+                <a href="pricing.html" class="btn-site btn-site-red"><i class="fa-solid fa-crown"></i> View pricing
+                    plans</a>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===================== CTA BAND ===================== -->
+    <section class="cta-band pt-4">
+        <div class="container">
+            <h2>Ready to grow your network?</h2>
+            <p>Join 18,000+ professionals already building trusted connections on BNPlatform.</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="pages/auth/register.html" class="btn-site btn-site-white"><i class="fa-solid fa-user-plus"></i>
+                    Join now — it's free</a>
+                <a href="how-it-works.html" class="btn-site btn-site-ghost-white">How it works</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== STATS BAR ===================== -->
+    <section style="background:#e31e24;padding:35px 0;">
+        <div class="container">
+            <div class="row text-center g-4 text-white">
+                <div class="col-6 col-md-3">
+                    <div style="font-size:34px;font-weight:800;">18,000+</div>
+                    <div style="opacity:.85;font-size:14px;">Active members</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div style="font-size:34px;font-weight:800;">40+</div>
+                    <div style="opacity:.85;font-size:14px;">Cities covered</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div style="font-size:34px;font-weight:800;">7,800+</div>
+                    <div style="opacity:.85;font-size:14px;">Referrals / month</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div style="font-size:34px;font-weight:800;">4.9★</div>
+                    <div style="opacity:.85;font-size:14px;">Avg. member rating</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===================== FEATURES ===================== -->
+    <!-- <section class="site-section pt-4">
+        <div class="container">
+            <div class="section-head">
+                <div class="eyebrow">Why BNPlatform</div>
+                <h2>Everything you need to grow your network</h2>
+                <p>A complete toolkit to find professionals, exchange referrals, and build a credible reputation.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#fde8e9;color:#e31e24;"><i
+                                class="fa-solid fa-location-dot"></i></div>
+                        <h3>Local discovery</h3>
+                        <p>Find verified professionals near you on an interactive map, filtered by category and
+                            distance.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#fde8e9;color:#e31e24;"><i
+                                class="fa-solid fa-shield-halved"></i></div>
+                        <h3>Verified profiles</h3>
+                        <p>Document-backed authenticity so you always know who you're dealing with.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#fde8e9;color:#e31e24;"><i
+                                class="fa-solid fa-handshake"></i></div>
+                        <h3>Smart referrals</h3>
+                        <p>Give and receive trusted referrals. Earn rewards and credibility points with every
+                            connection.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#fde8e9;color:#e31e24;"><i
+                                class="fa-solid fa-comments"></i></div>
+                        <h3>Direct messaging</h3>
+                        <p>Chat with professionals in real time and discuss work without leaving the platform.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#fde8e9;color:#e31e24;"><i
+                                class="fa-solid fa-star"></i></div>
+                        <h3>Ratings &amp; reviews</h3>
+                        <p>Build a reputation that speaks for itself with verified reviews on your profile.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#fde8e9;color:#e31e24;"><i
+                                class="fa-solid fa-trophy"></i></div>
+                        <h3>Leaderboards</h3>
+                        <p>Climb city &amp; state-wise rankings as you earn credibility points.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section> -->
+
+
+    <!-- ===================== REFERRAL TYPES ===================== -->
+    <!-- <section class="site-section bg-white pt-4">
+        <div class="container">
+            <div class="section-head">
+                <div class="eyebrow">Two ways to refer</div>
+                <h2>Referrals that reward everyone</h2>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-5">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#fde8e9;color:#e31e24;"><i
+                                class="fa-solid fa-user-plus"></i></div>
+                        <h3>App Referral</h3>
+                        <p style="margin-bottom:14px;">Invite a peer to join. When they sign up &amp; verify, you both
+                            get rewarded — including a <strong>free subscription month</strong>.</p>
+                        <span class="chip-soft"><i class="fa-solid fa-gift"></i> Reward: 1 free month</span>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background:#fde8e9;color:#e31e24;"><i
+                                class="fa-solid fa-handshake"></i></div>
+                        <h3>Deal Referral</h3>
+                        <p style="margin-bottom:14px;">Post a requirement for a service you need. A matching pro accepts
+                            it, and you earn <strong>credibility points</strong> when the deal closes.</p>
+                        <span class="chip-soft"><i class="fa-solid fa-star"></i> Reward: credibility points</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section> -->
+
+
+    <!-- ===================== TESTIMONIALS ===================== -->
+    <!-- <section class="site-section pt-4">
+        <div class="container">
+            <div class="section-head">
+                <div class="eyebrow">Success stories</div>
+                <h2>Loved by professionals across India</h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div style="color:#f59e0b;margin-bottom:10px;">★★★★★</div>
+                        <p style="font-style:italic;">"I referred 12 people in my first month. The dashboard is clear
+                            and payouts are fast."</p>
+                        <div class="d-flex align-items-center gap-2 mt-2"><img src="https://i.pravatar.cc/40?img=45"
+                                style="width:38px;height:38px;border-radius:50%;">
+                            <div><strong style="font-size:14px;">Sneha Rao</strong>
+                                <div class="text-muted" style="font-size:12px;">Chartered Accountant, Pune</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div style="color:#f59e0b;margin-bottom:10px;">★★★★★</div>
+                        <p style="font-style:italic;">"Reached Gold tier in three months. The local discovery feature is
+                            a game changer."</p>
+                        <div class="d-flex align-items-center gap-2 mt-2"><img src="https://i.pravatar.cc/40?img=33"
+                                style="width:38px;height:38px;border-radius:50%;">
+                            <div><strong style="font-size:14px;">Arjun Kapoor</strong>
+                                <div class="text-muted" style="font-size:12px;">Consultant, Mumbai</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div style="color:#f59e0b;margin-bottom:10px;">★★★★★</div>
+                        <p style="font-style:italic;">"BNPlatform adds real value to people I refer, so recommending it
+                            feels authentic."</p>
+                        <div class="d-flex align-items-center gap-2 mt-2"><img src="https://i.pravatar.cc/40?img=21"
+                                style="width:38px;height:38px;border-radius:50%;">
+                            <div><strong style="font-size:14px;">Priya Mehta</strong>
+                                <div class="text-muted" style="font-size:12px;">Marketing Director, Bangalore</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section> -->
+
+
+    <!-- ===================== PRICING TEASER ===================== -->
+    <!-- <section class="site-section alt pt-4">
+        <div class="container">
+            <div class="section-head">
+                <div class="eyebrow">Membership</div>
+                <h2>Start free, upgrade when you're ready</h2>
+                <p>Unlock the map, unlimited chat, and premium tools with a plan that fits you.</p>
+            </div>
+            <div class="text-center ">
+                <a href="pricing.html" class="btn-site btn-site-red"><i class="fa-solid fa-crown"></i> View pricing
+                    plans</a>
+            </div>
+        </div>
+    </section> -->
+
+
+    <!-- ===================== CTA BAND ===================== -->
+    <!-- <section class="cta-band pt-4">
+        <div class="container">
+            <h2>Ready to grow your network?</h2>
+            <p>Join 18,000+ professionals already building trusted connections on BNPlatform.</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="pages/auth/register.html" class="btn-site btn-site-white"><i class="fa-solid fa-user-plus"></i>
+                    Join now — it's free</a>
+                <a href="how-it-works.html" class="btn-site btn-site-ghost-white">How it works</a>
+            </div>
+        </div>
+    </section> -->
+
+
+    <!-- Shared footer is injected here by assets/js/include.js -->
+    <div id="footer-container"></div>
+
+    <script src="assets/js/professions.js"></script>
+    <script>
+        function renderProfessionPickers() {
+            const pillsWrap = document.getElementById('mapCategoryPills');
+            const moreWrap = pillsWrap.querySelector('.more-pill-wrap');
+            BnpProfessions.TOP.forEach((cat, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'map-pill' + (i === 0 ? ' active' : '');
+                btn.dataset.cat = cat;
+                btn.textContent = cat;
+                pillsWrap.insertBefore(btn, moreWrap);
+            });
+
+            const moreDropdown = document.getElementById('morePillDropdown');
+            const otherPillBtn = document.getElementById('otherPillBtn');
+            BnpProfessions.MORE.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'more-pill-item';
+                btn.dataset.cat = cat;
+                btn.textContent = cat;
+                moreDropdown.insertBefore(btn, otherPillBtn);
+            });
+
+            const otherGrid = document.getElementById('otherProfGrid');
+            BnpProfessions.OTHER.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'other-prof-item';
+                btn.dataset.cat = cat;
+                btn.textContent = cat;
+                otherGrid.appendChild(btn);
+            });
+        }
+        renderProfessionPickers();
+
+        let __allMembers = [];
+        let __activeCategory = 'IT';
+        let __map = null;
+        let __markerGroup = null;
+        let __pin = null;
+
+        function buildPopup(m) {
+            const safeName = m.name.replace(/"/g, '&quot;');
+            return `<div style="display:flex;align-items:center;gap:10px;min-width:190px;max-width:240px;padding:2px 0;">
+                <img src="${m.image}"
+                     onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(safeName)}&background=e31e24&color=fff'"
+                     style="width:46px;height:46px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid #e31e24;">
+                <div style="min-width:0;">
+                    <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.name}</div>
+                    <div style="font-size:12px;color:#555;margin-top:2px;">${m.profession}</div>
+                    <div style="font-size:11px;color:#999;margin-top:4px;">&#128205; ${m.location}</div>
+                </div>
+            </div>`;
+        }
+
+        function updateMapMarkers(members) {
+            if (!__map || !__markerGroup || !__pin) return;
+            __markerGroup.clearLayers();
+
+            const withCoords = members.filter(m => m.latitude != null && m.longitude != null);
+            withCoords.forEach(m => {
+                L.marker([m.latitude, m.longitude], { icon: __pin })
+                    .bindPopup(buildPopup(m), { maxWidth: 260, minWidth: 210 })
+                    .addTo(__markerGroup);
+            });
+
+            if (withCoords.length > 0) {
+                try {
+                    __map.fitBounds(__markerGroup.getBounds().pad(0.3), { maxZoom: 14 });
+                } catch (e) { }
+            }
+        }
+
+        function initMap() {
+            const center = [19.118, 72.906];
+            __map = L.map('map', { center, zoom: 13, zoomControl: false, scrollWheelZoom: false });
+            L.control.zoom({ position: 'bottomright' }).addTo(__map);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 17,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(__map);
+
+            L.circle(center, {
+                radius: 2600,
+                color: '#e31e24', weight: 1.5, opacity: 0.7,
+                fillColor: '#e31e24', fillOpacity: 0.06
+            }).addTo(__map);
+
+            L.circleMarker(center, {
+                radius: 7, color: '#fff', weight: 3,
+                fillColor: '#1a73e8', fillOpacity: 1
+            }).addTo(__map);
+
+            __pin = L.icon({
+                iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+                    '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="42" viewBox="0 0 24 32">' +
+                    '<path d="M12 0C7.58 0 4 3.58 4 8c0 7 8 22 8 22s8-15 8-22c0-4.42-3.58-8-8-8z" ' +
+                    'fill="#e31e24" stroke="#fff" stroke-width="1"/></svg>'),
+                iconSize: [32, 42], iconAnchor: [16, 42], popupAnchor: [0, -38]
+            });
+
+            __markerGroup = L.featureGroup().addTo(__map);
+        }
+
+        function paintMembers(list) {
+            const box = document.getElementById('memberResults');
+            const section = document.getElementById('professionalsSection');
+            if (!box || !section) return;
+            section.style.display = 'block';
+
+            if (!list.length) {
+                box.innerHTML = '<div class="col-12 text-center py-4 text-muted"><i class="fa-solid fa-user-slash" style="font-size:26px;display:block;margin-bottom:10px;color:#ddd;"></i>No professionals found for your search.</div>';
+                return;
+            }
+
+            box.innerHTML = list.slice(0, 8).map(m => `
+                <div class="col-sm-6 col-lg-3">
+                    <div class="member-card">
+                        <img src="${m.image}" alt="${m.name}"
+                             onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=e31e24&color=fff'">
+                        <div class="member-info">
+                            <h5>${m.name}</h5>
+                            <span>${m.profession}</span>
+                            <small><i class="fa-solid fa-location-dot"></i> ${m.location}</small>
+                        </div>
+                        <a href="pages/auth/login.html" class="view-btn">View</a>
+                    </div>
+                </div>`).join('');
+
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function doSearch() {
+            const q = (document.getElementById('memberSearch')?.value || '').toLowerCase().trim();
+            const section = document.getElementById('professionalsSection');
+
+            if (!q && (!__activeCategory || __activeCategory === 'more')) {
+                if (section) section.style.display = 'none';
+                updateMapMarkers(__allMembers);
+                return;
+            }
+
+            let results = __allMembers;
+
+            if (q) {
+                // Text typed: search name + profession + city across ALL members, ignore pill
+                results = results.filter(m =>
+                    m.name.toLowerCase().includes(q) ||
+                    (m.profession || '').toLowerCase().includes(q) ||
+                    (m.city || '').includes(q) ||
+                    (m.location || '').toLowerCase().includes(q)
+                );
+            } else {
+                // No text: use category pill to browse by profession
+                results = results.filter(m =>
+                    (m.profession || '').toLowerCase().includes(__activeCategory.toLowerCase())
+                );
+            }
+
+            updateMapMarkers(results);
+            paintMembers(results);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            getMembers().then(m => {
+                __allMembers = m;
+                updateMapMarkers(__allMembers);
+            }).catch(() => { });
+
+            document.getElementById('memberSearchBtn')?.addEventListener('click', doSearch);
+            document.getElementById('memberSearch')?.addEventListener('keydown', e => {
+                if (e.key === 'Enter') doSearch();
+            });
+
+            document.querySelectorAll('.map-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('.map-pill').forEach(p => p.classList.remove('active'));
+                    document.querySelectorAll('.more-pill-item').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    __activeCategory = pill.dataset.cat;
+                    doSearch();
+                });
+            });
+
+            const morePillBtn = document.getElementById('morePillBtn');
+            const morePillDropdown = document.getElementById('morePillDropdown');
+
+            morePillBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                morePillDropdown.classList.toggle('open');
+            });
+
+            document.querySelectorAll('.more-pill-item').forEach(item => {
+                if (item.id === 'otherPillBtn') return;
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.map-pill').forEach(p => p.classList.remove('active'));
+                    document.querySelectorAll('.more-pill-item').forEach(p => p.classList.remove('active'));
+                    item.classList.add('active');
+                    morePillBtn.classList.add('active');
+                    __activeCategory = item.dataset.cat;
+                    morePillDropdown.classList.remove('open');
+                    doSearch();
+                });
+            });
+
+            const otherPillBtn = document.getElementById('otherPillBtn');
+            const otherProfModal = document.getElementById('otherProfModal');
+            const otherProfClose = document.getElementById('otherProfClose');
+
+            otherPillBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                morePillDropdown.classList.remove('open');
+                otherProfModal.style.display = 'flex';
+            });
+
+            otherProfClose.addEventListener('click', () => {
+                otherProfModal.style.display = 'none';
+            });
+
+            otherProfModal.addEventListener('click', (e) => {
+                if (e.target === otherProfModal) otherProfModal.style.display = 'none';
+            });
+
+            document.querySelectorAll('.other-prof-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.map-pill').forEach(p => p.classList.remove('active'));
+                    document.querySelectorAll('.more-pill-item').forEach(p => p.classList.remove('active'));
+                    morePillBtn.classList.add('active');
+                    otherPillBtn.classList.add('active');
+                    __activeCategory = item.dataset.cat;
+                    otherProfModal.style.display = 'none';
+                    doSearch();
+                });
+            });
+
+            document.addEventListener('click', () => {
+                morePillDropdown.classList.remove('open');
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/include.js"></script>
+    <script src="assets/js/animate.js"></script>
+
+</body>
+
+</html>

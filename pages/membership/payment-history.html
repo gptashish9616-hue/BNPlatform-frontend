@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment History — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title"><h1>Payment History</h1><p>All your invoices &amp; receipts</p></div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <div class="grid grid-3" style="margin-bottom:18px;">
+                <div class="stat"><div class="stat-num" id="phTotal">—</div><div class="stat-lbl">Total paid</div></div>
+                <div class="stat"><div class="stat-num" id="phCount">—</div><div class="stat-lbl">Invoices</div></div>
+                <div class="stat"><div class="stat-num" id="phStatus" style="color:var(--green);">—</div><div class="stat-lbl" id="phStatusLbl">Membership</div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Invoices</div>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Reference</th><th>Gateway</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+                        <tbody id="phRows">
+                            <tr><td colspan="5" class="muted" style="text-align:center;padding:20px;">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        async function loadPayments() {
+            const tbody = document.getElementById("phRows");
+            try {
+                const [payments, sub] = await Promise.all([Api.subscription.payments(), Api.subscription.current()]);
+                const total = payments.filter((p) => p.status === "SUCCESS").reduce((s, p) => s + Number(p.amount || 0), 0);
+                document.getElementById("phTotal").textContent = BnpUtils.money(total);
+                document.getElementById("phCount").textContent = payments.length;
+                document.getElementById("phStatus").textContent = sub && sub.status === "ACTIVE" ? "Active" : "Inactive";
+                document.getElementById("phStatusLbl").textContent = sub && sub.status === "ACTIVE" ? "Membership active" : "No active plan";
+
+                if (!payments.length) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="muted" style="text-align:center;padding:20px;">No payments yet.</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = payments.map((p) => `
+                    <tr>
+                        <td><strong>${BnpUtils.escape(p.reference || "—")}</strong></td>
+                        <td class="muted">${BnpUtils.escape(p.gateway || "—")}</td>
+                        <td class="muted">${BnpUtils.date(p.paidAt || p.createdAt)}</td>
+                        <td><strong>${BnpUtils.money(p.amount)}</strong></td>
+                        <td>${BnpUtils.statusBadge(p.status)}</td>
+                    </tr>`).join("");
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="5" class="muted" style="text-align:center;padding:20px;">Could not load payments.</td></tr>`;
+            }
+        }
+        document.addEventListener("DOMContentLoaded", () => { if (window.BnpStorage.isAuthenticated()) loadPayments(); });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

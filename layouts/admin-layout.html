@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!--
+  ADMIN LAYOUT TEMPLATE (admin panel pages)
+  Same as the dashboard layout, but the #sidebar-container carries
+  data-shell="admin" so app-shell.js injects the ADMIN sidebar instead.
+  Copy into pages/admin/<your-page>.html (two levels deep).
+-->
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page Title — BNPlatform Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+</head>
+
+<body class="app">
+
+    <!-- Shared ADMIN sidebar (note data-shell="admin") -->
+    <div id="sidebar-container" data-shell="admin"></div>
+
+    <div class="app-main">
+
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>Page Title</h1>
+                <p>Optional subtitle</p>
+            </div>
+            <a href="../admin/profile.html" style="margin-left:auto;">
+                <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=Admin&background=e31e24&color=fff" alt="me" />
+            </a>
+        </header>
+
+        <!-- ============ PAGE CONTENT ============ -->
+        <div class="app-content">
+
+            <div class="card">
+                <div class="card-title">Section title</div>
+                <!-- your content here -->
+            </div>
+
+        </div>
+        <!-- ========== END PAGE CONTENT ========== -->
+
+    </div>
+
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../assets/js/animate.js"></script>
+</body>
+
+</html>

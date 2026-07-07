@@ -1,0 +1,30 @@
+﻿<link rel="stylesheet" href="referral-card.css">
+<!-- Reusable referral card.
+     Use inside a list/grid on the referrals pages. Self-contained styles. -->
+<div class="ref-card">
+    <div class="ref-card__top">
+        <img class="ref-card__avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="">
+        <div class="ref-card__who">
+            <strong>{{name}}</strong>
+            <small>{{profession}}</small>
+        </div>
+        <span class="ref-card__status ref-card__status--accepted">
+            <i class="fa-solid fa-check"></i> {{status}}
+        </span>
+    </div>
+
+    <p class="ref-card__note">{{note}}</p>
+
+    <div class="ref-card__meta">
+        <span><i class="fa-solid fa-tag"></i> {{category}}</span>
+        <span><i class="fa-solid fa-star"></i> {{points}}</span>
+        <span><i class="fa-solid fa-calendar"></i> {{date}}</span>
+    </div>
+
+    <div class="ref-card__actions">
+        <a href="../pages/referrals/referral-details.html" class="ref-card__btn">View details</a>
+        <button class="ref-card__btn ref-card__btn--ghost"><i class="fa-solid fa-comment"></i> Message</button>
+    </div>
+</div>
+
+

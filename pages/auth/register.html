@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create account — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/auth.css" />
+</head>
+
+<body class="auth-page">
+
+    <div class="auth-wrap">
+
+        <!-- BRAND PANEL -->
+        <aside class="auth-brand">
+            <a href="../../index.html" class="auth-brand-logo">BN<span>Platform</span></a>
+
+            <div class="auth-brand-body">
+                <h1>Join 18,000+ professionals growing together.</h1>
+                <p>Create your free account in minutes. Upgrade anytime to unlock chat, the map, and premium tools.</p>
+
+                <div class="auth-brand-features">
+                    <div class="auth-feature">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <div><strong>Free to start</strong><small>No card required for the free tier</small></div>
+                    </div>
+                    <div class="auth-feature">
+                        <i class="fa-solid fa-handshake"></i>
+                        <div><strong>Business referrals</strong><small>Refer clients to pros, earn points</small></div>
+                    </div>
+                    <div class="auth-feature">
+                        <i class="fa-solid fa-star"></i>
+                        <div><strong>Ratings &amp; reviews</strong><small>Build a trusted reputation</small></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- FORM PANEL -->
+        <main class="auth-form-panel">
+            <div class="auth-card">
+                <h2>Create your account</h2>
+                <p class="sub">Start networking with verified professionals today.</p>
+
+                <form id="regForm" novalidate>
+                    <div class="auth-field">
+                        <label for="name">Full name</label>
+                        <div class="auth-input">
+                            <i class="fa-solid fa-user"></i>
+                            <input type="text" id="name" placeholder="Your full name" autocomplete="name" />
+                        </div>
+                        <div class="auth-error" id="nameErr">Please enter your name.</div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="email">Email address</label>
+                        <div class="auth-input">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" id="email" placeholder="you@business.com" autocomplete="email" />
+                        </div>
+                        <div class="auth-error" id="emailErr">Please enter a valid email address.</div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="phone">Phone number</label>
+                        <div class="auth-input">
+                            <i class="fa-solid fa-phone"></i>
+                            <input type="tel" id="phone" placeholder="+91 98xxx xxxxx" autocomplete="tel" />
+                        </div>
+                        <div class="auth-error" id="phoneErr">Please enter a valid phone number.</div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="password">Password</label>
+                        <div class="auth-input">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="password" placeholder="Create a strong password" autocomplete="new-password" oninput="strength()" />
+                            <i class="fa-solid fa-eye toggle-pw" onclick="togglePw('password', this)"></i>
+                        </div>
+                        <div class="pw-strength" id="pwStrength"><span></span><span></span><span></span><span></span></div>
+                        <div class="auth-error" id="pwErr">Use at least 8 characters.</div>
+                    </div>
+
+                    <div class="auth-row" style="margin-bottom:18px;">
+                        <label><input type="checkbox" id="terms" /> I agree to the <a href="#" class="auth-link">Terms</a> &amp; <a href="#" class="auth-link">Privacy</a></label>
+                    </div>
+                    <div class="auth-error" id="termsErr" style="margin-top:-10px;margin-bottom:14px;">Please accept the terms to continue.</div>
+
+                    <button type="submit" class="auth-btn">
+                        <i class="fa-solid fa-user-plus"></i> Create account
+                    </button>
+                </form>
+
+                <div class="auth-divider">or sign up with</div>
+
+                <div class="auth-social">
+                    <button type="button"><i class="fa-brands fa-google" style="color:#ea4335"></i> Google</button>
+                    <button type="button"><i class="fa-brands fa-linkedin" style="color:#0a66c2"></i> LinkedIn</button>
+                </div>
+
+                <p class="auth-foot">Already have an account? <a href="login.html" class="auth-link">Sign in</a></p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Shared frontend stack: config → storage → utils → api → guards → page logic -->
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

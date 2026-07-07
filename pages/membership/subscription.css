@@ -1,0 +1,2 @@
+@media (max-width: 991px) { #subGrid { grid-template-columns: 1fr !important; } }
+#subGrid .list-item i { width: 18px; }

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Find Professionals — BNPlatform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/site.css" />
+    <link rel="stylesheet" href="members.css">
+</head>
+
+<body>
+
+    <div id="navbar-container"></div>
+
+    <!-- HERO + SEARCH -->
+    <section class="site-hero">
+        <div class="container">
+            <div class="eyebrow">Member directory</div>
+            <h1>Find the right <span style="color:var(--s-red);">professional</span></h1>
+            <p>Browse verified professionals across India. Sign in to see full profiles, contact details, and connect.</p>
+
+            <div class="filter-bar mx-auto" style="max-width:720px;">
+                <div class="row g-2">
+                    <div class="col-md-5"><input type="text" id="memberSearchInput" class="form-control" placeholder="Search by name, profession or city..."></div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="categorySelect">
+                            <option value="">All categories</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3"><button class="btn-site btn-site-red w-100" id="memberSearchBtn" style="padding:9px;">Search</button></div>
+                </div>
+                <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;">
+                    <button type="button" id="nearMeBtn" onclick="enableNearMe()" style="background:none;border:1.5px solid #e31e24;color:#e31e24;border-radius:20px;padding:5px 14px;font-size:12.5px;font-weight:600;cursor:pointer;">
+                        <i class="fa-solid fa-location-crosshairs"></i> Near me
+                    </button>
+                    <span id="locationBadge" style="display:none;font-size:12px;color:#1e8e3e;font-weight:500;"><i class="fa-solid fa-circle-check"></i> <span id="locationBadgeText">Sorted by distance</span></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CATEGORY PILLS (populated from assets/js/professions.js) -->
+    <section style="padding:28px 0 0;">
+        <div class="container">
+            <div class="d-flex flex-wrap gap-2 justify-content-center align-items-center" id="memberCatPills">
+                <span class="chip-soft cat-pill active-pill" data-cat="" style="background:#fde8e9;color:#a8181f;">All</span>
+                <div class="member-more-wrap" style="position:relative;display:inline-block;">
+                    <span class="chip-soft" id="memberMoreBtn" style="cursor:pointer;user-select:none;">More <i class="fa-solid fa-chevron-down" style="font-size:9px;"></i></span>
+                    <div id="memberMoreDropdown" style="display:none;flex-direction:column;gap:2px;position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1px solid #eee;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.12);padding:8px;min-width:210px;z-index:50;">
+                        <button type="button" id="memberOtherBtn" style="display:block;width:100%;text-align:left;background:none;border:none;padding:7px 10px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;color:#a8181f;">Other <i class="fa-solid fa-chevron-right" style="font-size:9px;"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Other professions modal -->
+    <div id="memberOtherModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#fff;border-radius:18px;width:min(520px,100%);max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;border-bottom:1px solid #f0f0f0;font-size:16px;font-weight:700;color:#222;">
+                <span>Other Professions</span>
+                <button id="memberOtherClose" style="background:none;border:none;font-size:18px;color:#888;cursor:pointer;padding:2px 6px;border-radius:6px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="memberOtherGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;padding:18px 22px 22px;overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <!-- MEMBERS GRID -->
+    <section class="site-section" style="padding-top:40px;">
+        <div class="container">
+            <div class="row g-4" id="membersGrid">
+                <div class="col-12 text-center text-muted py-3">Loading professionals…</div>
+            </div>
+
+            <div class="text-center mt-4" id="loadMoreWrap" style="display:none;">
+                <button type="button" id="loadMoreBtn" class="btn-site btn-site-outline" style="padding:10px 28px;"></button>
+            </div>
+
+            <div class="text-center mt-5">
+                <div class="feature-card d-inline-block" style="max-width:520px;">
+                    <div class="feature-icon mx-auto" style="background:#fde8e9;color:#e31e24;"><i class="fa-solid fa-lock"></i></div>
+                    <h3>See full profiles &amp; contact details</h3>
+                    <p class="mb-3">Create a free account to view complete profiles, reviews, and connect with professionals near you.</p>
+                    <a href="pages/auth/register.html" class="btn-site btn-site-red"><i class="fa-solid fa-user-plus"></i> Join free</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Write-a-review modal -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:16px;border:none;">
+                <div class="modal-header">
+                    <h5 class="modal-title">Review <span id="rvTarget">professional</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="reviewForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="rvTargetId">
+                        <label class="form-label" style="font-weight:600;">Your rating</label>
+                        <div id="rvStars" style="font-size:30px;color:#d8d8d8;cursor:pointer;margin-bottom:14px;">
+                            <i class="fa-solid fa-star" data-v="1"></i>
+                            <i class="fa-solid fa-star" data-v="2"></i>
+                            <i class="fa-solid fa-star" data-v="3"></i>
+                            <i class="fa-solid fa-star" data-v="4"></i>
+                            <i class="fa-solid fa-star" data-v="5"></i>
+                        </div>
+                        <label class="form-label" style="font-weight:600;">Comment <span class="text-muted">(optional)</span></label>
+                        <textarea id="rvComment" class="form-control" rows="3" placeholder="Share your experience working with this professional…"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-site btn-site-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-site btn-site-red"><i class="fa-solid fa-paper-plane"></i> Submit review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/include.js"></script>
+    <script src="assets/js/professions.js"></script>
+    <script>
+        let __allMembers = [];
+        let __page = 0;
+        const __pageSize = 24;
+        let __hasNext = false;
+        let __totalElements = 0;
+        let __loadingMore = false;
+        let __userLat = null;
+        let __userLng = null;
+        const loggedIn = window.BnpStorage?.isAuthenticated?.();
+
+        function haversineKm(lat1, lng1, lat2, lng2) {
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+            return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        window.enableNearMe = function () {
+            if (!navigator.geolocation) { BnpUtils?.toast("Geolocation not supported by your browser.", "error"); return; }
+            const btn = document.getElementById("nearMeBtn");
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Detecting…'; }
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    __userLat = pos.coords.latitude;
+                    __userLng = pos.coords.longitude;
+                    if (btn) { btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Near me'; btn.style.borderColor = "#1e8e3e"; btn.style.color = "#1e8e3e"; btn.disabled = false; }
+                    const badge = document.getElementById("locationBadge");
+                    if (badge) badge.style.display = "inline-flex";
+                    doFilter();
+                },
+                function () {
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Near me'; }
+                    BnpUtils?.toast("Location access denied. Please allow location in your browser.", "error");
+                },
+                { timeout: 10000 }
+            );
+        };
+
+        function renderGrid(items) {
+            const grid = document.getElementById("membersGrid");
+            if (!grid) return;
+            if (!items.length) {
+                grid.innerHTML = `<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-user-slash" style="font-size:28px;display:block;margin-bottom:10px;color:#ddd;"></i>No professionals found.</div>`;
+                return;
+            }
+            grid.innerHTML = items.map((m) => {
+                const actions = loggedIn
+                    ? `<div class="d-flex gap-2">
+                           <a href="pages/chat/chat.html?to=${encodeURIComponent(m.id)}" class="btn-site btn-site-red flex-fill" style="padding:8px;"><i class="fa-solid fa-comment"></i> Message</a>
+                           <button type="button" class="btn-site btn-site-outline" style="padding:8px 12px;" onclick="openReview(${Number(m.id)}, '${BnpUtils.escape(String(m.name)).replace(/'/g, "&#39;")}')"><i class="fa-solid fa-star"></i></button>
+                       </div>`
+                    : `<a href="pages/auth/login.html" class="btn-site btn-site-outline w-100" style="padding:8px;"><i class="fa-solid fa-lock"></i> Sign in to connect</a>`;
+                return `
+                <div class="col-lg-3 col-md-6">
+                    <article class="member-tile">
+                        <img src="${m.image}" alt="${BnpUtils.escape(m.name)}" onerror="this.onerror=null;this.src='${BnpUtils.avatar(m.name)}'">
+                        <h5 style="margin-bottom:2px;">${BnpUtils.escape(m.name)} ${m.verified ? '<i class="fa-solid fa-circle-check text-danger" title="Verified"></i>' : ""}</h5>
+                        <p class="text-muted mb-1" style="font-size:13.5px;">${BnpUtils.escape(m.profession)}</p>
+                        <small class="text-muted d-block mb-3"><i class="fa-solid fa-location-dot"></i> ${BnpUtils.escape(m.location)}${m._distKm != null ? ` <span style="color:#e31e24;font-weight:600;">${m._distKm} km away</span>` : ""}</small>
+                        ${actions}
+                    </article>
+                </div>`;
+            }).join("");
+        }
+
+        function doFilter() {
+            const q = (document.getElementById("memberSearchInput")?.value || "").toLowerCase().trim();
+            const cat = (document.getElementById("categorySelect")?.value || "").toLowerCase();
+
+            let results = __allMembers;
+
+            if (q) {
+                results = results.filter(m =>
+                    m.name.toLowerCase().includes(q) ||
+                    (m.profession || "").toLowerCase().includes(q) ||
+                    (m.city || "").includes(q) ||
+                    (m.location || "").toLowerCase().includes(q)
+                );
+            }
+
+            if (cat) {
+                results = results.filter(m =>
+                    (m.profession || "").toLowerCase().includes(cat)
+                );
+            }
+
+            if (__userLat !== null && __userLng !== null) {
+                results = [...results].sort((a, b) => {
+                    const dA = (a.latitude != null && a.longitude != null) ? haversineKm(__userLat, __userLng, a.latitude, a.longitude) : Infinity;
+                    const dB = (b.latitude != null && b.longitude != null) ? haversineKm(__userLat, __userLng, b.latitude, b.longitude) : Infinity;
+                    return dA - dB;
+                });
+                results = results.map(m => ({
+                    ...m,
+                    _distKm: (m.latitude != null && m.longitude != null) ? Math.round(haversineKm(__userLat, __userLng, m.latitude, m.longitude)) : null
+                }));
+            }
+
+            renderGrid(results);
+            document.getElementById("membersGrid")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        // Load the real public member directory from the backend, one page at a time,
+        // so the list scales to any number of members (100, 10000, ...) instead of
+        // fetching them all in a single request.
+        function updateLoadMoreUi() {
+            const wrap = document.getElementById("loadMoreWrap");
+            const btn = document.getElementById("loadMoreBtn");
+            if (!wrap || !btn) return;
+            if (!__hasNext) { wrap.style.display = "none"; return; }
+            wrap.style.display = "block";
+            btn.disabled = false;
+            btn.textContent = `Load more (${__allMembers.length} of ${__totalElements})`;
+        }
+
+        function loadMembersPage(page) {
+            const grid = document.getElementById("membersGrid");
+            if (page === 0 && grid) {
+                grid.innerHTML = `<div class="col-12 text-center text-muted py-3">Loading professionals…</div>`;
+            }
+            __loadingMore = true;
+            return getMembersPage(page, __pageSize)
+                .then((result) => {
+                    __allMembers = page === 0 ? result.members : __allMembers.concat(result.members);
+                    __page = result.page;
+                    __hasNext = result.hasNext;
+                    __totalElements = result.totalElements;
+                    doFilter();
+                    updateLoadMoreUi();
+                })
+                .catch(() => {
+                    if (grid) grid.innerHTML = `<div class="col-12 text-center text-muted py-3">Could not load professionals right now.</div>`;
+                })
+                .finally(() => { __loadingMore = false; });
+        }
+
+        document.getElementById("loadMoreBtn")?.addEventListener("click", (e) => {
+            if (__loadingMore) return;
+            e.target.disabled = true;
+            e.target.textContent = "Loading…";
+            loadMembersPage(__page + 1);
+        });
+
+        loadMembersPage(0);
+
+        function renderMemberCategoryPicker() {
+            const select = document.getElementById("categorySelect");
+            BnpProfessions.fillSelect(select, { placeholder: "All categories" });
+
+            const pillsWrap = document.getElementById("memberCatPills");
+            const moreWrap = pillsWrap.querySelector(".member-more-wrap");
+            const moreDrop = document.getElementById("memberMoreDropdown");
+            const otherBtn = document.getElementById("memberOtherBtn");
+            const otherModal = document.getElementById("memberOtherModal");
+            const otherGrid = document.getElementById("memberOtherGrid");
+
+            function selectCategory(cat, activeEl) {
+                document.querySelectorAll("#memberCatPills .cat-pill").forEach(p => {
+                    p.classList.remove("active-pill");
+                    p.style.background = "";
+                    p.style.color = "";
+                });
+                if (activeEl) {
+                    activeEl.classList.add("active-pill");
+                    activeEl.style.background = "#fde8e9";
+                    activeEl.style.color = "#a8181f";
+                }
+                if (select) select.value = cat;
+                moreDrop.style.display = "none";
+                otherModal.style.display = "none";
+                doFilter();
+            }
+
+            pillsWrap.querySelector('.cat-pill[data-cat=""]')?.addEventListener("click", (e) => selectCategory("", e.currentTarget));
+
+            BnpProfessions.TOP.forEach(cat => {
+                const span = document.createElement("span");
+                span.className = "chip-soft cat-pill";
+                span.dataset.cat = cat;
+                span.textContent = cat;
+                span.addEventListener("click", () => selectCategory(cat, span));
+                pillsWrap.insertBefore(span, moreWrap);
+            });
+
+            BnpProfessions.MORE.forEach(cat => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.textContent = cat;
+                btn.style.cssText = "display:block;width:100%;text-align:left;background:none;border:none;padding:7px 10px;border-radius:6px;font-size:13px;cursor:pointer;color:#333;";
+                btn.addEventListener("mouseenter", () => btn.style.background = "#f7f7f8");
+                btn.addEventListener("mouseleave", () => btn.style.background = "none");
+                btn.addEventListener("click", () => selectCategory(cat, null));
+                moreDrop.insertBefore(btn, otherBtn);
+            });
+
+            BnpProfessions.OTHER.forEach(cat => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.textContent = cat;
+                btn.style.cssText = "background:#f7f7f8;border:1px solid #eee;border-radius:10px;padding:9px 10px;font-size:12.5px;font-weight:600;cursor:pointer;color:#333;";
+                btn.addEventListener("click", () => selectCategory(cat, null));
+                otherGrid.appendChild(btn);
+            });
+
+            document.getElementById("memberMoreBtn").addEventListener("click", (e) => {
+                e.stopPropagation();
+                moreDrop.style.display = moreDrop.style.display === "flex" ? "none" : "flex";
+            });
+            moreDrop.addEventListener("click", e => e.stopPropagation());
+            document.addEventListener("click", () => { moreDrop.style.display = "none"; });
+
+            otherBtn.addEventListener("click", () => {
+                moreDrop.style.display = "none";
+                otherModal.style.display = "flex";
+            });
+            document.getElementById("memberOtherClose").addEventListener("click", () => {
+                otherModal.style.display = "none";
+            });
+            otherModal.addEventListener("click", (e) => {
+                if (e.target === otherModal) otherModal.style.display = "none";
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("memberSearchBtn")?.addEventListener("click", doFilter);
+            document.getElementById("memberSearchInput")?.addEventListener("keydown", e => {
+                if (e.key === "Enter") doFilter();
+            });
+            document.getElementById("categorySelect")?.addEventListener("change", doFilter);
+
+            renderMemberCategoryPicker();
+        });
+
+        // ---- Review modal (star rating + comment -> POST /api/reviews) ----
+        let rvRating = 0;
+        function paintStars(v) {
+            document.querySelectorAll("#rvStars i").forEach((s) => {
+                s.style.color = Number(s.dataset.v) <= v ? "#f5b301" : "#d8d8d8";
+            });
+        }
+        document.querySelectorAll("#rvStars i").forEach((s) => {
+            s.addEventListener("mouseenter", () => paintStars(Number(s.dataset.v)));
+            s.addEventListener("click", () => { rvRating = Number(s.dataset.v); paintStars(rvRating); });
+        });
+        document.getElementById("rvStars").addEventListener("mouseleave", () => paintStars(rvRating));
+
+        function openReview(targetId, name) {
+            rvRating = 0; paintStars(0);
+            document.getElementById("rvTargetId").value = targetId;
+            document.getElementById("rvTarget").textContent = name || "professional";
+            document.getElementById("rvComment").value = "";
+            new bootstrap.Modal(document.getElementById("reviewModal")).show();
+        }
+        window.openReview = openReview;
+
+        document.getElementById("reviewForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!rvRating) { BnpUtils.toast("Please pick a star rating.", "warning"); return; }
+            const btn = e.target.querySelector("button[type=submit]");
+            BnpUtils.loading(btn, true, "Submitting…");
+            try {
+                await Api.reviews.add({
+                    targetUserId: Number(document.getElementById("rvTargetId").value),
+                    rating: rvRating,
+                    comment: document.getElementById("rvComment").value.trim()
+                });
+                bootstrap.Modal.getInstance(document.getElementById("reviewModal")).hide();
+                BnpUtils.toast("Thanks! Your review was submitted.", "success");
+            } catch (err) {
+                BnpUtils.toast(err.message, "error");
+            } finally {
+                BnpUtils.loading(btn, false);
+            }
+        });
+    </script>
+    <script src="assets/js/animate.js"></script>
+</body>
+
+</html>

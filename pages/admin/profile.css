@@ -1,0 +1,25 @@
+@media (max-width: 991px) { #adminProfileGrid { grid-template-columns: 1fr !important; } }
+
+.ap-cover {
+    height: 130px;
+    background: linear-gradient(120deg, #2b2f36, #12151a);
+    background-image:
+        linear-gradient(120deg, #2b2f36, #12151a),
+        repeating-linear-gradient(135deg, rgba(255,255,255,.06) 0 2px, transparent 2px 26px);
+}
+
+.ap-shield-badge {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--red);
+    color: #fff;
+    border: 3px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+}

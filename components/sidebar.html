@@ -1,0 +1,87 @@
+<!-- Shared USER app sidebar — injected by app-shell.js into #sidebar-container.
+     All app pages live two levels deep (pages/<section>/), so links use ../ -->
+<aside class="app-sidebar" id="appSidebar">
+
+    <div class="sb-head">
+        <a href="../dashboard/user-dashboard.html" class="sb-logo">BN<span>Platform</span></a>
+        <button class="sb-close" onclick="toggleSidebar()" aria-label="Close menu"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <nav class="sb-nav">
+
+        <a class="sb-link" href="../dashboard/user-dashboard.html" data-page="user-dashboard.html">
+            <i class="fa-solid fa-gauge-high"></i> Dashboard
+        </a>
+        <a class="sb-link" href="../../index.html" data-page="index.html">
+            <i class="fa-solid fa-location-dot"></i> Find Professionals
+        </a>
+
+        <div class="sb-group">Requirements</div>
+        <a class="sb-link" href="../requirements/all-requirements.html" data-page="all-requirements.html">
+            <i class="fa-solid fa-layer-group"></i> All Requirements
+            <span class="sb-badge" id="sbReqBadge" style="display:none;"></span>
+        </a>
+        <a class="sb-link" href="../requirements/my-requirements.html" data-page="my-requirements.html">
+            <i class="fa-solid fa-list-check"></i> My Requirements
+        </a>
+        <a class="sb-link" href="../requirements/create-requirement.html" data-page="create-requirement.html">
+            <i class="fa-solid fa-plus"></i> Post Requirement
+        </a>
+        <a class="sb-link" href="../requirements/my-responses.html" data-page="my-responses.html">
+            <i class="fa-solid fa-comments"></i> Responses
+        </a>
+
+        <div class="sb-group">Business Referrals</div>
+        <a class="sb-link" href="../referrals/given-referrals.html" data-page="given-referrals.html">
+            <i class="fa-solid fa-share-from-square"></i> Given
+        </a>
+        <a class="sb-link" href="../referrals/received-referrals.html" data-page="received-referrals.html">
+            <i class="fa-solid fa-inbox"></i> Received
+        </a>
+        <a class="sb-link" href="../referrals/create-referral.html" data-page="create-referral.html">
+            <i class="fa-solid fa-paper-plane"></i> New Referral
+        </a>
+
+        <div class="sb-group">Application Referrals</div>
+        <a class="sb-link" href="../invites/send-invite.html" data-page="send-invite.html">
+            <i class="fa-solid fa-user-plus"></i> Invite People
+        </a>
+        <a class="sb-link" href="../invites/invite-history.html" data-page="invite-history.html">
+            <i class="fa-solid fa-clock-rotate-left"></i> Invite History
+        </a>
+
+        <div class="sb-group">General</div>
+        <a class="sb-link" href="../chat/chat.html" data-page="chat.html">
+            <i class="fa-solid fa-comments"></i> Messages
+            <span class="sb-badge" id="sbMsgBadge" style="display:none;"></span>
+        </a>
+        <a class="sb-link" href="../chat/group-chat.html" data-page="group-chat.html">
+            <i class="fa-solid fa-users-rectangle"></i> Group Chat
+        </a>
+        <a class="sb-link" href="../notifications/notifications.html" data-page="notifications.html">
+            <i class="fa-solid fa-bell"></i> Notifications
+            <span class="sb-badge" id="sbNotifBadge" style="display:none;"></span>
+        </a>
+
+        <div class="sb-group">Account</div>
+        <a class="sb-link" href="../profile/profile.html" data-page="profile.html">
+            <i class="fa-solid fa-user"></i> My Profile
+        </a>
+        <a class="sb-link" href="../membership/plans.html" data-page="plans.html">
+            <i class="fa-solid fa-crown"></i> Membership
+        </a>
+    </nav>
+
+    <div class="sb-foot">
+        <div class="sb-user">
+            <img src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="user" />
+            <div>
+                <strong>Member</strong>
+                <small>&mdash;</small>
+            </div>
+        </div>
+        <a href="../auth/login.html" class="sb-logout" title="Log out"><i class="fa-solid fa-right-from-bracket"></i></a>
+    </div>
+</aside>
+
+<div class="sb-backdrop" id="sbBackdrop" onclick="toggleSidebar()"></div>

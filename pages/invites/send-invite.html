@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Application Referral — BNPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="send-invite.css">
+</head>
+
+<body class="app">
+
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+        <header class="topbar">
+            <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="topbar-title">
+                <h1>Application Referral</h1>
+                <p>Invite new members — earn free months, then points</p>
+            </div>
+            <a class="topbar-icon" href="../notifications/notifications.html"><i class="fa-solid fa-bell"></i><span class="dot"></span></a>
+            <img class="topbar-avatar" src="https://ui-avatars.com/api/?name=User&background=e31e24&color=fff" alt="me" />
+        </header>
+
+        <div class="app-content">
+
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:22px;">
+                <a href="../dashboard/user-dashboard.html" style="color:var(--muted);display:flex;align-items:center;gap:5px;">
+                    <i class="fa-solid fa-house" style="color:var(--red);"></i> Home
+                </a>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span>Invites</span>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+                <span style="color:var(--text);font-weight:600;">Send Invite</span>
+            </nav>
+
+            <!-- Locked state (free tier) -->
+            <div class="card" id="invLocked" style="display:none;text-align:center;padding:54px 24px;">
+                <div style="font-size:38px;color:var(--red);margin-bottom:14px;"><i class="fa-solid fa-lock"></i></div>
+                <h3 style="margin:0 0 8px;font-size:17px;">Application Referrals is a Premium feature</h3>
+                <p class="muted" style="max-width:440px;margin:0 auto 20px;line-height:1.65;">Inviting new members and earning free months / credibility points is available to Premium members. Upgrade to get your shareable referral link.</p>
+                <a href="../membership/plans.html" class="btn btn-primary"><i class="fa-solid fa-crown"></i> Upgrade to Premium</a>
+            </div>
+
+            <div class="grid" style="grid-template-columns:1fr 340px;align-items:start;" id="invGrid">
+
+                <div style="display:flex;flex-direction:column;gap:18px;">
+
+                    <!-- Referral link -->
+                    <div class="card">
+                        <div class="card-title">Your referral link</div>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                            <input type="text" id="refLink" readonly
+                                style="flex:1;min-width:200px;padding:11px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;background:var(--bg);color:var(--muted);"
+                                value="Loading your link…">
+                            <button class="btn btn-primary" onclick="copyLink()">
+                                <i class="fa-solid fa-copy"></i> Copy
+                            </button>
+                        </div>
+
+                        <!-- Share buttons -->
+                        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+                            <button class="btn btn-outline btn-sm" id="shareWhatsApp">
+                                <i class="fa-brands fa-whatsapp" style="color:#25d366;"></i> WhatsApp
+                            </button>
+                            <button class="btn btn-outline btn-sm" id="shareLinkedIn">
+                                <i class="fa-brands fa-linkedin" style="color:#0a66c2;"></i> LinkedIn
+                            </button>
+                            <button class="btn btn-outline btn-sm" id="shareEmail">
+                                <i class="fa-solid fa-envelope" style="color:var(--red);"></i> Email
+                            </button>
+                            <button class="btn btn-outline btn-sm" id="shareX">
+                                <i class="fa-brands fa-x-twitter"></i> X
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Invite by email -->
+                    <div class="card">
+                        <div class="card-title">Invite by email</div>
+                        <form id="inviteForm">
+                            <div class="field">
+                                <label>Email addresses <span class="muted">(comma separated)</span></label>
+                                <textarea id="invEmails" rows="3" placeholder="friend1@email.com, friend2@email.com"></textarea>
+                            </div>
+                            <div class="field">
+                                <label>Personal message <span class="muted">(optional)</span></label>
+                                <textarea id="invMessage" rows="3" placeholder="Hey! Join me on BNPlatform — it's a great way to grow your network."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width:100%;">
+                                <i class="fa-solid fa-paper-plane"></i> Send invitations
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+
+                <!-- Right sidebar -->
+                <div style="display:flex;flex-direction:column;gap:18px;">
+
+                    <!-- Reward explanation -->
+                    <div class="card" style="background:var(--green-light);border:none;text-align:center;">
+                        <div style="font-size:28px;color:var(--red);margin-bottom:10px;">
+                            <i class="fa-solid fa-gift"></i>
+                        </div>
+                        <strong style="font-size:15px;">Earn 1 free month</strong>
+                        <p class="muted" style="font-size:12.5px;margin:10px 0 0;line-height:1.65;">
+                            For each of your first 6 invitees who joins and buys a subscription.
+                            After 6, every successful invite earns you credibility points instead.
+                        </p>
+                    </div>
+
+                    <!-- Your invite stats (loaded from API) -->
+                    <div class="card">
+                        <div class="card-title">Your invites</div>
+                        <div style="text-align:center;padding:8px 0 14px;">
+                            <div style="font-size:34px;font-weight:800;color:var(--red);line-height:1;" id="invJoined">—</div>
+                            <p class="muted" style="font-size:12.5px;margin:4px 0 0;">invites accepted</p>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--border);">
+                            <span class="muted">Free months earned</span>
+                            <strong id="invFreeMonths">—</strong>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--border);">
+                            <span class="muted">Total invites sent</span>
+                            <strong id="invSent">—</strong>
+                        </div>
+                        <a href="invite-history.html" class="btn btn-ghost btn-sm" style="width:100%;margin-top:12px;">
+                            <i class="fa-solid fa-clock-rotate-left"></i> View history
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/storage.js"></script>
+    <script src="../../assets/js/utils.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/guards.js"></script>
+    <script src="../../assets/js/app-shell.js"></script>
+    <script src="../../assets/js/app-page.js"></script>
+    <script>
+        // ── Referral link helpers ────────────────────────────────────
+        let myReferralLink = "";
+
+        function buildLink(code) {
+            const base = location.origin + location.pathname.replace(/pages\/invites\/.*$/, "");
+            return base + "pages/auth/register.html?ref=" + encodeURIComponent(code);
+        }
+
+        function setShareButtons(link) {
+            const text = "Join me on BNPlatform — the professional network that pays you to refer! ";
+            document.getElementById("shareWhatsApp").onclick = () =>
+                window.open("https://wa.me/?text=" + encodeURIComponent(text + link), "_blank");
+            document.getElementById("shareLinkedIn").onclick = () =>
+                window.open("https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(link), "_blank");
+            document.getElementById("shareEmail").onclick = () =>
+                window.open("mailto:?subject=" + encodeURIComponent("Join me on BNPlatform") +
+                    "&body=" + encodeURIComponent(text + "\n\n" + link), "_blank");
+            document.getElementById("shareX").onclick = () =>
+                window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) +
+                    "&url=" + encodeURIComponent(link), "_blank");
+        }
+
+        async function loadMyLink() {
+            try {
+                const code = await Api.invites.myCode();
+                myReferralLink = buildLink(code);
+                document.getElementById("refLink").value = myReferralLink;
+                setShareButtons(myReferralLink);
+            } catch (e) {
+                document.getElementById("refLink").value = "Could not load referral link.";
+            }
+        }
+
+        function copyLink() {
+            const val = document.getElementById("refLink").value;
+            if (!val || val.startsWith("Could") || val.startsWith("Send") || val.startsWith("Loading")) {
+                BnpUtils.toast("Referral link not ready yet.", "warning");
+                return;
+            }
+            navigator.clipboard?.writeText(val)
+                .then(() => BnpUtils.toast("Referral link copied!", "success"))
+                .catch(() => {
+                    document.getElementById("refLink").select();
+                    document.execCommand("copy");
+                    BnpUtils.toast("Referral link copied!", "success");
+                });
+        }
+
+        // ── Email invite form ────────────────────────────────────────
+        document.getElementById("inviteForm").addEventListener("submit", async e => {
+            e.preventDefault();
+            const raw = document.getElementById("invEmails").value.trim();
+            const message = document.getElementById("invMessage").value.trim();
+            const emails = raw.split(/[\s,;]+/).filter(x => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x));
+            if (!emails.length) { BnpUtils.toast("Enter at least one valid email.", "warning"); return; }
+
+            const btn = e.target.querySelector("button[type=submit]");
+            BnpUtils.loading(btn, true, "Sending…");
+            try {
+                const result = await Api.invites.bulk(emails, message || null);
+                BnpUtils.toast(result || `${emails.length} invitation(s) sent!`, "success");
+                e.target.reset();
+                loadInviteStats();
+            } catch (err) {
+                BnpUtils.toast(err.message, "error");
+            } finally {
+                BnpUtils.loading(btn, false);
+            }
+        });
+
+        // ── Stats ────────────────────────────────────────────────────
+        async function loadInviteStats() {
+            try {
+                const stats = await Api.invites.stats();
+                document.getElementById("invSent").textContent       = stats.sent;
+                document.getElementById("invJoined").textContent     = stats.accepted;
+                document.getElementById("invFreeMonths").textContent = stats.freeMonthsEarned;
+            } catch (e) { console.warn(e); }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!window.BnpStorage.isAuthenticated()) return;
+            if (!window.BnpStorage.isPremium()) {
+                document.getElementById("invGrid").style.display = "none";
+                document.getElementById("invLocked").style.display = "";
+                return;
+            }
+            loadMyLink();
+            loadInviteStats();
+        });
+    </script>
+    <script src="../../assets/js/animate.js"></script>
+</body>
+
+</html>

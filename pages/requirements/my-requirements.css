@@ -1,0 +1,32 @@
+/* breadcrumb */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.breadcrumb a {
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: color .15s;
+}
+.breadcrumb a:hover { color: var(--red); }
+.breadcrumb .fa-house { color: var(--red); }
+.breadcrumb .sep { color: var(--hint); font-size: 12px; }
+.breadcrumb .bc-current { color: var(--text); font-weight: 600; }
+
+/* action buttons in table stay on one line */
+.req-actions { display: flex; gap: 6px; align-items: center; }
+
+@media (max-width: 700px) {
+    /* stacked-card mobile table: title reads like a card heading, actions
+       become full-width buttons instead of a cramped inline row */
+    .tbl-stack tbody td:first-child strong { font-size: 14.5px; }
+    .tbl-stack .req-actions { flex-wrap: wrap; margin-top: 6px; }
+    .tbl-stack .req-actions .btn { flex: 1; min-width: 110px; }
+}
