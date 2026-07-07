@@ -314,7 +314,7 @@
         @media (max-width: 768px) {
             .map-hero {
                 height: 500px;
-                margin-top: 60px;
+                /* margin-top: 60px; */
             }
 
             /* search bar: keep row layout on mobile */
@@ -393,7 +393,8 @@
             }
 
             .map-search-bar {
-                top: 8px;
+                /* top: 8px; */
+                top: 33px;
             }
         }
 
