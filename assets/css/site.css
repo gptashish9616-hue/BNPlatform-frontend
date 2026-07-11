@@ -20,7 +20,8 @@ body {
     font-family: 'Inter', Arial, sans-serif;
     color: var(--s-text);
     background: #eef1f6;
-    padding-top: 80px; /* clear the fixed navbar */
+    padding-top: 65px;
+    /* clear the fixed navbar */
 }
 
 /* ---------- HERO (classic: background image + dark overlay) ---------- */
@@ -28,18 +29,19 @@ body {
     position: relative;
     background:
         linear-gradient(rgba(17, 24, 39, .72), rgba(17, 24, 39, .82)),
-        url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80')
-        center / cover no-repeat;
+        url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80') center / cover no-repeat;
     color: #fff;
     text-align: center;
     padding: 88px 0 76px;
     border-bottom: none;
 }
+
 .site-hero.hero-red {
     background: linear-gradient(150deg, #e31e24, #a8181f);
     color: #fff;
     border: none;
 }
+
 .eyebrow {
     font-size: 14px;
     font-weight: 700;
@@ -48,8 +50,16 @@ body {
     color: var(--s-red);
     margin-bottom: 12px;
 }
-.hero-red .eyebrow { color: #ffd9da; }
-.site-hero .eyebrow { color: #ff8488; }   /* readable on the dark photo */
+
+.hero-red .eyebrow {
+    color: #ffd9da;
+}
+
+.site-hero .eyebrow {
+    color: #ff8488;
+}
+
+/* readable on the dark photo */
 .site-hero h1 {
     font-size: 42px;
     font-weight: 800;
@@ -58,6 +68,7 @@ body {
     color: #fff;
     text-shadow: 0 2px 14px rgba(0, 0, 0, .35);
 }
+
 .site-hero p {
     font-size: 18px;
     color: rgba(255, 255, 255, .9);
@@ -65,7 +76,11 @@ body {
     margin: 0 auto 28px;
     line-height: 1.7;
 }
-.hero-red p { color: rgba(255, 255, 255, .9); }
+
+.hero-red p {
+    color: rgba(255, 255, 255, .9);
+}
+
 .hero-badge {
     display: inline-flex;
     align-items: center;
@@ -80,11 +95,31 @@ body {
 }
 
 /* ---------- SECTIONS ---------- */
-.site-section { padding: 72px 0; }
-.site-section.alt { background: var(--s-bg); }
-.section-head { text-align: center; max-width: 640px; margin: 0 auto 48px; }
-.section-head h2 { font-size: 32px; font-weight: 800; margin-bottom: 12px; }
-.section-head p { font-size: 16px; color: var(--s-muted); margin: 0; }
+.site-section {
+    padding: 35px 0;
+}
+
+.site-section.alt {
+    background: var(--s-bg);
+}
+
+.section-head {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 48px;
+}
+
+.section-head h2 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.section-head p {
+    font-size: 16px;
+    color: var(--s-muted);
+    margin: 0;
+}
 
 /* ---------- CARDS ---------- */
 .feature-card {
@@ -96,30 +131,55 @@ body {
     box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
     transition: border-color .2s, transform .2s, box-shadow .25s;
 }
-.feature-card:hover { border-color: var(--s-red); transform: translateY(-4px); box-shadow: 0 16px 38px rgba(16, 24, 40, .10); }
+
+.feature-card:hover {
+    border-color: var(--s-red);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 38px rgba(16, 24, 40, .10);
+}
 
 /* One consistent brand-coloured icon treatment (a classic, branded business
    look) — overrides the assorted inline pastel colours so the cards stop
    looking like a generic multi-colour template. */
 .feature-icon {
-    width: 54px; height: 54px;
+    width: 54px;
+    height: 54px;
     border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 22px;
     margin-bottom: 18px;
     background: #fdecec !important;
     color: var(--s-red) !important;
     box-shadow: inset 0 0 0 1px rgba(227, 30, 36, .12);
 }
-.feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; letter-spacing: -.01em; }
-.feature-card p { font-size: 14px; color: var(--s-muted); line-height: 1.65; margin: 0; }
+
+.feature-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -.01em;
+}
+
+.feature-card p {
+    font-size: 14px;
+    color: var(--s-muted);
+    line-height: 1.65;
+    margin: 0;
+}
 
 /* ---------- PILLS / CHIPS ---------- */
 .chip-soft {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 12.5px; font-weight: 600;
-    padding: 4px 12px; border-radius: 20px;
-    background: #eef0f3; color: var(--s-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: #eef0f3;
+    color: var(--s-muted);
 }
 
 /* ---------- CTA BAND ---------- */
@@ -127,25 +187,78 @@ body {
     background: linear-gradient(150deg, #e31e24, #a8181f);
     color: #fff;
     text-align: center;
-    padding: 64px 0;
+    padding: 40px 0;
 }
-.cta-band h2 { font-size: 34px; font-weight: 800; margin-bottom: 12px; }
-.cta-band p { font-size: 17px; opacity: .9; max-width: 480px; margin: 0 auto 28px; }
+
+.cta-band h2 {
+    font-size: 34px;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.cta-band p {
+    font-size: 17px;
+    opacity: .9;
+    max-width: 480px;
+    margin: 0 auto 28px;
+}
 
 .btn-site {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 12px 26px; border-radius: 10px;
-    font-size: 15px; font-weight: 700; cursor: pointer;
-    border: 2px solid transparent; transition: all .15s; text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 26px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all .15s;
+    text-decoration: none;
 }
-.btn-site-red { background: var(--s-red); color: #fff; }
-.btn-site-red:hover { background: var(--s-red-dark); color: #fff; }
-.btn-site-white { background: #fff; color: var(--s-red); }
-.btn-site-white:hover { background: #f3f3f3; color: var(--s-red); }
-.btn-site-outline { background: transparent; border-color: var(--s-border); color: var(--s-text); }
-.btn-site-outline:hover { border-color: var(--s-text); color: var(--s-text); }
-.btn-site-ghost-white { background: transparent; border-color: rgba(255,255,255,.5); color: #fff; }
-.btn-site-ghost-white:hover { border-color: #fff; color: #fff; }
+
+.btn-site-red {
+    background: var(--s-red);
+    color: #fff;
+}
+
+.btn-site-red:hover {
+    background: var(--s-red-dark);
+    color: #fff;
+}
+
+.btn-site-white {
+    background: #fff;
+    color: var(--s-red);
+}
+
+.btn-site-white:hover {
+    background: #f3f3f3;
+    color: var(--s-red);
+}
+
+.btn-site-outline {
+    background: transparent;
+    border-color: var(--s-border);
+    color: var(--s-text);
+}
+
+.btn-site-outline:hover {
+    border-color: var(--s-text);
+    color: var(--s-text);
+}
+
+.btn-site-ghost-white {
+    background: transparent;
+    border-color: rgba(255, 255, 255, .5);
+    color: #fff;
+}
+
+.btn-site-ghost-white:hover {
+    border-color: #fff;
+    color: #fff;
+}
 
 /* ---------- FAQ ACCORDION ---------- */
 .bnp-faq {
@@ -249,16 +362,52 @@ body {
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 768px) {
-    .site-hero { padding: 44px 0 36px; }
-    .site-hero h1 { font-size: 30px; }
-    .site-hero p { font-size: 15px; }
-    .site-section { padding: 48px 0; }
-    .section-head { margin-bottom: 32px; }
-    .section-head h2 { font-size: 25px; }
-    .cta-band { padding: 48px 0; }
-    .cta-band h2 { font-size: 26px; }
-    .bnp-faq { padding: 44px 0; }
-    .bnp-faq h2 { font-size: 24px; }
-    .bnp-faq__q { padding: 16px 18px; font-size: 14.5px; }
-    .bnp-faq__a { padding: 0 18px 16px; }
+    .site-hero {
+        padding: 44px 0 36px;
+    }
+
+    .site-hero h1 {
+        font-size: 30px;
+    }
+
+    .site-hero p {
+        font-size: 15px;
+    }
+
+    .site-section {
+        padding: 28px 0;
+    }
+
+    .section-head {
+        margin-bottom: 32px;
+    }
+
+    .section-head h2 {
+        font-size: 25px;
+    }
+
+    .cta-band {
+        padding: 48px 0;
+    }
+
+    .cta-band h2 {
+        font-size: 26px;
+    }
+
+    .bnp-faq {
+        padding: 44px 0;
+    }
+
+    .bnp-faq h2 {
+        font-size: 24px;
+    }
+
+    .bnp-faq__q {
+        padding: 16px 18px;
+        font-size: 14.5px;
+    }
+
+    .bnp-faq__a {
+        padding: 0 18px 16px;
+    }
 }
