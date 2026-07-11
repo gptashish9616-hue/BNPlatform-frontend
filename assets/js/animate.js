@@ -72,7 +72,7 @@
             ".bnp-breadcrumb .bnp-sep{color:#9aa3af;font-size:12px;}",
             ".bnp-breadcrumb .bnp-current{color:#6b7280;}",
             ".bnp-breadcrumb--app{margin:-2px 0 20px;}",
-            ".bnp-crumb-bar{background:#f7f8fa;border-bottom:1px solid #eceff3;padding:5px 0;}",
+            // ".bnp-crumb-bar{background:#f7f8fa;border-bottom:1px solid #eceff3;padding:5px 0;}",
 
             /* shared FAQ accordion (theme red, self-contained) */
             ".bnp-faq{background:#fff;padding:64px 0;border-top:1px solid #eceff3;}",
